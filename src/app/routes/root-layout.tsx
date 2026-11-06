@@ -3,7 +3,6 @@ import '@/shared/i18n';
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ActivityIndicator, View } from 'react-native';
 
 import { useSessionStore } from '@/entities/auth';
 import { useWalletStore } from '@/entities/wallet';
@@ -12,6 +11,9 @@ import { colors } from '@/shared/ui';
 import { useAppReady } from '../model/use-app-ready';
 import { resolveEntryRoute } from '../model/resolve-entry-route';
 import { useAutoLock } from '../model/use-auto-lock';
+import { holdNativeSplash, SplashHandoff } from './splash-handoff';
+
+holdNativeSplash();
 
 const STUB_HEADER = {
   headerShown: true,
@@ -32,13 +34,8 @@ export function RootLayout() {
   const isRecoveryRequired = useWalletStore((state) => state.isRecoveryRequired);
   useAutoLock();
 
-  if (!isReady) {
-    return (
-      <View className="flex-1 items-center justify-center bg-surface">
-        <ActivityIndicator color={colors.primary[600]} />
-      </View>
-    );
-  }
+  // The native splash stays up until bootstrap is done, so nothing unstyled ever shows.
+  if (!isReady) return null;
 
   const isActive = status === 'active';
   const entryRoute = resolveEntryRoute({ status, isUnlocked, isRecoveryRequired });
@@ -65,6 +62,7 @@ export function RootLayout() {
           <Stack.Screen name="scan" options={STUB_HEADER} />
         </Stack.Protected>
       </Stack>
+      <SplashHandoff />
     </>
   );
 }
