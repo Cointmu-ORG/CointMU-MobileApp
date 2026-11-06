@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          # Its npm caching runs `npm config get cache` with Node's bundled
+          # npm before the pinned npm is installed.
+          package-manager-cache: false
+
+      # Same npm as Dependabot and local: package.json "packageManager".
+      # Must run before any other npm command in the repo, so setup-node's
+      # `cache: npm` (it calls `npm config get cache` first) is replaced by
+      # actions/cache.
+      - name: Use pinned npm
+        id: npm
+        run: |
+          version=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          [ "$(npm -v)" = "$version" ] || npm install -g "npm@$version"
+          echo "cache=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.npm.outputs.cache }}
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      # The only install scripts in the tree are @parcel/watcher's
+      # build-from-source fallback (prebuilt binaries ship as optional deps)
+      # and macOS-only fsevents; nothing below needs them.
+      - run: npm ci --ignore-scripts
+
+      - run: npm run format:check
+
+      - run: npm run typecheck
+
+      # Jest mocks SecureStore and the RPC provider and sets its own
+      # EXPO_PUBLIC_* values (jest.setup.ts); no .env or RPC is needed.
+      - run: npm test
+
+      - name: expo-doctor
+        run: npx --yes expo-doctor
+
+      # Bundles both platforms with Metro, like the desktop's build step.
+      # EXPO_PUBLIC_* are inlined at bundle time, so harmless dummies are set;
+      # nothing is uploaded and no device or RPC is involved.
+      - name: Bundle (expo export)
+        run: npx --no expo export --platform android --platform ios --output-dir dist
+        env:
+          EXPO_PUBLIC_RPC_URL: http://rpc.ci.invalid
+          EXPO_PUBLIC_CHAIN_ID: "1912"
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          # Its npm caching runs `npm config get cache` with Node's bundled
+          # npm before the pinned npm is installed.
+          package-manager-cache: false
+
+      # Same npm as Dependabot and local: package.json "packageManager".
+      # Must run before any other npm command in the repo, so setup-node's
+      # `cache: npm` (it calls `npm config get cache` first) is replaced by
+      # actions/cache.
+      - name: Use pinned npm
+        id: npm
+        run: |
+          version=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          [ "$(npm -v)" = "$version" ] || npm install -g "npm@$version"
+          echo "cache=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.npm.outputs.cache }}
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - run: npm ci --ignore-scripts
+
+      # Blocking: the codebase is at 0 ESLint errors and warnings.
+      - name: eslint
+        run: npx --no eslint . --max-warnings 0 -f json -o eslint.json
+
+      # Blocking: src is at 0 FSD errors and warnings.
+      - name: steiger
+        run: npx --no steiger ./src --reporter json > steiger.json
+
+      - name: Summary
+        if: always()
+        run: node scripts/lint-summary.js eslint.json steiger.json >> "$GITHUB_STEP_SUMMARY"
+
+  audit:
+    name: audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          # Its npm caching runs `npm config get cache` with Node's bundled
+          # npm before the pinned npm is installed.
+          package-manager-cache: false
+
+      - name: Use pinned npm
+        run: |
+          version=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          [ "$(npm -v)" = "$version" ] || npm install -g "npm@$version"
+
+      # Non-blocking, as on desktop: a new upstream advisory should not block
+      # unrelated PRs; the summary tracks counts (0 critical/high when added).
+      # npm audit only reads package-lock.json, so no install is needed.
+      - name: npm audit (high and above)
+        continue-on-error: true
+        run: |
+          status=0
+          npm audit --audit-level=high --json > audit.json || status=$?
+          node scripts/audit-summary.js audit.json >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"

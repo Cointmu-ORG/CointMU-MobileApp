@@ -2,6 +2,7 @@
   "name": "cointmu-mobileapp",
   "version": "1.0.0",
   "main": "index.ts",
+  "packageManager": "npm@12.2.0",
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "ethers": "^6.17.0",
@@ -55,7 +56,8 @@
     "lint": "eslint .",
     "lint:fsd": "steiger ./src",
     "test": "jest",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "private": true
 }

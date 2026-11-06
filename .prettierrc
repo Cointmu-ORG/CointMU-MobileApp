@@ -3,7 +3,7 @@
   "printWidth": 100,
   "overrides": [
     {
-      "files": ".github/**",
+      "files": [".github/**", "scripts/*-summary.js"],
       "options": { "singleQuote": false, "printWidth": 80 }
     }
   ]
