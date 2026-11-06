@@ -50,18 +50,19 @@ Let Expo pin `react` / `react-native` versions. Install with `npx expo install`,
 
 Expo Router requires a root `app/` folder for routes. FSD also has an `app` layer. To avoid the clash:
 `app/` (root) = route files only, thin re-exports. FSD layers live in `src/`.
+The router root is pinned in app.json: `["expo-router", { "root": "./app" }]` (D-26), so Expo Router never treats `src/app` as routes.
 
 ```
 app/                         # Expo Router routes ONLY. No logic.
-  _layout.tsx                # re-exports src/app root layout
+  _layout.tsx                # re-exports src/app root layout (auth guard)
   (onboarding)/...           # welcome, create, import, backup, verify, set-pin
-  (tabs)/                    # home, history, settings
+  (tabs)/                    # home (index, owns `/`), history, settings
   send/ ...                  # send, confirm, result
   receive.tsx
   scan.tsx
   lock.tsx
 src/
-  app/        providers, bootstrap, global styles, auth guard, i18n init
+  app/        routes/ (navigator layouts + auth guard), model/ (bootstrap, auto-lock), styles/
   pages/      full-screen compositions, one slice per screen
   widgets/    composite blocks (balance-card, tx-list, asset-list)
   features/   user actions (see below)
@@ -73,6 +74,9 @@ src/
     ui/       design-system components (Button, Input, Screen, ...)
     i18n/     locales/en.json, locales/id.json, setup
 ```
+
+Auth guard (D-36): the root and onboarding layouts wrap screens in `Stack.Protected`, driven by wallet status and session state. Every group's `redirectTo` comes from one function, `resolveEntryRoute(status, isUnlocked)`: `none` → welcome, `pendingBackup` → backup, `pendingPin` → set-pin, `active` → lock or home. Protected screens never render, and a status change redirects automatically, so features change state instead of navigating.
+The FSD `app` layer has no `ui` segment (Steiger `fsd/no-ui-in-app`); navigator layouts live in `src/app/routes`.
 
 Route file example:
 ```ts
@@ -95,14 +99,18 @@ export { HomePage as default } from '@/pages/home';
 ## 5. Wallet and key handling
 
 - Derivation: BIP-39 mnemonic (12 words), BIP-44 path `m/44'/60'/0'/0/{index}`. MVP uses index 0 only, but the data model stores `accountIndex` so multi-account can be added later.
-- Import: mnemonic (12 or 24 words) or raw private key. A private-key import has no mnemonic and cannot derive more accounts.
-- Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params.
+- Derivation wrapper: all mnemonic → account derivation goes through `deriveAccount()` in `entities/wallet/lib/derive.ts`. ethers v6 `fromPhrase` runs PBKDF2 in pure JS and blocks the Hermes JS thread, so the wrapper yields one frame first and the UI shows a Reanimated (UI-thread) progress animation. Swapping the PBKDF2 backend later only touches this function (Q-30).
+- Import: mnemonic (12 or 24 words) or raw private key. A private-key import has no mnemonic and cannot derive more accounts. The import screen shows a mandatory "back up this key yourself" warning that the user must acknowledge (D-28).
+- Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params. The clipboard is used only for the user's own address; there is no copy action for the mnemonic or a private key.
+- Onboarding state (D-32): a new mnemonic goes to SecureStore immediately, and the wallet status (persisted, non-secret) moves `none` → `pendingBackup` → `pendingPin` → `active`; imports go `none` → `pendingPin` → `active`. A killed app resumes at the step for its status.
+- Fresh install (D-33): the iOS Keychain survives uninstall but AsyncStorage does not. If the `muvo.installed` marker is missing at startup, all of the app's SecureStore items are wiped before anything reads them.
 - Signing: read the secret from SecureStore **after successful auth**, build the `Wallet`, sign, and drop the reference immediately. Do not keep a long-lived `Wallet` object in global state.
 - Backup flow (create wallet): show the 12 words once, block screenshots (`expo-screen-capture`), then force a verification quiz (re-enter 3 random words) before the wallet is activated.
 - Auth: user sets a 6-digit PIN at onboarding. PIN is stored as a salted hash, never plain. Biometrics are optional on top of the PIN, and PIN is always the fallback.
+- PIN hashing goes through one `PinHasher` interface in `entities/auth` with the algorithm and parameters in `entities/auth/config`. SecureStore holds a versioned record `{ v, algo, iterations, salt, hash }`; verification uses the record's own params, and an outdated record is rehashed after a successful unlock (D-34). The KDF is a placeholder until Q-32 is decided.
 - Auth is required: on app open, after returning from background past the auto-lock timeout, and **before every transaction signature** and before revealing the mnemonic.
 - Auto-lock: 1 minute default, user-adjustable (immediately, 1, 5, 15 min).
-- PIN brute force: escalating lockout after failed attempts. After 10 failures, offer wallet reset (this wipes local keys; recovery requires the mnemonic).
+- PIN brute force: escalating lockout after failed attempts. After 10 failures, offer wallet reset (this wipes local keys; recovery requires the mnemonic). The failed count, lockout-until and lastSeenAt live in SecureStore, not in a persisted store (D-27). If the clock goes backwards during a lockout, the lockout restarts from now. Biometrics are not offered while a lockout runs.
 - Reset wallet: confirm twice, wipe SecureStore and persisted stores, return to onboarding.
 
 ## 6. Transaction flow
@@ -111,7 +119,7 @@ export { HomePage as default } from '@/pages/home';
 2. Estimate gas (`estimateGas`) and fee. Detect fee mode at runtime: if `getFeeData()` returns `maxFeePerGas`, use EIP-1559; otherwise use legacy `gasPrice` (`type: 0`).
 3. Review screen: recipient, amount, fee, total. Balance check includes fee.
 4. Authenticate (PIN or biometric).
-5. Sign and broadcast. Persist a local `pending` record with the hash right away.
+5. Sign and broadcast. Persist a local `pending` record with the hash right away. The record includes the nonce, fetched with `getTransactionCount(addr, 'pending')`, so replaced or dropped transactions can be detected (D-29).
 6. Poll the receipt. Status: `pending` (0 conf) -> `confirmed` (1 conf) -> `final` (N conf, `FINAL_CONFIRMATIONS` in config).
 7. Handle replaced, dropped, and reverted (status 0) transactions explicitly in the UI.
 
@@ -128,11 +136,12 @@ Native CMU is the default asset. ERC-20 uses a minimal ABI (`balanceOf`, `transf
 
 ## 8. History
 
-No indexer is assumed. Plan (see decisions.md D-11):
+No indexer is assumed. Plan (see decisions.md Q-11):
 - Local records for transactions sent from this app (reliable, instant).
 - ERC-20: `getLogs` filtered by `Transfer` topic for the user's address.
 - Native incoming transfers: bounded block scan over recent blocks, cached, lazy-loaded with pagination.
 - Isolated behind one interface (`TransactionSource`) so an indexer or explorer API can replace it later without touching UI.
+- Known limitation: a block scan only sees top-level transactions. Native value moved by contract calls (internal transfers) is invisible without tracing or an indexer (Q-33).
 
 ## 9. UI and i18n
 
