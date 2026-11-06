@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { logger } from '@/shared/lib';
-import { Button, Text } from '@/shared/ui';
+import { Button, Spinner, Text } from '@/shared/ui';
 
 import { createWallet } from '../model/create-wallet';
-import { KeySpinner } from './key-spinner';
 
 /** Starts wallet creation on mount. Success flips wallet status, and the router moves on. */
 export function CreateWalletProgress() {
@@ -43,7 +42,7 @@ export function CreateWalletProgress() {
 
   return (
     <View className="items-center gap-6">
-      <KeySpinner />
+      <Spinner label={t('onboarding.create.progress')} />
       <Text tone="secondary" className="text-center">
         {t('onboarding.create.progress')}
       </Text>

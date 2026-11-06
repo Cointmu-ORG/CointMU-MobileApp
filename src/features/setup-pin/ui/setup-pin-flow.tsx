@@ -4,14 +4,17 @@ import { View } from 'react-native';
 
 import { canUseBiometrics, PIN_LENGTH } from '@/entities/auth';
 import { logger } from '@/shared/lib';
-import { PinDots, PinPad, Text, usePinInput } from '@/shared/ui';
+import { PinDots, PinPad, Spinner, Text, usePinInput } from '@/shared/ui';
 
 import { finishOnboarding, savePin } from '../model/save-pin';
 import { BiometricsOffer } from './biometrics-offer';
 
 type Step = 'create' | 'confirm' | 'saving' | 'biometrics';
 
-/** Enter the PIN twice, save its hash, then optionally offer biometrics. */
+/**
+ * Enter the PIN twice, then hash it once (only after the confirmation matched) while a UI-thread
+ * spinner shows progress. Then optionally offer biometrics.
+ */
 export function SetupPinFlow() {
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>('create');
@@ -76,10 +79,23 @@ export function SetupPinFlow() {
           </Text>
           <Text tone="secondary">{t('onboarding.setPin.subtitle')}</Text>
         </View>
-        <PinDots length={PIN_LENGTH} filledCount={filledCount} errorSignal={errorSignal} />
-        <Text tone="danger" className="text-center" accessibilityLiveRegion="polite">
-          {message ?? ''}
-        </Text>
+        <PinDots
+          length={PIN_LENGTH}
+          filledCount={step === 'saving' ? PIN_LENGTH : filledCount}
+          errorSignal={errorSignal}
+        />
+        {step === 'saving' ? (
+          <View className="min-h-12 items-center gap-3">
+            <Spinner size="small" />
+            <Text tone="secondary" accessibilityLiveRegion="polite">
+              {t('onboarding.setPin.saving')}
+            </Text>
+          </View>
+        ) : (
+          <Text tone="danger" className="min-h-12 text-center" accessibilityLiveRegion="polite">
+            {message ?? ''}
+          </Text>
+        )}
       </View>
       <PinPad onDigit={addDigit} onDelete={removeDigit} isDisabled={step === 'saving'} />
     </View>

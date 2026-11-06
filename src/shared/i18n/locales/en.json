@@ -49,6 +49,7 @@
       "titleCreate": "Create a 6-digit PIN",
       "titleConfirm": "Enter the PIN again",
       "subtitle": "You'll use it to unlock Muvo and approve transactions.",
+      "saving": "Securing your PIN…",
       "mismatch": "The PINs don't match. Start again.",
       "error": "Couldn't save your PIN. Please try again.",
       "biometricsTitle": "Unlock with biometrics?",

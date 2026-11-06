@@ -54,7 +54,8 @@
       "biometricsTitle": "Buka dengan biometrik?",
       "biometricsBody": "Gunakan sidik jari atau wajah untuk membuka Muvo. PIN tetap bisa dipakai.",
       "biometricsEnable": "Aktifkan",
-      "biometricsSkip": "Nanti saja"
+      "biometricsSkip": "Nanti saja",
+      "saving": "Mengamankan PIN Anda…"
     },
     "recover": {
       "title": "Dompet tidak dapat dibaca",

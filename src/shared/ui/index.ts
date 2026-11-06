@@ -9,6 +9,7 @@ export { PlaceholderScreen } from './placeholder-screen';
 export { Screen } from './screen';
 export { ScrollScreen } from './scroll-screen';
 export { Skeleton } from './skeleton';
+export { Spinner } from './spinner';
 export { Text, type TextTone, type TextVariant } from './text';
 export { colors } from './theme/colors';
 export { useShake } from './use-shake';

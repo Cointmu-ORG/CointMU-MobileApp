@@ -3,3 +3,4 @@ export { formatAmount, type FormatAmountOptions } from './amount';
 export { logger, redact } from './logger';
 export { secureRandomInt, type RandomInt } from './random';
 export { secureStorage } from './secure-storage';
+export { waitForPaint } from './wait-for-paint';

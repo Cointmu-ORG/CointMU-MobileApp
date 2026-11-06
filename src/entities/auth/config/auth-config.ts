@@ -1,14 +1,15 @@
 export const PIN_LENGTH = 6;
 
 /**
- * PIN KDF parameters. PLACEHOLDER (Q-32): algorithm and cost are not final. A 6-digit PIN has
- * only 10^6 values, so the KDF must be slow; tune iterations on a real device (~300 ms target).
+ * PIN KDF parameters. PLACEHOLDER (Q-32): algorithm and cost are not final.
+ * v2 (D-41): 20,000 → 2,000 iterations. Pure-JS PBKDF2 runs on the JS thread; 20,000 took
+ * ~4.7 s per hash in an interpreter (no JIT, like Hermes), on setup and on every unlock.
  * Changing these is safe: stored records keep their own params and are rehashed on next unlock.
  */
 export const PIN_KDF = {
-  version: 1,
+  version: 2,
   algo: 'pbkdf2-sha256',
-  iterations: 20_000,
+  iterations: 2_000,
   saltBytes: 16,
   keyBytes: 32,
 } as const;

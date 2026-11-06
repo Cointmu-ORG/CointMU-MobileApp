@@ -43,6 +43,16 @@ describe('attemptPinUnlock', () => {
     await expect(attemptPinUnlock(PIN, NOW)).resolves.toEqual({ status: 'verified' });
   });
 
+  it('migrates a v1 record (20,000 iterations) to the current version (D-41)', async () => {
+    const v1 = createPbkdf2PinHasher({ ...PIN_KDF, version: 1, iterations: 20_000 });
+    await writePinRecord(await v1.hash(PIN));
+    await expect(attemptPinUnlock(PIN, NOW)).resolves.toEqual({ status: 'verified' });
+    await expect(readPinRecord()).resolves.toMatchObject({
+      v: PIN_KDF.version,
+      iterations: PIN_KDF.iterations,
+    });
+  });
+
   it('keeps an outdated record when the PIN is wrong', async () => {
     await storePin(OUTDATED_ITERATIONS);
     await attemptPinUnlock('000000', NOW);
