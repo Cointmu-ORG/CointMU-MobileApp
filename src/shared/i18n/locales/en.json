@@ -1,0 +1,122 @@
+{
+  "common": {
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "comingSoon": "Coming soon"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Muvo",
+      "subtitle": "Your CointMU wallet. Your keys stay on this phone.",
+      "create": "Create a new wallet",
+      "import": "I already have a wallet"
+    },
+    "create": {
+      "title": "Creating your wallet",
+      "progress": "Generating your recovery phrase and keys. This can take a few seconds.",
+      "error": "Couldn't create the wallet. Please try again.",
+      "retry": "Try again"
+    },
+    "backup": {
+      "title": "Your recovery phrase",
+      "subtitle": "Write these words down in order and keep them offline. Anyone who has them can take your funds, and nobody can recover them for you.",
+      "confirm": "I've written it down",
+      "loadError": "Couldn't load your recovery phrase."
+    },
+    "verify": {
+      "title": "Check your backup",
+      "subtitle": "Enter these words from your recovery phrase.",
+      "wordLabel": "Word #{{number}}",
+      "submit": "Verify",
+      "incorrect": "That word doesn't match. Check what you wrote down.",
+      "correct": "Correct"
+    },
+    "import": {
+      "title": "Import a wallet",
+      "modeMnemonic": "Recovery phrase",
+      "modePrivateKey": "Private key",
+      "mnemonicLabel": "Recovery phrase (12 or 24 words)",
+      "privateKeyLabel": "Private key",
+      "invalidMnemonic": "That isn't a valid 12- or 24-word recovery phrase.",
+      "invalidPrivateKey": "That isn't a valid private key.",
+      "privateKeyWarningTitle": "Back up this key yourself",
+      "privateKeyWarningBody": "A wallet imported from a private key has no recovery phrase. The key is stored only on this phone. If you lose the phone or reset the app without your own backup of the key, the funds are gone.",
+      "privateKeyAck": "I have my own backup of this private key",
+      "submit": "Import wallet",
+      "error": "Couldn't import the wallet. Please try again."
+    },
+    "setPin": {
+      "titleCreate": "Create a 6-digit PIN",
+      "titleConfirm": "Enter the PIN again",
+      "subtitle": "You'll use it to unlock Muvo and approve transactions.",
+      "mismatch": "The PINs don't match. Start again.",
+      "error": "Couldn't save your PIN. Please try again.",
+      "biometricsTitle": "Unlock with biometrics?",
+      "biometricsBody": "Use your fingerprint or face to unlock Muvo. Your PIN always works too.",
+      "biometricsEnable": "Turn on",
+      "biometricsSkip": "Not now"
+    }
+  },
+  "lock": {
+    "title": "Enter your PIN",
+    "wrongPin": "Wrong PIN",
+    "lockedOut": "Too many wrong attempts. Try again in {{time}}.",
+    "biometricsPrompt": "Unlock Muvo",
+    "resetHint": "Forgot your PIN? You can reset this wallet and restore it with your recovery phrase.",
+    "resetButton": "Reset wallet"
+  },
+  "reset": {
+    "confirmTitle": "Reset this wallet?",
+    "confirmBody": "This deletes the wallet from this phone. Without your recovery phrase or private key, the funds are lost.",
+    "finalTitle": "Are you sure?",
+    "finalBody": "This can't be undone.",
+    "confirm": "Reset"
+  },
+  "pinPad": {
+    "delete": "Delete",
+    "biometrics": "Use biometrics",
+    "progress": "{{filled}} of {{total}} digits entered"
+  },
+  "tabs": {
+    "home": "Home",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "home": {
+    "balance": {
+      "label": "Total balance",
+      "error": "Can't reach the CointMU network right now. Pull down to refresh or try again.",
+      "retry": "Try again",
+      "copyAddress": "Copy address",
+      "copied": "Address copied"
+    },
+    "actions": {
+      "send": "Send",
+      "receive": "Receive",
+      "scan": "Scan"
+    },
+    "assets": {
+      "title": "Assets",
+      "nativeName": "CointMU"
+    },
+    "transactions": {
+      "title": "Recent activity",
+      "empty": "No transactions yet",
+      "emptyHint": "Transactions you send from Muvo appear here.",
+      "sent": "Sent",
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "final": "Final",
+        "failed": "Failed",
+        "dropped": "Dropped",
+        "replaced": "Replaced"
+      }
+    }
+  },
+  "history": { "title": "History" },
+  "settings": { "title": "Settings" },
+  "send": { "title": "Send" },
+  "receive": { "title": "Receive" },
+  "scan": { "title": "Scan" }
+}
