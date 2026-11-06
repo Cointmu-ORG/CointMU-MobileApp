@@ -24,6 +24,15 @@ const SUB_SCREEN_HEADER = {
   headerStyle: { backgroundColor: colors.surface.DEFAULT },
 } as const;
 
+/** Screens opened from Settings, each below a native header with a back button. */
+const SETTINGS_SCREENS = [
+  { name: 'network', titleKey: 'settings.network.title' },
+  { name: 'accounts', titleKey: 'settings.accounts.title' },
+  { name: 'change-pin', titleKey: 'settings.changePin.title' },
+  { name: 'recovery-phrase', titleKey: 'settings.recoveryPhrase.title' },
+  { name: 'remove-wallet', titleKey: 'settings.removeWallet.title' },
+] as const;
+
 /**
  * Auth guard (architecture §4). Protected groups follow wallet status and session state, and
  * Expo Router redirects automatically when a guard flips, so protected screens never render.
@@ -62,14 +71,13 @@ export function RootLayout() {
           <Stack.Screen name="send" options={SUB_SCREEN_HEADER} />
           <Stack.Screen name="receive" options={SUB_SCREEN_HEADER} />
           <Stack.Screen name="scan" options={SUB_SCREEN_HEADER} />
-          <Stack.Screen
-            name="network"
-            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('settings.network.title') }}
-          />
-          <Stack.Screen
-            name="accounts"
-            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('settings.accounts.title') }}
-          />
+          {SETTINGS_SCREENS.map(({ name, titleKey }) => (
+            <Stack.Screen
+              key={name}
+              name={name}
+              options={{ ...SUB_SCREEN_HEADER, headerTitle: t(titleKey) }}
+            />
+          ))}
         </Stack.Protected>
       </Stack>
       <SplashHandoff />

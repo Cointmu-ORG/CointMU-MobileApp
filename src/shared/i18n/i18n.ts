@@ -7,14 +7,14 @@ import { FALLBACK_LANGUAGE, SUPPORTED_LANGUAGES, type Language } from '@/shared/
 import en from './locales/en.json';
 import id from './locales/id.json';
 
-function isSupported(code: string | null): code is Language {
+export function isSupportedLanguage(code: string | null): code is Language {
   return SUPPORTED_LANGUAGES.some((language) => language === code);
 }
 
 /** Device language when supported, else English (architecture §9). */
 export function detectLanguage(): Language {
   const deviceLanguage = getLocales()[0].languageCode;
-  return isSupported(deviceLanguage) ? deviceLanguage : FALLBACK_LANGUAGE;
+  return isSupportedLanguage(deviceLanguage) ? deviceLanguage : FALLBACK_LANGUAGE;
 }
 
 export const i18n = createInstance();

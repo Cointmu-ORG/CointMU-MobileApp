@@ -2,7 +2,8 @@
   "common": {
     "continue": "Lanjut",
     "cancel": "Batal",
-    "comingSoon": "Segera hadir"
+    "comingSoon": "Segera hadir",
+    "done": "Selesai"
   },
   "onboarding": {
     "welcome": {
@@ -50,13 +51,11 @@
       "titleCreate": "Buat PIN 6 digit",
       "titleConfirm": "Masukkan PIN sekali lagi",
       "subtitle": "PIN dipakai untuk membuka Muvo dan menyetujui transaksi.",
-      "mismatch": "PIN tidak cocok. Ulangi dari awal.",
       "error": "Gagal menyimpan PIN. Silakan coba lagi.",
       "biometricsTitle": "Buka dengan biometrik?",
       "biometricsBody": "Gunakan sidik jari atau wajah untuk membuka Muvo. PIN tetap bisa dipakai.",
       "biometricsEnable": "Aktifkan",
-      "biometricsSkip": "Nanti saja",
-      "saving": "Mengamankan PIN Anda…"
+      "biometricsSkip": "Nanti saja"
     },
     "recover": {
       "title": "Dompet tidak dapat dibaca",
@@ -149,7 +148,8 @@
       "add": "Tambah dan pakai",
       "invalidUrl": "Masukkan URL http:// atau https://.",
       "alreadyListed": "Node tersebut sudah ada di daftar.",
-      "remove": "Hapus node Anda"
+      "remove": "Hapus node Anda",
+      "row": "Node yang dipakai"
     },
     "accounts": {
       "title": "Akun",
@@ -161,7 +161,85 @@
       "nameField": "Nama untuk {{account}}",
       "nameHint": "Hanya tampil di ponsel ini.",
       "save": "Simpan nama",
-      "saved": "Nama tersimpan"
+      "saved": "Nama tersimpan",
+      "row": "Akun aktif"
+    },
+    "general": {
+      "title": "Umum",
+      "language": "Bahasa",
+      "languageDesc": "Bahasa aplikasi"
+    },
+    "security": {
+      "title": "Keamanan",
+      "changePin": "Ubah PIN",
+      "biometricsTitle": "Buka dengan biometrik",
+      "biometricsDesc": "Sidik jari atau wajah. PIN tetap bisa dipakai.",
+      "biometricsUnavailable": "Belum ada sidik jari atau wajah yang diatur di ponsel ini.",
+      "biometricsPrompt": "Aktifkan buka dengan biometrik",
+      "autoLockTitle": "Kunci otomatis dompet",
+      "autoLockDesc": "Kunci Muvo setelah berada di latar belakang selama ini; setelahnya Anda perlu memasukkan PIN lagi.",
+      "immediately": "Langsung",
+      "minutes_one": "{{count}} mnt",
+      "minutes_other": "{{count}} mnt",
+      "recoveryPhraseTitle": "Frasa pemulihan",
+      "recoveryPhraseDesc": "Kata-kata untuk memulihkan dompet Anda"
+    },
+    "changePin": {
+      "title": "Ubah PIN",
+      "currentTitle": "Masukkan PIN saat ini",
+      "currentSubtitle": "Percobaan yang salah dihitung untuk penguncian.",
+      "newTitle": "Pilih PIN baru",
+      "confirmTitle": "Masukkan PIN baru lagi",
+      "newSubtitle": "6 digit. Dipakai untuk membuka Muvo dan menyetujui transaksi.",
+      "error": "PIN baru tidak dapat disimpan. PIN lama masih berlaku. Silakan coba lagi.",
+      "done": "PIN diubah"
+    },
+    "recoveryPhrase": {
+      "title": "Frasa pemulihan",
+      "description": "Frasa pemulihan Anda memulihkan akses penuh ke dompet ini.",
+      "warning": "Jangan pernah membagikan frasa pemulihan Anda. Siapa pun yang memilikinya dapat mengambil alih dompet Anda dan mencuri seluruh dana. Simpan secara offline dan jangan pernah mengetiknya di situs web.",
+      "reveal": "Tampilkan frasa pemulihan",
+      "authTitle": "Masukkan PIN Anda",
+      "authSubtitle": "untuk menampilkan frasa pemulihan",
+      "hide": "Sembunyikan",
+      "autoHide": "Frasa juga disembunyikan saat Anda meninggalkan layar ini atau Muvo masuk ke latar belakang.",
+      "failed": "Gagal menampilkan frasa pemulihan.",
+      "privateKey": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan. Simpan cadangan kunci Anda sendiri: hanya itu cara memulihkan dompet ini."
+    },
+    "logout": {
+      "title": "Keluar",
+      "lockNow": "Kunci sekarang",
+      "lockNowDesc": "Kunci Muvo sampai Anda memasukkan PIN. Tidak ada yang dihapus.",
+      "remove": "Hapus dompet dari perangkat ini",
+      "removeDesc": "Menghapus kunci dari ponsel ini. Anda perlu frasa pemulihan untuk mendapatkan dompet kembali."
+    },
+    "removeWallet": {
+      "title": "Hapus dompet",
+      "warningTitle": "Pastikan Anda memiliki frasa pemulihan",
+      "warning": "Tindakan ini tidak dapat dibatalkan. Jika Anda belum mencadangkan frasa pemulihan atau kunci privat, dana Anda akan hilang selamanya. CointMU tidak dapat memulihkannya untuk Anda.",
+      "description": "Ini menghapus semua akun dan kunci dari perangkat ini secara permanen. Dana Anda tetap ada di jaringan CointMU; Anda bisa memulihkan dompet nanti dengan frasa pemulihan atau kunci privat.",
+      "ack": "Saya sudah mencatat frasa pemulihan atau kunci privat saya",
+      "continue": "Hapus dompet",
+      "authTitle": "Masukkan PIN Anda",
+      "authSubtitle": "untuk menghapus dompet dari ponsel ini",
+      "finalTitle": "Hapus dompet sekarang?",
+      "confirm": "Hapus"
+    },
+    "about": {
+      "title": "Tentang",
+      "versionLine": "Versi {{version}} (build {{build}})",
+      "devBuild": "pengembangan",
+      "chainId": "Chain ID",
+      "rpcNode": "Node RPC",
+      "links": "Tautan",
+      "opensBrowser": "Dibuka di browser Anda",
+      "documentationTitle": "Dokumentasi",
+      "documentationDesc": "Panduan, referensi API, skema RPC",
+      "githubTitle": "GitHub",
+      "reportIssueTitle": "Laporkan masalah",
+      "reportIssueDesc": "Kirim laporan bug atau permintaan fitur",
+      "licenseTitle": "Lisensi",
+      "licenseDesc": "Sumber terbuka dengan Lisensi MIT"
     }
   },
   "send": { "title": "Kirim" },
@@ -169,7 +247,9 @@
   "scan": { "title": "Pindai" },
   "pinPrompt": {
     "checking": "Memeriksa PIN Anda",
-    "error": "PIN tidak dapat diperiksa. Silakan coba lagi."
+    "error": "PIN tidak dapat diperiksa. Silakan coba lagi.",
+    "mismatch": "PIN tidak cocok. Ulangi dari awal.",
+    "saving": "Mengamankan PIN Anda…"
   },
   "accounts": { "defaultName": "Akun {{number}}" }
 }

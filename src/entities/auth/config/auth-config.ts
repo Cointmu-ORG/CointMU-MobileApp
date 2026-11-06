@@ -25,5 +25,7 @@ export const LOCKOUT_POLICY = {
   resetOfferAfterFailures: 10,
 } as const;
 
-/** D-16. User-adjustable later (lock-settings feature). */
-export const AUTO_LOCK_DEFAULT_MS = MINUTE_MS;
+/** D-16: choices in Settings > Security. 0 locks as soon as the app leaves the foreground. */
+export const AUTO_LOCK_OPTIONS_MS = [0, MINUTE_MS, 5 * MINUTE_MS, 15 * MINUTE_MS] as const;
+export type AutoLockMs = (typeof AUTO_LOCK_OPTIONS_MS)[number];
+export const AUTO_LOCK_DEFAULT_MS: AutoLockMs = MINUTE_MS;

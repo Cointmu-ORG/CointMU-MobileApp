@@ -2,7 +2,8 @@
   "common": {
     "continue": "Continue",
     "cancel": "Cancel",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "done": "Done"
   },
   "onboarding": {
     "welcome": {
@@ -50,8 +51,6 @@
       "titleCreate": "Create a 6-digit PIN",
       "titleConfirm": "Enter the PIN again",
       "subtitle": "You'll use it to unlock Muvo and approve transactions.",
-      "saving": "Securing your PIN…",
-      "mismatch": "The PINs don't match. Start again.",
       "error": "Couldn't save your PIN. Please try again.",
       "biometricsTitle": "Unlock with biometrics?",
       "biometricsBody": "Use your fingerprint or face to unlock Muvo. Your PIN always works too.",
@@ -149,7 +148,8 @@
       "add": "Add and use",
       "invalidUrl": "Enter an http:// or https:// URL.",
       "alreadyListed": "That node is already in the list.",
-      "remove": "Remove your node"
+      "remove": "Remove your node",
+      "row": "Node in use"
     },
     "accounts": {
       "title": "Accounts",
@@ -161,7 +161,85 @@
       "nameField": "Name for {{account}}",
       "nameHint": "Only shown on this phone.",
       "save": "Save name",
-      "saved": "Name saved"
+      "saved": "Name saved",
+      "row": "Active account"
+    },
+    "general": {
+      "title": "General",
+      "language": "Language",
+      "languageDesc": "Application language"
+    },
+    "security": {
+      "title": "Security",
+      "changePin": "Change PIN",
+      "biometricsTitle": "Unlock with biometrics",
+      "biometricsDesc": "Fingerprint or face. Your PIN always works too.",
+      "biometricsUnavailable": "No fingerprint or face is set up on this phone.",
+      "biometricsPrompt": "Turn on biometric unlock",
+      "autoLockTitle": "Auto-lock wallet",
+      "autoLockDesc": "Lock Muvo after it has been in the background this long; you then need your PIN again.",
+      "immediately": "Immediately",
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "recoveryPhraseTitle": "Recovery phrase",
+      "recoveryPhraseDesc": "The words that restore your wallet"
+    },
+    "changePin": {
+      "title": "Change PIN",
+      "currentTitle": "Enter your current PIN",
+      "currentSubtitle": "Wrong attempts count toward the lockout.",
+      "newTitle": "Choose a new PIN",
+      "confirmTitle": "Enter the new PIN again",
+      "newSubtitle": "6 digits. You'll use it to unlock Muvo and approve transactions.",
+      "error": "Couldn't save the new PIN. Your old PIN still works. Please try again.",
+      "done": "PIN changed"
+    },
+    "recoveryPhrase": {
+      "title": "Recovery phrase",
+      "description": "Your recovery phrase restores full access to this wallet.",
+      "warning": "Never share your recovery phrase. Anyone who has it can take full control of your wallet and steal all of your funds. Store it offline and never type it into a website.",
+      "reveal": "Reveal recovery phrase",
+      "authTitle": "Enter your PIN",
+      "authSubtitle": "to show your recovery phrase",
+      "hide": "Hide",
+      "autoHide": "It is also hidden when you leave this screen or Muvo goes to the background.",
+      "failed": "Failed to reveal recovery phrase.",
+      "privateKey": "This wallet was imported from a private key, so it has no recovery phrase. Keep your own backup of the key: it is the only way to restore this wallet."
+    },
+    "logout": {
+      "title": "Log out",
+      "lockNow": "Lock now",
+      "lockNowDesc": "Lock Muvo until you enter your PIN. Nothing is deleted.",
+      "remove": "Remove wallet from this device",
+      "removeDesc": "Deletes the keys from this phone. You need your recovery phrase to get the wallet back."
+    },
+    "removeWallet": {
+      "title": "Remove wallet",
+      "warningTitle": "Make sure you have your recovery phrase",
+      "warning": "This action is irreversible. If you have not backed up your recovery phrase or private key, your funds will be lost forever. CointMU cannot recover them for you.",
+      "description": "This permanently removes all accounts and keys from this device. Your funds stay on the CointMU network; you can restore the wallet later with your recovery phrase or private key.",
+      "ack": "I have my recovery phrase or private key written down",
+      "continue": "Remove wallet",
+      "authTitle": "Enter your PIN",
+      "authSubtitle": "to remove the wallet from this phone",
+      "finalTitle": "Remove the wallet now?",
+      "confirm": "Remove"
+    },
+    "about": {
+      "title": "About",
+      "versionLine": "Version {{version}} (build {{build}})",
+      "devBuild": "development",
+      "chainId": "Chain ID",
+      "rpcNode": "RPC node",
+      "links": "Links",
+      "opensBrowser": "Opens in your browser",
+      "documentationTitle": "Documentation",
+      "documentationDesc": "Guides, API reference, RPC schema",
+      "githubTitle": "GitHub",
+      "reportIssueTitle": "Report an issue",
+      "reportIssueDesc": "Send a bug report or feature request",
+      "licenseTitle": "License",
+      "licenseDesc": "Open source under the MIT License"
     }
   },
   "send": { "title": "Send" },
@@ -169,7 +247,9 @@
   "scan": { "title": "Scan" },
   "pinPrompt": {
     "checking": "Checking your PIN",
-    "error": "Couldn't check the PIN. Please try again."
+    "error": "Couldn't check the PIN. Please try again.",
+    "mismatch": "The PINs don't match. Start again.",
+    "saving": "Securing your PIN…"
   },
   "accounts": { "defaultName": "Account {{number}}" }
 }

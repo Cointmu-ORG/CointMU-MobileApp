@@ -24,4 +24,5 @@ export { Spinner } from './spinner';
 export { Text, type TextTone, type TextVariant } from './text';
 export { colors } from './theme/colors';
 export { useShake } from './use-shake';
+export { WordGrid } from './word-grid';
 export { usePinInput } from './use-pin-input';

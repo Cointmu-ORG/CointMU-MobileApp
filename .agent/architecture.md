@@ -114,7 +114,8 @@ export { HomePage as default } from '@/pages/home';
 - Auth is required: on app open, after returning from background past the auto-lock timeout, and **before every transaction signature** and before revealing the mnemonic.
 - Auto-lock: 1 minute default, user-adjustable (immediately, 1, 5, 15 min).
 - PIN brute force: escalating lockout after failed attempts. After 10 failures, offer wallet reset (this wipes local keys; recovery requires the mnemonic). The failed count, lockout-until and lastSeenAt live in SecureStore, not in a persisted store (D-27). If the clock goes backwards during a lockout, the lockout restarts from now. Biometrics are not offered while a lockout runs.
-- Reset wallet: confirm twice, wipe SecureStore and persisted stores, return to onboarding.
+- Reset wallet: confirm twice, wipe SecureStore and persisted stores, return to onboarding. From the lock screen (after 10 failures) it is two confirmations. From Settings it is "Remove wallet from this device" (D-45): a strong warning with a "I have my recovery phrase" acknowledgement, the PIN, then a final confirmation. "Lock now" only locks the session.
+- Settings (D-46): Security holds change PIN (current PIN, then the new one twice), the biometrics switch (turning it on needs one successful biometric check), the auto-lock timeout (persisted in `muvo.auth.prefs`), and the recovery phrase. The phrase is read only after a PIN or biometric check, screenshots are blocked on that screen, and the words are dropped on Hide, on leaving the screen and when the app leaves the foreground. Private-key wallets show no phrase and no key (Q-35). Every PIN check, including these, shares the lockout.
 
 ## 6. Transaction flow
 
@@ -149,7 +150,7 @@ No indexer is assumed. Plan (see decisions.md Q-11):
 ## 9. UI and i18n
 
 - White and blue theme, matching the desktop app. Light mode only for MVP. Design tokens in Tailwind config.
-- Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`. No hardcoded user-facing strings.
+- Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`; a language picked in Settings is stored (`muvo.language`, AsyncStorage) and restored during bootstrap, before the splash hides. No hardcoded user-facing strings.
 - Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting. No fiat.
 
 ## 10. Config

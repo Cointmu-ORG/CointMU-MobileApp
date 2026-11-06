@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
+import { formatUrlHost } from '@/shared/lib';
 import { ListRow, RadioMark, Text, type TextTone } from '@/shared/ui';
 
-import { displayHost } from '../lib/describe-node';
 import type { NodeStatus } from '../model/use-node-probes';
 
 type NodeRowProps = {
@@ -40,7 +40,7 @@ export function NodeRow({ name, url, status, isSelected, onSelect }: NodeRowProp
   return (
     <ListRow
       title={name}
-      description={displayHost(url)}
+      description={formatUrlHost(url)}
       leading={<RadioMark isSelected={isSelected} />}
       trailing={
         <Text variant="caption" tone={label.tone} className="max-w-[40%] text-right">
