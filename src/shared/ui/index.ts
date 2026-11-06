@@ -1,5 +1,6 @@
 export { Button, type ButtonVariant } from './button';
 export { Card } from './card';
+export { FormScreen } from './form-screen';
 export { Input, type InputStatus } from './input';
 export { MOTION } from './motion';
 export { PinDots } from './pin-dots';

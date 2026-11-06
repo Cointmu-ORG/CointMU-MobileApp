@@ -58,6 +58,8 @@ export function ImportWalletForm() {
           setMode(next);
           setValue('');
           setError(null);
+          // D-28: the acknowledgement belongs to the key being imported, never carried over.
+          setIsAcknowledged(false);
         }}
       />
       <Input
@@ -67,6 +69,9 @@ export function ImportWalletForm() {
         value={value}
         onChangeText={setValue}
         multiline={!isPrivateKey}
+        // Return closes the keyboard so the button below is reachable; a phrase needs no newline.
+        submitBehavior="blurAndSubmit"
+        returnKeyType="done"
         secureTextEntry={isPrivateKey}
         status={error ? 'error' : 'default'}
         message={error ? t(ERROR_KEYS[error]) : undefined}

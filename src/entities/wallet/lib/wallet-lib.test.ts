@@ -36,6 +36,13 @@ describe('mnemonic', () => {
     expect(normalizePhrase('  Test  TEST\ntest ')).toBe('test test test');
   });
 
+  it('drops invisible characters that come along with a pasted phrase', () => {
+    // Regression: zero-width spaces and BOMs from copy-paste made a valid phrase invalid.
+    const pasted = `\uFEFF${TEST_PHRASE.replace(/ /g, ' \u200B')}\u2060`;
+    expect(normalizePhrase(pasted)).toBe(TEST_PHRASE);
+    expect(isValidMnemonic(normalizePhrase(TEST_PHRASE.replace(/ /g, '\u200B')))).toBe(true);
+  });
+
   it('rejects a bad checksum and wrong word counts', () => {
     expect(isValidMnemonic(TEST_PHRASE.replace('junk', 'test'))).toBe(false);
     expect(isValidMnemonic('test test test')).toBe(false);
@@ -47,6 +54,13 @@ describe('private key', () => {
     const key = normalizePrivateKey(TEST_KEY_0.slice(2).toUpperCase());
     expect(key).toBe(TEST_KEY_0);
     expect(addressFromPrivateKey(TEST_KEY_0)).toBe(TEST_ADDRESS_0);
+  });
+
+  it('accepts a 0X prefix and a key wrapped over several lines', () => {
+    // Regression: keys pasted from a wrapped display or typed with caps lock were rejected.
+    expect(normalizePrivateKey(`0X${TEST_KEY_0.slice(2).toUpperCase()}`)).toBe(TEST_KEY_0);
+    const wrapped = `${TEST_KEY_0.slice(0, 34)}\n ${TEST_KEY_0.slice(34, 50)} ${TEST_KEY_0.slice(50)}\n`;
+    expect(normalizePrivateKey(wrapped)).toBe(TEST_KEY_0);
   });
 
   it('rejects malformed, zero and out-of-range keys', () => {
