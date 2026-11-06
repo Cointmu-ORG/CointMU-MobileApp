@@ -36,14 +36,15 @@
       "modeMnemonic": "Frasa pemulihan",
       "modePrivateKey": "Kunci privat",
       "mnemonicLabel": "Frasa pemulihan (12 atau 24 kata)",
-      "privateKeyLabel": "Kunci privat",
+      "privateKeyLabel": "Kunci privat (64 karakter heksadesimal)",
       "invalidMnemonic": "Itu bukan frasa pemulihan 12 atau 24 kata yang valid.",
       "invalidPrivateKey": "Itu bukan kunci privat yang valid.",
       "privateKeyWarningTitle": "Cadangkan kunci ini sendiri",
       "privateKeyWarningBody": "Dompet yang diimpor dari kunci privat tidak punya frasa pemulihan. Kunci hanya tersimpan di HP ini. Jika HP hilang atau aplikasi direset tanpa cadangan kunci milikmu sendiri, dana akan hilang.",
       "privateKeyAck": "Saya punya cadangan sendiri untuk kunci privat ini",
       "submit": "Impor dompet",
-      "error": "Gagal mengimpor dompet. Silakan coba lagi."
+      "error": "Gagal mengimpor dompet. Silakan coba lagi.",
+      "modeLabel": "Impor dengan"
     },
     "setPin": {
       "titleCreate": "Buat PIN 6 digit",

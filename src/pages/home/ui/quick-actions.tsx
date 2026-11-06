@@ -4,11 +4,11 @@ import ArrowUpRight from 'lucide-react-native/icons/arrow-up-right';
 import ScanLine from 'lucide-react-native/icons/scan-line';
 import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { ROUTES, type AppRoute } from '@/shared/config';
-import { colors, MOTION, Text, usePressScale } from '@/shared/ui';
+import { colors, MOTION, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
 
 const ICON_SIZE = 22;
 
@@ -19,24 +19,19 @@ const ACTIONS: readonly { key: string; route: AppRoute; Icon: LucideIcon }[] = [
 ];
 
 function QuickAction({ label, route, Icon }: { label: string; route: AppRoute; Icon: LucideIcon }) {
-  const press = usePressScale();
   return (
-    <Animated.View style={press.style}>
-      <Pressable
-        onPress={() => router.push(route)}
-        onPressIn={press.onPressIn}
-        onPressOut={press.onPressOut}
-        accessibilityRole="button"
-        accessibilityLabel={label}
-      >
-        <View className="items-center gap-2">
-          <View className="h-14 w-14 items-center justify-center rounded-full bg-primary-600 shadow-sm shadow-primary-200">
-            <Icon size={ICON_SIZE} color={colors.content.inverse} />
-          </View>
-          <Text variant="label">{label}</Text>
-        </View>
-      </Pressable>
-    </Animated.View>
+    <PressableSurface
+      palette={SURFACE_PALETTE.ghost}
+      className="min-w-20 items-center gap-2 rounded-card px-3 py-2"
+      onPress={() => router.push(route)}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <View className="h-14 w-14 items-center justify-center rounded-full bg-primary-600">
+        <Icon size={ICON_SIZE} color={colors.content.inverse} />
+      </View>
+      <Text variant="label">{label}</Text>
+    </PressableSurface>
   );
 }
 

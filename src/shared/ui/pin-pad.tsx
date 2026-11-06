@@ -2,12 +2,11 @@ import Delete from 'lucide-react-native/icons/delete';
 import Fingerprint from 'lucide-react-native/icons/fingerprint-pattern';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { View } from 'react-native';
 
+import { PressableSurface, SURFACE_PALETTE } from './pressable-surface';
 import { Text } from './text';
 import { colors } from './theme/colors';
-import { usePressScale } from './use-press-scale';
 
 const DIGIT_ROWS = [
   ['1', '2', '3'],
@@ -32,27 +31,17 @@ type PadKeyProps = {
 };
 
 function PadKey({ label, onPress, isDisabled, children }: PadKeyProps) {
-  const press = usePressScale();
   return (
-    <Animated.View style={press.style}>
-      <Pressable
-        onPress={onPress}
-        onPressIn={press.onPressIn}
-        onPressOut={press.onPressOut}
-        disabled={isDisabled}
-        accessibilityRole="button"
-        accessibilityLabel={label}
-        accessibilityState={{ disabled: isDisabled }}
-      >
-        <View
-          className={`h-16 w-16 items-center justify-center rounded-full bg-surface-card ${
-            isDisabled ? 'opacity-50' : ''
-          }`}
-        >
-          {children}
-        </View>
-      </Pressable>
-    </Animated.View>
+    <PressableSurface
+      palette={SURFACE_PALETTE.key}
+      className="h-16 w-16 items-center justify-center rounded-full"
+      onPress={onPress}
+      isDisabled={isDisabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      {children}
+    </PressableSurface>
   );
 }
 

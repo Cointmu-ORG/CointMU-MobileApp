@@ -14,7 +14,7 @@ beforeEach(async () => {
 });
 
 async function switchTo(name: 'Private key' | 'Recovery phrase') {
-  await fireEvent.press(screen.getByRole('tab', { name }));
+  await fireEvent.press(screen.getByRole('radio', { name }));
 }
 
 describe('ImportWalletForm', () => {
@@ -26,7 +26,7 @@ describe('ImportWalletForm', () => {
     await switchTo('Private key');
 
     expect(screen.getByRole('checkbox')).not.toBeChecked();
-    await fireEvent.changeText(screen.getByLabelText('Private key'), KEY);
+    await fireEvent.changeText(screen.getByLabelText('Private key (64 hex characters)'), KEY);
     expect(screen.getByRole('button', { name: 'Import wallet' })).toBeDisabled();
   });
 
@@ -34,7 +34,7 @@ describe('ImportWalletForm', () => {
     await render(<ImportWalletForm />);
     await switchTo('Private key');
     const pasted = `0X${KEY.slice(2, 34).toUpperCase()}\n${KEY.slice(34)}\n`;
-    await fireEvent.changeText(screen.getByLabelText('Private key'), pasted);
+    await fireEvent.changeText(screen.getByLabelText('Private key (64 hex characters)'), pasted);
     await fireEvent.press(screen.getByRole('checkbox'));
     await fireEvent.press(screen.getByRole('button', { name: 'Import wallet' }));
 

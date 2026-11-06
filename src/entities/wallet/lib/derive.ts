@@ -10,7 +10,6 @@ export type DerivedAccount = {
   readonly accountIndex: number;
 };
 
-
 /**
  * The single swap point for mnemonic → account derivation (Q-30).
  *

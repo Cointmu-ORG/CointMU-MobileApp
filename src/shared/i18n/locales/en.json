@@ -36,14 +36,15 @@
       "modeMnemonic": "Recovery phrase",
       "modePrivateKey": "Private key",
       "mnemonicLabel": "Recovery phrase (12 or 24 words)",
-      "privateKeyLabel": "Private key",
+      "privateKeyLabel": "Private key (64 hex characters)",
       "invalidMnemonic": "That isn't a valid 12- or 24-word recovery phrase.",
       "invalidPrivateKey": "That isn't a valid private key.",
       "privateKeyWarningTitle": "Back up this key yourself",
       "privateKeyWarningBody": "A wallet imported from a private key has no recovery phrase. The key is stored only on this phone. If you lose the phone or reset the app without your own backup of the key, the funds are gone.",
       "privateKeyAck": "I have my own backup of this private key",
       "submit": "Import wallet",
-      "error": "Couldn't import the wallet. Please try again."
+      "error": "Couldn't import the wallet. Please try again.",
+      "modeLabel": "Import with"
     },
     "setPin": {
       "titleCreate": "Create a 6-digit PIN",

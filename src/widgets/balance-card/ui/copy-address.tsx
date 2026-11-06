@@ -3,10 +3,10 @@ import Check from 'lucide-react-native/icons/check';
 import Copy from 'lucide-react-native/icons/copy';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { logger, shortenAddress } from '@/shared/lib';
-import { colors, Text } from '@/shared/ui';
+import { colors, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
 
 const ICON_SIZE = 16;
 const COPIED_FEEDBACK_MS = 2_000;
@@ -33,27 +33,27 @@ export function CopyAddress({ address }: { address: string }) {
   };
 
   return (
-    <Pressable
-      onPress={() => void copy()}
-      accessibilityRole="button"
-      accessibilityLabel={t('home.balance.copyAddress')}
-      accessibilityHint={address}
-    >
-      <View className="flex-row items-center gap-2 self-start rounded-full bg-surface-muted px-3 py-2">
-        <Text variant="mono" tone="secondary">
-          {shortenAddress(address)}
-        </Text>
+    <View className="items-start gap-1">
+      <PressableSurface
+        palette={SURFACE_PALETTE.quiet}
+        className="min-h-11 flex-row items-center gap-2 rounded-full px-4"
+        onPress={() => void copy()}
+        accessibilityRole="button"
+        accessibilityLabel={t('home.balance.copyAddress')}
+        accessibilityHint={address}
+      >
+        <Text variant="mono">{shortenAddress(address)}</Text>
         {isCopied ? (
-          <Check size={ICON_SIZE} color={colors.success.DEFAULT} />
+          <Check size={ICON_SIZE} color={colors.success.strong} />
         ) : (
           <Copy size={ICON_SIZE} color={colors.content.secondary} />
         )}
-      </View>
+      </PressableSurface>
       {isCopied ? (
-        <Text variant="caption" tone="success" accessibilityLiveRegion="polite" className="mt-1">
+        <Text variant="caption" tone="success" accessibilityLiveRegion="polite">
           {t('home.balance.copied')}
         </Text>
       ) : null}
-    </Pressable>
+    </View>
   );
 }
