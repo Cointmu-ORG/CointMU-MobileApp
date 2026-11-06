@@ -3,6 +3,13 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { readWalletSecret, splitWords, useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
+// No test hits a real RPC: the provider factory returns a stub with a fixed balance.
+const ONE_CMU = 10n ** 18n;
+jest.mock('@/shared/api', () => ({
+  ...jest.requireActual('@/shared/api'),
+  createRpcProvider: () => ({ getBalance: jest.fn(async () => ONE_CMU) }),
+}));
+
 const SLOW_STEP_TIMEOUT_MS = 10_000;
 // Real key derivation and two real PIN hashes run in this flow.
 const FLOW_TIMEOUT_MS = 60_000;
@@ -53,10 +60,12 @@ describe('onboarding flow', () => {
       expect(await screen.findByText('Enter the PIN again')).toBeOnTheScreen();
       await enterPin();
 
-      // PIN saved, no biometrics in tests → active + unlocked → home tab.
+      // PIN saved, no biometrics in tests → active + unlocked → home tab with the mocked balance.
       expect(
-        await screen.findByText('Muvo', {}, { timeout: SLOW_STEP_TIMEOUT_MS }),
+        await screen.findByText('Total balance', {}, { timeout: SLOW_STEP_TIMEOUT_MS }),
       ).toBeOnTheScreen();
+      // The mocked 1 CMU shows in the balance card and the asset list.
+      expect(await screen.findAllByText('1')).toHaveLength(2);
       expect(useWalletStore.getState().status).toBe('active');
     },
     FLOW_TIMEOUT_MS,

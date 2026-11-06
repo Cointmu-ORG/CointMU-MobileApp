@@ -13,6 +13,14 @@ import { useAppReady } from '../model/use-app-ready';
 import { resolveEntryRoute } from '../model/resolve-entry-route';
 import { useAutoLock } from '../model/use-auto-lock';
 
+const STUB_HEADER = {
+  headerShown: true,
+  headerTitle: '',
+  headerShadowVisible: false,
+  headerTintColor: colors.primary[600],
+  headerStyle: { backgroundColor: colors.surface.DEFAULT },
+} as const;
+
 /**
  * Auth guard (architecture §4). Protected groups follow wallet status and session state, and
  * Expo Router redirects automatically when a guard flips, so protected screens never render.
@@ -51,6 +59,9 @@ export function RootLayout() {
         </Stack.Protected>
         <Stack.Protected guard={isActive && isUnlocked} redirectTo={entryRoute}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="send" options={STUB_HEADER} />
+          <Stack.Screen name="receive" options={STUB_HEADER} />
+          <Stack.Screen name="scan" options={STUB_HEADER} />
         </Stack.Protected>
       </Stack>
     </>
