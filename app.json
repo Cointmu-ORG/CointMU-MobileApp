@@ -19,13 +19,12 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "allowBackup": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      ["expo-router", { "root": "app" }]
-    ]
+    "plugins": [["expo-router", { "root": "./app" }]]
   }
 }

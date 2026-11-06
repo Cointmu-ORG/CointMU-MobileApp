@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      production-dependencies:
+        dependency-type: production
+    # Versions pinned by the Expo SDK move together via `npx expo install --fix`
+    # on an SDK upgrade (AGENTS.md); single bumps would break the SDK pins.
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-*"
+      - dependency-name: "@react-native/*"
+      - dependency-name: "@react-native-async-storage/*"
+      - dependency-name: "jest-expo"
+      - dependency-name: "@types/react"
+      - dependency-name: "typescript"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

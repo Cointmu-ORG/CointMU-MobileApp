@@ -31,6 +31,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
@@ -40,4 +41,6 @@ yarn-error.*
 /ios
 /android
 graphify-out
-CLAUDE.md
+
+# machine-specific Claude Code notes (D-35)
+CLAUDE.local.md
