@@ -19,9 +19,11 @@ Keys live on the device only. There is no "forgot password" and no server-side r
 | Symbol | CMU |
 | Decimals | 18 (assumed, VERIFY against the chain) |
 | Consensus | Proof of Work (geth-based) |
-| RPC | from `EXPO_PUBLIC_RPC_URL` (see decisions.md, open questions) |
+| RPC | preset node list from `EXPO_PUBLIC_RPC_URLS` (comma-separated, first is the default) plus one user-added node; see below and D-43 |
 
 Chain config lives in one place (`src/entities/network`). Never hardcode chain ID or RPC elsewhere.
+
+Node selection (D-43): Settings > Network lists the preset nodes and at most one node the user added. Before a node is used (selected or added) the app calls `eth_chainId` and refuses anything that is not 1912, so balances and signatures can never go to another chain. Each node shows its status and latency. The choice (`muvo.network`: selected URL and custom URL) is persisted; it is not a secret. A stored choice that no longer exists falls back to the first preset. `getProvider()` follows the selection.
 
 ## 3. Stack
 
@@ -152,4 +154,4 @@ No indexer is assumed. Plan (see decisions.md Q-11):
 
 ## 10. Config
 
-Only non-secret values via `EXPO_PUBLIC_*` (RPC URL, chain ID, explorer URL). Anything in the app bundle is public. Never put API keys or credentials in the app.
+Only non-secret values via `EXPO_PUBLIC_*`: `EXPO_PUBLIC_RPC_URLS` (comma-separated preset nodes), `EXPO_PUBLIC_CHAIN_ID`, later the explorer URL. Anything in the app bundle is public. Never put API keys or credentials in the app.

@@ -12,6 +12,7 @@ export const ROUTES = {
   send: '/send',
   receive: '/receive',
   scan: '/scan',
+  network: '/network',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

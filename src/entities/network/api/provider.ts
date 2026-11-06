@@ -3,11 +3,16 @@ import type { JsonRpcProvider } from 'ethers';
 import { createRpcProvider } from '@/shared/api';
 
 import { network } from '../config/network';
+import { resolveActiveUrl, useNetworkStore } from '../model/network-store';
 
-let provider: JsonRpcProvider | null = null;
+let cached: { url: string; provider: JsonRpcProvider } | null = null;
 
-/** Lazily created app-wide provider for the configured CointMU endpoint. */
+/** App-wide provider for the selected CointMU node; rebuilt when the selection changes. */
 export function getProvider(): JsonRpcProvider {
-  provider ??= createRpcProvider({ url: network.rpcUrl, chainId: network.chainId });
-  return provider;
+  const url = resolveActiveUrl(useNetworkStore.getState());
+  if (cached?.url !== url) {
+    cached?.provider.destroy();
+    cached = { url, provider: createRpcProvider({ url, chainId: network.chainId }) };
+  }
+  return cached.provider;
 }

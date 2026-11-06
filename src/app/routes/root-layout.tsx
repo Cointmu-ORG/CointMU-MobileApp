@@ -3,6 +3,7 @@ import '@/shared/i18n';
 
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useTranslation } from 'react-i18next';
 
 import { useSessionStore } from '@/entities/auth';
 import { useWalletStore } from '@/entities/wallet';
@@ -15,7 +16,7 @@ import { holdNativeSplash, SplashHandoff } from './splash-handoff';
 
 holdNativeSplash();
 
-const STUB_HEADER = {
+const SUB_SCREEN_HEADER = {
   headerShown: true,
   headerTitle: '',
   headerShadowVisible: false,
@@ -28,6 +29,7 @@ const STUB_HEADER = {
  * Expo Router redirects automatically when a guard flips, so protected screens never render.
  */
 export function RootLayout() {
+  const { t } = useTranslation();
   const isReady = useAppReady();
   const status = useWalletStore((state) => state.status);
   const isUnlocked = useSessionStore((state) => state.isUnlocked);
@@ -57,9 +59,13 @@ export function RootLayout() {
         </Stack.Protected>
         <Stack.Protected guard={isActive && isUnlocked} redirectTo={entryRoute}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="send" options={STUB_HEADER} />
-          <Stack.Screen name="receive" options={STUB_HEADER} />
-          <Stack.Screen name="scan" options={STUB_HEADER} />
+          <Stack.Screen name="send" options={SUB_SCREEN_HEADER} />
+          <Stack.Screen name="receive" options={SUB_SCREEN_HEADER} />
+          <Stack.Screen name="scan" options={SUB_SCREEN_HEADER} />
+          <Stack.Screen
+            name="network"
+            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('settings.network.title') }}
+          />
         </Stack.Protected>
       </Stack>
       <SplashHandoff />

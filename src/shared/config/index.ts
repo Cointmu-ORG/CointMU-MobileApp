@@ -1,4 +1,4 @@
-export { env, readEnv, type Env } from './env';
+export { env, isHttpUrl, readEnv, type Env } from './env';
 export {
   AMOUNT_DISPLAY_FRACTION_DIGITS,
   BALANCE_POLL_INTERVAL_MS,

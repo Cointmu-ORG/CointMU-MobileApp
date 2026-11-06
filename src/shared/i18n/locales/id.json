@@ -122,7 +122,35 @@
     }
   },
   "history": { "title": "Riwayat" },
-  "settings": { "title": "Pengaturan" },
+  "settings": {
+    "title": "Pengaturan",
+    "network": {
+      "title": "Jaringan",
+      "subtitle": "Node CointMU yang dipakai Muvo. Kunci Anda tidak pernah keluar dari ponsel ini; node hanya melihat alamat publik Anda dan permintaan yang dikirim Muvo.",
+      "nodesTitle": "Node CointMU",
+      "nodesFooter": "Muvo hanya beralih ke node yang melaporkan chain ID {{chainId}}.",
+      "nodeName": "Node {{number}}",
+      "customName": "Node Anda",
+      "checkAll": "Cek semua",
+      "status": {
+        "unchecked": "Belum dicek",
+        "checking": "Mengecek…",
+        "reachable": "Terjangkau · {{ms}} ms",
+        "unreachable": "Tidak terjangkau",
+        "wrongChain": "Jaringan salah (chain {{chainId}})"
+      },
+      "refusedUnreachable": "Node tersebut tidak dapat dihubungi. Muvo tetap memakai node saat ini.",
+      "refusedWrongChain": "Node tersebut ada di chain {{chainId}}, bukan CointMU ({{expected}}). Muvo tetap memakai node saat ini.",
+      "addTitle": "Tambah node",
+      "urlField": "URL RPC",
+      "urlPlaceholder": "https://",
+      "addHint": "Gunakan https://. http:// biasa diblokir di build rilis.",
+      "add": "Tambah dan pakai",
+      "invalidUrl": "Masukkan URL http:// atau https://.",
+      "alreadyListed": "Node tersebut sudah ada di daftar.",
+      "remove": "Hapus node Anda"
+    }
+  },
   "send": { "title": "Kirim" },
   "receive": { "title": "Terima" },
   "scan": { "title": "Pindai" },

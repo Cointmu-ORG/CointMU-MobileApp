@@ -4,5 +4,9 @@ import { env } from '@/shared/config';
 export const network = {
   name: 'CointMU',
   chainId: env.chainId,
-  rpcUrl: env.rpcUrl,
+  /** Preset RPC nodes (EXPO_PUBLIC_RPC_URLS). The first is the default. */
+  presetUrls: env.rpcUrls,
 } as const;
+
+/** Wait for an eth_chainId answer when checking a node; one try, no retries. */
+export const NODE_PROBE_TIMEOUT_MS = 5_000;
