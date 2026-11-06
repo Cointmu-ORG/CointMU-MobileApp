@@ -7,7 +7,7 @@
 | Non-custodial | The user holds the keys. Nobody, including us, can recover or move funds. |
 | Mnemonic / seed phrase | 12 (or 24) BIP-39 words that deterministically generate the wallet keys. |
 | Derivation path | BIP-44 path used to derive accounts: `m/44'/60'/0'/0/{index}`. |
-| Account | One address derived from the mnemonic (MVP: index 0 only). |
+| Account | One address derived from the mnemonic at a BIP-44 index (0, 1, 2, …), with an optional local name. A private-key wallet has one account. |
 | Private key | Raw 32-byte key for one address. Imported keys have no mnemonic. |
 | RPC | JSON-RPC endpoint of a CointMU node (HTTP). |
 | Wei | Smallest unit. 1 CMU = 10^decimals wei. Amounts are `bigint` in wei. |

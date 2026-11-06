@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
 
-import { ListRow, Text, type TextTone } from '@/shared/ui';
+import { ListRow, RadioMark, Text, type TextTone } from '@/shared/ui';
 
 import { displayHost } from '../lib/describe-node';
 import type { NodeStatus } from '../model/use-node-probes';
@@ -34,18 +33,6 @@ function useStatusLabel(status: NodeStatus | undefined): { text: string; tone: T
     case 'unreachable':
       return { text: t('settings.network.status.unreachable'), tone: 'danger' };
   }
-}
-
-function RadioMark({ isSelected }: { isSelected: boolean }) {
-  return (
-    <View
-      className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
-        isSelected ? 'border-primary-600' : 'border-content-secondary'
-      }`}
-    >
-      {isSelected ? <View className="h-2.5 w-2.5 rounded-full bg-primary-600" /> : null}
-    </View>
-  );
 }
 
 export function NodeRow({ name, url, status, isSelected, onSelect }: NodeRowProps) {

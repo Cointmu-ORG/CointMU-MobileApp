@@ -13,6 +13,7 @@ export const ROUTES = {
   receive: '/receive',
   scan: '/scan',
   network: '/network',
+  accounts: '/accounts',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

@@ -95,7 +95,8 @@
       "error": "Can't reach the CointMU network right now. Pull down to refresh or try again.",
       "retry": "Try again",
       "copyAddress": "Copy address",
-      "copied": "Address copied"
+      "copied": "Address copied",
+      "switchAccount": "Switch account"
     },
     "actions": {
       "send": "Send",
@@ -149,6 +150,18 @@
       "invalidUrl": "Enter an http:// or https:// URL.",
       "alreadyListed": "That node is already in the list.",
       "remove": "Remove your node"
+    },
+    "accounts": {
+      "title": "Accounts",
+      "listTitle": "Accounts in this wallet",
+      "add": "Add account",
+      "addHint": "New accounts come from your recovery phrase, so it restores all of them.",
+      "privateKeyHint": "This wallet was imported from a private key, so it has no recovery phrase to create more accounts from. To use several accounts, use a wallet with a recovery phrase.",
+      "addFailed": "Couldn't add an account. Please try again.",
+      "nameField": "Name for {{account}}",
+      "nameHint": "Only shown on this phone.",
+      "save": "Save name",
+      "saved": "Name saved"
     }
   },
   "send": { "title": "Send" },
@@ -157,5 +170,6 @@
   "pinPrompt": {
     "checking": "Checking your PIN",
     "error": "Couldn't check the PIN. Please try again."
-  }
+  },
+  "accounts": { "defaultName": "Account {{number}}" }
 }

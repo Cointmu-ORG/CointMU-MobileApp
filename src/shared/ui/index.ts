@@ -16,6 +16,7 @@ export {
   type SurfacePalette,
 } from './pressable-surface';
 export { Screen } from './screen';
+export { RadioMark } from './radio-mark';
 export { ScrollScreen } from './scroll-screen';
 export { SegmentedControl, type SegmentOption } from './segmented-control';
 export { Skeleton } from './skeleton';

@@ -8,5 +8,12 @@ export {
 export { deriveAccount, type DerivedAccount } from './lib/derive';
 export { generateMnemonic, isValidMnemonic, normalizePhrase, splitWords } from './lib/mnemonic';
 export { addressFromPrivateKey, normalizePrivateKey } from './lib/private-key';
-export { useWalletStore, type WalletSource, type WalletStatus } from './model/wallet-store';
+export { useAccountLabel, useActiveAccount } from './model/use-account-label';
+export {
+  migrateWalletState,
+  useWalletStore,
+  type WalletAccount,
+  type WalletSource,
+  type WalletStatus,
+} from './model/wallet-store';
 export { useMnemonicWords, type MnemonicWordsState } from './model/use-mnemonic-words';

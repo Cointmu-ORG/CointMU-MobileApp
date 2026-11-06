@@ -95,7 +95,8 @@
       "error": "Tidak dapat terhubung ke jaringan CointMU saat ini. Tarik ke bawah untuk memuat ulang atau coba lagi.",
       "retry": "Coba lagi",
       "copyAddress": "Salin alamat",
-      "copied": "Alamat disalin"
+      "copied": "Alamat disalin",
+      "switchAccount": "Ganti akun"
     },
     "actions": {
       "send": "Kirim",
@@ -149,6 +150,18 @@
       "invalidUrl": "Masukkan URL http:// atau https://.",
       "alreadyListed": "Node tersebut sudah ada di daftar.",
       "remove": "Hapus node Anda"
+    },
+    "accounts": {
+      "title": "Akun",
+      "listTitle": "Akun di dompet ini",
+      "add": "Tambah akun",
+      "addHint": "Akun baru dibuat dari frasa pemulihan Anda, jadi frasa itu memulihkan semuanya.",
+      "privateKeyHint": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan untuk membuat akun lain. Untuk memakai beberapa akun, gunakan dompet dengan frasa pemulihan.",
+      "addFailed": "Akun tidak dapat ditambahkan. Silakan coba lagi.",
+      "nameField": "Nama untuk {{account}}",
+      "nameHint": "Hanya tampil di ponsel ini.",
+      "save": "Simpan nama",
+      "saved": "Nama tersimpan"
     }
   },
   "send": { "title": "Kirim" },
@@ -157,5 +170,6 @@
   "pinPrompt": {
     "checking": "Memeriksa PIN Anda",
     "error": "PIN tidak dapat diperiksa. Silakan coba lagi."
-  }
+  },
+  "accounts": { "defaultName": "Akun {{number}}" }
 }

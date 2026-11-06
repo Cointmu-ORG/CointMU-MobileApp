@@ -66,6 +66,10 @@ export function RootLayout() {
             name="network"
             options={{ ...SUB_SCREEN_HEADER, headerTitle: t('settings.network.title') }}
           />
+          <Stack.Screen
+            name="accounts"
+            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('settings.accounts.title') }}
+          />
         </Stack.Protected>
       </Stack>
       <SplashHandoff />

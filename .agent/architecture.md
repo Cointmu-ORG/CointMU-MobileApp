@@ -87,7 +87,7 @@ export { HomePage as default } from '@/pages/home';
 ```
 
 ### Features
-`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `change-language`, `lock-settings`, `reset-wallet`.
+`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `change-language`, `lock-settings`, `reset-wallet`, `select-network`, `manage-accounts`.
 
 ### Slice segments
 `ui/`, `model/` (Zustand store, selectors, types), `api/` (RPC calls), `lib/` (pure helpers), `config/`. Each slice exposes only `index.ts`.
@@ -100,8 +100,8 @@ export { HomePage as default } from '@/pages/home';
 
 ## 5. Wallet and key handling
 
-- Derivation: BIP-39 mnemonic (12 words), BIP-44 path `m/44'/60'/0'/0/{index}`. MVP uses index 0 only, but the data model stores `accountIndex` so multi-account can be added later.
-- Derivation wrapper: all mnemonic → account derivation goes through `deriveAccount()` in `entities/wallet/lib/derive.ts`. ethers v6 `fromPhrase` runs PBKDF2 in pure JS and blocks the Hermes JS thread, so the wrapper yields one frame first and the UI shows a Reanimated (UI-thread) progress animation. Swapping the PBKDF2 backend later only touches this function (Q-30).
+- Derivation: BIP-39 mnemonic (12 words), BIP-44 path `m/44'/60'/0'/0/{index}`. A wallet starts with index 0; the user can add more accounts (index 1, 2, …) from the same mnemonic, switch between them and name them (D-44). The wallet store keeps `accounts` (index, address, name) and the active `accountIndex`/`address`; names are local and public. Private-key wallets have exactly one account. Multiple separate wallets (several secrets) are out of scope (Q-34).
+- Derivation wrapper: all mnemonic → account derivation goes through `deriveAccount()` in `entities/wallet/lib/derive.ts`. ethers v6 `fromPhrase` runs PBKDF2 in pure JS and blocks the Hermes JS thread, so the wrapper waits for a painted frame first and the UI shows a Reanimated (UI-thread) progress animation. Swapping the PBKDF2 backend later only touches this function (Q-30).
 - Import: mnemonic (12 or 24 words) or raw private key. A private-key import has no mnemonic and cannot derive more accounts. The import screen shows a mandatory "back up this key yourself" warning that the user must acknowledge (D-28).
 - Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params. The clipboard is used only for the user's own address; there is no copy action for the mnemonic or a private key.
 - Onboarding state (D-32): a new mnemonic goes to SecureStore immediately, and the wallet status (persisted, non-secret) moves `none` → `pendingBackup` → `pendingPin` → `active`; imports go `none` → `pendingPin` → `active`. A killed app resumes at the step for its status.
