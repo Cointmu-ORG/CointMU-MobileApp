@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { LockoutState } from '@/entities/auth';
+import type { LockoutState } from '../lib/lockout';
 
 const TICK_MS = 1_000;
 

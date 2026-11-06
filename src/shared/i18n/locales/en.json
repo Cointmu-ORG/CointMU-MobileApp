@@ -125,5 +125,9 @@
   "settings": { "title": "Settings" },
   "send": { "title": "Send" },
   "receive": { "title": "Receive" },
-  "scan": { "title": "Scan" }
+  "scan": { "title": "Scan" },
+  "pinPrompt": {
+    "checking": "Checking your PIN",
+    "error": "Couldn't check the PIN. Please try again."
+  }
 }

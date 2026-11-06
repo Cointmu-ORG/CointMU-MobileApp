@@ -125,5 +125,9 @@
   "settings": { "title": "Pengaturan" },
   "send": { "title": "Kirim" },
   "receive": { "title": "Terima" },
-  "scan": { "title": "Pindai" }
+  "scan": { "title": "Pindai" },
+  "pinPrompt": {
+    "checking": "Memeriksa PIN Anda",
+    "error": "PIN tidak dapat diperiksa. Silakan coba lagi."
+  }
 }

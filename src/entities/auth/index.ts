@@ -17,5 +17,7 @@ export {
   type LockoutState,
 } from './lib/lockout';
 export { createPbkdf2PinHasher, pinHasher, type PinHasher, type PinRecord } from './lib/pin-hasher';
+export { attemptBiometrics, attemptPin, loadLockout, type PinAttempt } from './model/verify-pin';
+export { PinPrompt, type PinPromptBiometrics } from './ui/pin-prompt';
 export { useAuthPrefsStore } from './model/auth-prefs-store';
 export { useSessionStore } from './model/session-store';
