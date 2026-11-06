@@ -55,7 +55,7 @@ The router root is pinned in app.json: `["expo-router", { "root": "./app" }]` (D
 ```
 app/                         # Expo Router routes ONLY. No logic.
   _layout.tsx                # re-exports src/app root layout (auth guard)
-  (onboarding)/...           # welcome, create, import, backup, verify, set-pin
+  (onboarding)/...           # welcome, create, import, backup, verify, set-pin, recover (D-39)
   (tabs)/                    # home (index, owns `/`), history, settings
   send/ ...                  # send, confirm, result
   receive.tsx
@@ -75,7 +75,7 @@ src/
     i18n/     locales/en.json, locales/id.json, setup
 ```
 
-Auth guard (D-36): the root and onboarding layouts wrap screens in `Stack.Protected`, driven by wallet status and session state. Every group's `redirectTo` comes from one function, `resolveEntryRoute(status, isUnlocked)`: `none` → welcome, `pendingBackup` → backup, `pendingPin` → set-pin, `active` → lock or home. Protected screens never render, and a status change redirects automatically, so features change state instead of navigating.
+Auth guard (D-36): the root and onboarding layouts wrap screens in `Stack.Protected`, driven by wallet status and session state. Every group's `redirectTo` comes from one function, `resolveEntryRoute({ status, isUnlocked, isRecoveryRequired })`: `none` → welcome (or recover when recovery is required, D-39), `pendingBackup` → backup, `pendingPin` → set-pin, `active` → lock or home. Protected screens never render, and a status change redirects automatically, so features change state instead of navigating.
 The FSD `app` layer has no `ui` segment (Steiger `fsd/no-ui-in-app`); navigator layouts live in `src/app/routes`.
 
 Route file example:
@@ -104,6 +104,7 @@ export { HomePage as default } from '@/pages/home';
 - Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params. The clipboard is used only for the user's own address; there is no copy action for the mnemonic or a private key.
 - Onboarding state (D-32): a new mnemonic goes to SecureStore immediately, and the wallet status (persisted, non-secret) moves `none` → `pendingBackup` → `pendingPin` → `active`; imports go `none` → `pendingPin` → `active`. A killed app resumes at the step for its status.
 - Fresh install (D-33): the iOS Keychain survives uninstall but AsyncStorage does not. If the `muvo.installed` marker is missing at startup, all of the app's SecureStore items are wiped before anything reads them.
+- Startup integrity check (D-39): after the fresh-install check and store hydration, the persisted status must match what SecureStore can still read. `pendingBackup` and `pendingPin` need a readable secret; `active` needs a readable secret and a readable PIN record; `none` needs nothing. On a mismatch the app does not open the lock screen: it wipes local wallet data through the reset-wallet flow and routes to `/recover`, which explains the data couldn't be read and offers import by mnemonic or private key (reusing import-wallet) or starting a new wallet. The recovery state is persisted, so a killed app returns to `/recover`. The check reads the secret only to validate its shape; the value never leaves the wallet entity (`hasReadableWalletSecret`).
 - Signing: read the secret from SecureStore **after successful auth**, build the `Wallet`, sign, and drop the reference immediately. Do not keep a long-lived `Wallet` object in global state.
 - Backup flow (create wallet): show the 12 words once, block screenshots (`expo-screen-capture`), then force a verification quiz (re-enter 3 random words) before the wallet is activated.
 - Auth: user sets a 6-digit PIN at onboarding. PIN is stored as a salted hash, never plain. Biometrics are optional on top of the PIN, and PIN is always the fallback.
