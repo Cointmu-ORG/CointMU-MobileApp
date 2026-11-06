@@ -41,6 +41,7 @@ Note: D-11 and D-17 are intentionally unused (the history-source topic is tracke
 - **D-35 Committed `CLAUDE.md` imports `AGENTS.md`.** Supersedes D-24: rules are referenced from `AGENTS.md`, and a committed `CLAUDE.md` containing `@AGENTS.md` makes Claude Code load them. Machine-specific notes (graphify, Obsidian vault paths) move to the gitignored `CLAUDE.local.md`.
 - **D-36 Auth guard uses Expo Router protected routes.** Root and onboarding layouts wrap screens in `Stack.Protected`, driven by wallet status and session state, with `redirectTo` computed by one function (`resolveEntryRoute`). Protected screens never render, and a status change redirects automatically. There is no root `app/index.tsx`: the home tab (`(tabs)/index`) owns `/`.
 - **D-37 Icons are imported per file.** Use `lucide-react-native/icons/<name>` instead of the package barrel. The barrel pulls in about 2,000 icon modules (Metro does not tree-shake by default) and made Jest runs take minutes.
+- **D-38 Android auto-backup is off (`android.allowBackup: false`).** Auto-backup would restore AsyncStorage (wallet status and the D-33 install marker) on a new device or reinstall, but never the Android Keystore keys that encrypt SecureStore. The app would then skip the reinstall wipe and treat the wallet as active with a secret it cannot decrypt. Users move wallets between devices with their mnemonic or private key.
 
 ## Open questions (need an answer from the owner)
 
