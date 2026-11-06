@@ -1,5 +1,6 @@
 export {
   deleteWalletSecret,
+  hasReadableWalletSecret,
   readWalletSecret,
   saveWalletSecret,
   type WalletSecret,

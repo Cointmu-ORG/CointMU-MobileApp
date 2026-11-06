@@ -1,4 +1,5 @@
 export {
+  hasReadablePinRecord,
   readLockoutState,
   readPinRecord,
   wipeAuthRecords,

@@ -17,15 +17,25 @@ type WalletState = {
   address: string | null;
   source: WalletSource | null;
   accountIndex: number;
+  /** D-39: local data was unreadable and wiped; show the recovery screen instead of welcome. */
+  isRecoveryRequired: boolean;
   hasHydrated: boolean;
   startBackup: (address: string) => void;
   completeBackup: () => void;
   startPinSetup: (address: string, source: WalletSource) => void;
   activate: () => void;
   reset: () => void;
+  requireRecovery: () => void;
+  dismissRecovery: () => void;
 };
 
-const INITIAL = { status: 'none', address: null, source: null, accountIndex: 0 } as const;
+const INITIAL = {
+  status: 'none',
+  address: null,
+  source: null,
+  accountIndex: 0,
+  isRecoveryRequired: false,
+} as const;
 
 // Public data only (status, address). Secrets never enter this store (forbidden rule 2).
 export const useWalletStore = create<WalletState>()(
@@ -33,24 +43,29 @@ export const useWalletStore = create<WalletState>()(
     (set, get) => ({
       ...INITIAL,
       hasHydrated: false,
-      startBackup: (address) => set({ status: 'pendingBackup', address, source: 'mnemonic' }),
+      startBackup: (address) =>
+        set({ status: 'pendingBackup', address, source: 'mnemonic', isRecoveryRequired: false }),
       completeBackup: () => {
         if (get().status === 'pendingBackup') set({ status: 'pendingPin' });
       },
-      startPinSetup: (address, source) => set({ status: 'pendingPin', address, source }),
+      startPinSetup: (address, source) =>
+        set({ status: 'pendingPin', address, source, isRecoveryRequired: false }),
       activate: () => {
         if (get().status === 'pendingPin') set({ status: 'active' });
       },
       reset: () => set(INITIAL),
+      requireRecovery: () => set({ ...INITIAL, isRecoveryRequired: true }),
+      dismissRecovery: () => set({ isRecoveryRequired: false }),
     }),
     {
       name: 'muvo.wallet',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ status, address, source, accountIndex }) => ({
+      partialize: ({ status, address, source, accountIndex, isRecoveryRequired }) => ({
         status,
         address,
         source,
         accountIndex,
+        isRecoveryRequired,
       }),
       onRehydrateStorage: () => (_state, error) => {
         if (error) logger.error('Wallet store rehydration failed', { error });

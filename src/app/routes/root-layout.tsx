@@ -29,6 +29,7 @@ export function RootLayout() {
   const isReady = useAppReady();
   const status = useWalletStore((state) => state.status);
   const isUnlocked = useSessionStore((state) => state.isUnlocked);
+  const isRecoveryRequired = useWalletStore((state) => state.isRecoveryRequired);
   useAutoLock();
 
   if (!isReady) {
@@ -40,7 +41,7 @@ export function RootLayout() {
   }
 
   const isActive = status === 'active';
-  const entryRoute = resolveEntryRoute(status, isUnlocked);
+  const entryRoute = resolveEntryRoute({ status, isUnlocked, isRecoveryRequired });
   return (
     <>
       <StatusBar style="dark" />

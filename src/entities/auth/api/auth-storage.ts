@@ -48,6 +48,15 @@ export async function readPinRecord(): Promise<PinRecord | null> {
   return isPinRecord(parsed) ? parsed : null;
 }
 
+/** True when a valid PIN record is stored; SecureStore read errors count as unreadable (D-39). */
+export async function hasReadablePinRecord(): Promise<boolean> {
+  try {
+    return (await readPinRecord()) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function writePinRecord(record: PinRecord): Promise<void> {
   return secureStorage.set(PIN_RECORD_KEY, JSON.stringify(record));
 }

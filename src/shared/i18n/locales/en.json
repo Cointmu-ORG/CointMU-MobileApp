@@ -55,6 +55,11 @@
       "biometricsBody": "Use your fingerprint or face to unlock Muvo. Your PIN always works too.",
       "biometricsEnable": "Turn on",
       "biometricsSkip": "Not now"
+    },
+    "recover": {
+      "title": "We couldn't read your wallet",
+      "body": "The wallet data on this device couldn't be read, so it was removed to keep you safe. Your funds are still on the CointMU network. Import your recovery phrase or private key to get access back.",
+      "startOver": "Create a new wallet instead"
     }
   },
   "lock": {

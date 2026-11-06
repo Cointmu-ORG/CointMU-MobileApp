@@ -6,6 +6,7 @@ export const ROUTES = {
   backup: '/backup',
   verify: '/verify',
   setPin: '/set-pin',
+  recover: '/recover',
   lock: '/lock',
   home: '/',
   send: '/send',

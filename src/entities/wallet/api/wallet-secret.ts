@@ -31,6 +31,18 @@ export async function readWalletSecret(): Promise<WalletSecret | null> {
   return parsed;
 }
 
+/**
+ * True when a well-formed secret is stored. Used by the startup integrity check (D-39); the
+ * parsed value never leaves this function. Read or parse failures count as unreadable.
+ */
+export async function hasReadableWalletSecret(): Promise<boolean> {
+  try {
+    return (await readWalletSecret()) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function deleteWalletSecret(): Promise<void> {
   return secureStorage.remove(SECRET_KEY);
 }

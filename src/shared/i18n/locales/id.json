@@ -55,6 +55,11 @@
       "biometricsBody": "Gunakan sidik jari atau wajah untuk membuka Muvo. PIN tetap bisa dipakai.",
       "biometricsEnable": "Aktifkan",
       "biometricsSkip": "Nanti saja"
+    },
+    "recover": {
+      "title": "Dompet tidak dapat dibaca",
+      "body": "Data dompet di perangkat ini tidak dapat dibaca, jadi dihapus demi keamanan. Dana kamu tetap ada di jaringan CointMU. Impor frasa pemulihan atau kunci privat untuk memulihkan akses.",
+      "startOver": "Buat dompet baru saja"
     }
   },
   "lock": {
