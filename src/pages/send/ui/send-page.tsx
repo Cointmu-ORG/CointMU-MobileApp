@@ -1,8 +1,9 @@
+import ArrowUpRight from 'lucide-react-native/icons/arrow-up-right';
 import { useTranslation } from 'react-i18next';
 
 import { PlaceholderScreen } from '@/shared/ui';
 
 export function SendPage() {
   const { t } = useTranslation();
-  return <PlaceholderScreen title={t('send.title')} />;
+  return <PlaceholderScreen title={t('send.title')} icon={ArrowUpRight} />;
 }

@@ -10,8 +10,10 @@ import { colors } from '@/shared/ui';
 
 function tabIcon(Icon: LucideIcon) {
   function TabIcon({ color, size }: { color: ColorValue; size: number }) {
-    // The tab bar passes our string tint colors; anything else falls back to the muted token.
-    return <Icon color={typeof color === 'string' ? color : colors.content.muted} size={size} />;
+    // The tab bar passes our string tint colors; anything else falls back to the inactive tint.
+    return (
+      <Icon color={typeof color === 'string' ? color : colors.content.secondary} size={size} />
+    );
   }
   return TabIcon;
 }
@@ -23,7 +25,7 @@ export function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary[600],
-        tabBarInactiveTintColor: colors.content.muted,
+        tabBarInactiveTintColor: colors.content.secondary,
         tabBarStyle: {
           backgroundColor: colors.surface.card,
           borderTopColor: colors.border.DEFAULT,

@@ -22,7 +22,7 @@ function TxRow({ record }: { record: LocalTxRecord }) {
     <View className="flex-row items-center justify-between py-2">
       <View>
         <Text variant="label">{t('home.transactions.sent')}</Text>
-        <Text variant="mono" tone="muted">
+        <Text variant="mono" tone="secondary">
           {shortenAddress(record.to)}
         </Text>
       </View>
@@ -40,7 +40,7 @@ function EmptyState() {
   const { t } = useTranslation();
   return (
     <View className="items-center gap-2 py-6">
-      <Inbox size={EMPTY_ICON_SIZE} color={colors.content.muted} />
+      <Inbox size={EMPTY_ICON_SIZE} color={colors.content.secondary} />
       <Text variant="label">{t('home.transactions.empty')}</Text>
       <Text variant="caption" tone="secondary" className="text-center">
         {t('home.transactions.emptyHint')}

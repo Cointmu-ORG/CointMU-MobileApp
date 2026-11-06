@@ -1,6 +1,6 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -10,11 +10,10 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { logger } from '@/shared/lib';
-import { colors, MOTION } from '@/shared/ui';
+import { BrandMark, colors, MOTION } from '@/shared/ui';
 
 // Same image, size and background as the native splash (expo-splash-screen in app.json), so the
 // swap from native to JS is invisible; then this copy zooms out of the way.
-const SPLASH_IMAGE = require('../../../assets/splash-icon.png');
 const SPLASH_IMAGE_WIDTH = 120;
 const EXIT_SCALE = 1.15;
 
@@ -54,7 +53,7 @@ export function SplashHandoff() {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <Image source={SPLASH_IMAGE} style={styles.image} resizeMode="contain" />
+      <BrandMark size={SPLASH_IMAGE_WIDTH} />
     </Animated.View>
   );
 }
@@ -66,5 +65,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.surface.DEFAULT,
   },
-  image: { width: SPLASH_IMAGE_WIDTH, height: SPLASH_IMAGE_WIDTH },
 });

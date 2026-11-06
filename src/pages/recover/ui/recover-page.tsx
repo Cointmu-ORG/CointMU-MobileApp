@@ -17,7 +17,7 @@ export function RecoverPage() {
   return (
     <FormScreen>
       <View className="h-14 w-14 items-center justify-center rounded-card bg-warning-soft">
-        <ShieldAlert size={ICON_SIZE} color={colors.warning.DEFAULT} />
+        <ShieldAlert size={ICON_SIZE} color={colors.warning.strong} />
       </View>
       <View className="gap-2">
         <Text variant="title" accessibilityRole="header">

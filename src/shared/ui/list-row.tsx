@@ -6,8 +6,7 @@ import { View, type AccessibilityRole, type AccessibilityState } from 'react-nat
 import { PressableSurface, SURFACE_PALETTE } from './pressable-surface';
 import { Text } from './text';
 import { colors } from './theme/colors';
-
-export const ICON_SIZE = { sm: 16, md: 20, lg: 24 } as const;
+import { ICON_SIZE } from './theme/icon-size';
 
 type ListRowProps = {
   title: string;

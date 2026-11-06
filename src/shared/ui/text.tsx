@@ -12,14 +12,15 @@ const VARIANT_CLASS = {
 } as const;
 
 // Color is separate from size so classes never conflict (NativeWind resolves by CSS order).
+// Every tone meets WCAG AA (4.5:1) on white and on the surface color. `content.muted` is too
+// light for text (2.6:1), so it is not a tone; status colors use their darker "strong" shade.
 const TONE_CLASS = {
   default: 'text-content',
   secondary: 'text-content-secondary',
-  muted: 'text-content-muted',
   primary: 'text-primary-600',
   inverse: 'text-content-inverse',
-  danger: 'text-danger',
-  success: 'text-success',
+  danger: 'text-danger-strong',
+  success: 'text-success-strong',
 } as const;
 
 export type TextVariant = keyof typeof VARIANT_CLASS;

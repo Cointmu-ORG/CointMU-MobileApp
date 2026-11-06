@@ -24,7 +24,7 @@ function AssetRow({ asset }: { asset: Asset }) {
         </View>
         <View>
           <Text variant="label">{name}</Text>
-          <Text variant="caption" tone="muted">
+          <Text variant="caption" tone="secondary">
             {asset.symbol}
           </Text>
         </View>
