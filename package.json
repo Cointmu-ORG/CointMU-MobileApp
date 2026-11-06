@@ -57,7 +57,8 @@
     "lint:fsd": "steiger ./src",
     "test": "jest",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "version": "node scripts/sync-release-files.js"
   },
   "private": true
 }
