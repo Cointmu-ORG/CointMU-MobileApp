@@ -1,4 +1,4 @@
-import { isHttpUrl, readEnv } from './env';
+import { explorerTxUrl, isHttpUrl, readEnv } from './env';
 
 const CHAIN = { EXPO_PUBLIC_CHAIN_ID: '1912' };
 
@@ -8,13 +8,33 @@ describe('readEnv', () => {
       ...CHAIN,
       EXPO_PUBLIC_RPC_URLS: ' https://a.invalid , http://b.invalid:8545,,https://a.invalid',
     });
-    expect(env).toEqual({ rpcUrls: ['https://a.invalid', 'http://b.invalid:8545'], chainId: 1912 });
+    expect(env).toEqual({
+      rpcUrls: ['https://a.invalid', 'http://b.invalid:8545'],
+      chainId: 1912,
+      explorerUrl: null,
+    });
   });
 
   it('fails fast on a missing list or a non-http entry', () => {
     expect(() => readEnv(CHAIN)).toThrow('EXPO_PUBLIC_RPC_URLS');
     expect(() => readEnv({ ...CHAIN, EXPO_PUBLIC_RPC_URLS: 'https://a.invalid,ftp://b' })).toThrow(
       'comma-separated list',
+    );
+  });
+});
+
+describe('explorer URL (Q-27)', () => {
+  const NODES = { ...CHAIN, EXPO_PUBLIC_RPC_URLS: 'https://a.invalid' };
+
+  it('is optional and builds tx links without a double slash', () => {
+    const env = readEnv({ ...NODES, EXPO_PUBLIC_EXPLORER_URL: 'https://scan.example.invalid/' });
+    expect(explorerTxUrl('0xabc', env.explorerUrl)).toBe('https://scan.example.invalid/tx/0xabc');
+    expect(explorerTxUrl('0xabc', null)).toBeNull();
+  });
+
+  it('rejects a non-http explorer URL', () => {
+    expect(() => readEnv({ ...NODES, EXPO_PUBLIC_EXPLORER_URL: 'javascript:alert(1)' })).toThrow(
+      'EXPO_PUBLIC_EXPLORER_URL',
     );
   });
 });

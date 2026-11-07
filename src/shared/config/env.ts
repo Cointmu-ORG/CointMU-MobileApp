@@ -3,6 +3,8 @@ export type Env = {
   /** Preset CointMU RPC nodes, in the order they are offered. The first is the default. */
   readonly rpcUrls: readonly string[];
   readonly chainId: number;
+  /** Block explorer base URL for tx links (Q-27); null hides the links. */
+  readonly explorerUrl: string | null;
 };
 
 type EnvSource = Readonly<Record<string, string | undefined>>;
@@ -50,11 +52,24 @@ export function readEnv(source: EnvSource): Env {
   if (!Number.isSafeInteger(chainId) || chainId <= 0) {
     throw new Error('EXPO_PUBLIC_CHAIN_ID must be a positive integer.');
   }
-  return { rpcUrls, chainId };
+  return { rpcUrls, chainId, explorerUrl: parseExplorerUrl(source.EXPO_PUBLIC_EXPLORER_URL) };
+}
+
+function parseExplorerUrl(raw: string | undefined): string | null {
+  const value = raw?.trim().replace(/\/+$/, '');
+  if (!value) return null;
+  if (!isHttpUrl(value)) throw new Error('EXPO_PUBLIC_EXPLORER_URL must be an http(s) URL.');
+  return value;
+}
+
+/** Explorer page for a tx hash, or null when no explorer is configured. */
+export function explorerTxUrl(hash: string, explorerUrl: string | null = env.explorerUrl) {
+  return explorerUrl === null ? null : `${explorerUrl}/tx/${hash}`;
 }
 
 // Expo only inlines EXPO_PUBLIC_* when accessed as literal `process.env.NAME`.
 export const env: Env = readEnv({
   EXPO_PUBLIC_RPC_URLS: process.env.EXPO_PUBLIC_RPC_URLS,
   EXPO_PUBLIC_CHAIN_ID: process.env.EXPO_PUBLIC_CHAIN_ID,
+  EXPO_PUBLIC_EXPLORER_URL: process.env.EXPO_PUBLIC_EXPLORER_URL,
 });
