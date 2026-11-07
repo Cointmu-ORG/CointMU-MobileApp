@@ -1,0 +1,91 @@
+import * as Clipboard from 'expo-clipboard';
+import { getAddress } from 'ethers';
+import Copy from 'lucide-react-native/icons/copy';
+import Share2 from 'lucide-react-native/icons/share-2';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Share, View } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+
+import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
+import { logger } from '@/shared/lib';
+import { Button, Card, colors, ICON_SIZE, Notice, Text } from '@/shared/ui';
+
+const QR_SIZE = 220;
+const QR_QUIET_ZONE = 12;
+const COPIED_FEEDBACK_MS = 2_000;
+
+function useCopy(address: string) {
+  const [isCopied, setIsCopied] = useState(false);
+  useEffect(() => {
+    if (!isCopied) return;
+    const timer = setTimeout(() => setIsCopied(false), COPIED_FEEDBACK_MS);
+    return () => clearTimeout(timer);
+  }, [isCopied]);
+  const copy = async () => {
+    try {
+      // The user's own public address is the only thing Muvo ever puts on the clipboard.
+      await Clipboard.setStringAsync(address);
+      setIsCopied(true);
+    } catch (error) {
+      logger.warn('Copying address failed', { error });
+    }
+  };
+  return { isCopied, copy };
+}
+
+/**
+ * The active account's address as a QR code (the plain checksummed address, no URI, D-50),
+ * with copy and share. A note says which assets belong on this address.
+ */
+export function ReceiveCard() {
+  const { t } = useTranslation();
+  const account = useActiveAccount();
+  const labelOf = useAccountLabel();
+  const address = account ? getAddress(account.address) : '';
+  const { isCopied, copy } = useCopy(address);
+  if (account === null) return null;
+
+  const share = async () => {
+    try {
+      await Share.share({ message: address });
+    } catch (error) {
+      logger.warn('Sharing address failed', { error });
+    }
+  };
+
+  return (
+    <View className="gap-6">
+      <Card className="items-center gap-4">
+        <Text variant="heading">{labelOf(account)}</Text>
+        <View accessible accessibilityRole="image" accessibilityLabel={t('receive.qrLabel')}>
+          <QRCode
+            value={address}
+            size={QR_SIZE}
+            quietZone={QR_QUIET_ZONE}
+            color={colors.content.DEFAULT}
+            backgroundColor={colors.surface.card}
+            ecl="M"
+          />
+        </View>
+        <Text variant="mono" className="text-center" selectable>
+          {address}
+        </Text>
+      </Card>
+      <View className="gap-3">
+        <Button
+          label={isCopied ? t('receive.copied') : t('receive.copy')}
+          onPress={() => void copy()}
+          icon={<Copy size={ICON_SIZE.md} color={colors.content.inverse} />}
+        />
+        <Button
+          variant="secondary"
+          label={t('receive.share')}
+          onPress={() => void share()}
+          icon={<Share2 size={ICON_SIZE.md} color={colors.primary[600]} />}
+        />
+      </View>
+      <Notice tone="info">{t('receive.note')}</Notice>
+    </View>
+  );
+}

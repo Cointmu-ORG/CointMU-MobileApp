@@ -317,7 +317,12 @@
     }
   },
   "receive": {
-    "title": "Terima"
+    "title": "Terima",
+    "qrLabel": "Kode QR alamatmu",
+    "copy": "Salin alamat",
+    "copied": "Alamat disalin",
+    "share": "Bagikan alamat",
+    "note": "Kirim hanya CMU atau token CointMU ke alamat ini. Koin dari jaringan lain yang dikirim ke sini bisa hilang."
   },
   "scan": {
     "title": "Pindai"

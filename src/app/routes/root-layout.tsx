@@ -66,8 +66,14 @@ export function RootLayout() {
         <Stack.Protected guard={isActive && isUnlocked} redirectTo={entryRoute}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="send" />
-          <Stack.Screen name="receive" options={SUB_SCREEN_HEADER} />
-          <Stack.Screen name="scan" options={SUB_SCREEN_HEADER} />
+          <Stack.Screen
+            name="receive"
+            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('receive.title') }}
+          />
+          <Stack.Screen
+            name="scan"
+            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('scan.title') }}
+          />
           {SETTINGS_SCREENS.map(({ name, titleKey }) => (
             <Stack.Screen
               key={name}

@@ -317,7 +317,12 @@
     }
   },
   "receive": {
-    "title": "Receive"
+    "title": "Receive",
+    "qrLabel": "QR code of your address",
+    "copy": "Copy address",
+    "copied": "Address copied",
+    "share": "Share address",
+    "note": "Only send CMU or CointMU tokens to this address. Coins from other networks sent here may be lost."
   },
   "scan": {
     "title": "Scan"
