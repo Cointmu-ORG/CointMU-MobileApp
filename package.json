@@ -61,6 +61,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "probe:nodes": "node --env-file-if-exists=.env scripts/probe-nodes.js",
+    "watch:tx": "node --env-file-if-exists=.env scripts/watch-tx.js",
     "version": "node scripts/sync-release-files.js"
   },
   "private": true
