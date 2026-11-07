@@ -45,3 +45,12 @@ export const TX_POLL_MAX_BACKOFF_MS = 60_000;
 
 /** Records polled at once, to keep one node from being flooded. */
 export const TX_POLL_CONCURRENCY = 3;
+
+/** History: smallest getLogs range to fall back to when a node rejects a wider one. */
+export const MIN_LOGS_CHUNK_BLOCKS = 500;
+
+/**
+ * History: full blocks requested at once during the native scan. ethers batches concurrent
+ * requests into one JSON-RPC batch (up to 100), which the probe measured at 18–36 ms on the LAN.
+ */
+export const BLOCK_FETCH_CONCURRENCY = 50;

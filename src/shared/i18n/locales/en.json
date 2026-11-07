@@ -130,7 +130,17 @@
       "hash": "Transaction hash",
       "explorer": "View in explorer",
       "missing": "This transaction isn't in your history on this device."
-    }
+    },
+    "help": "Shows the last 7 days of transfers for this account, plus everything sent from Muvo. Transfers made by smart contracts on your behalf (internal transfers) don't appear here.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "rowLabel": "{{direction}} {{amount}}, {{address}}, {{status}}. Open details",
+    "empty": "No transactions in the last 7 days.",
+    "error": "Couldn't load your history from the CointMU network.",
+    "retry": "Try again",
+    "loading": "Loading history…",
+    "loadMore": "Load older transactions",
+    "end": "That's everything from the last 7 days."
   },
   "settings": {
     "title": "Settings",

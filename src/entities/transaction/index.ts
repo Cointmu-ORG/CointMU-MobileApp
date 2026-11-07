@@ -1,4 +1,13 @@
 export { fetchTxFee } from './api/fetch-tx-fee';
+export {
+  erc20LogsSource,
+  localSource,
+  nativeScanSource,
+  type HistoryReader,
+  type SourceContext,
+  type SourcePage,
+  type TransactionSource,
+} from './api/history-sources';
 export { observeTx, type TxReader } from './api/observe-tx';
 export {
   LOGS_CHUNK_BLOCKS,
@@ -17,6 +26,7 @@ export {
   type FeeDataLike,
   type FeeQuote,
 } from './lib/fee';
+export { chunkRange, fetchInChunks, mergeHistory, type BlockRange } from './lib/history';
 export { directionOf, recordToHistoryItem } from './lib/history-item';
 export { nextPollDelayMs } from './lib/poll-schedule';
 export { classifySendError, type SendErrorCode } from './lib/send-error';
@@ -28,6 +38,12 @@ export {
   type TxObservation,
   type TxProgress,
 } from './lib/tx-status';
+export {
+  hasMoreHistory,
+  useHistoryStore,
+  type HistoryEntry,
+  type HistoryStatus,
+} from './model/history-store';
 export { pollUnsettledTxs, selectUnsettled } from './model/poll-txs';
 export { migrateTxState, useTxStore } from './model/tx-store';
 export { TxStatusBadge } from './ui/tx-status-badge';

@@ -130,7 +130,17 @@
       "hash": "Hash transaksi",
       "explorer": "Lihat di explorer",
       "missing": "Transaksi ini tidak ada di riwayat di perangkat ini."
-    }
+    },
+    "help": "Menampilkan transfer 7 hari terakhir untuk akun ini, ditambah semua yang dikirim dari Muvo. Transfer yang dilakukan kontrak pintar atas namamu (transfer internal) tidak muncul di sini.",
+    "today": "Hari ini",
+    "yesterday": "Kemarin",
+    "rowLabel": "{{direction}} {{amount}}, {{address}}, {{status}}. Buka detail",
+    "empty": "Tidak ada transaksi dalam 7 hari terakhir.",
+    "error": "Riwayat tidak bisa dimuat dari jaringan CointMU.",
+    "retry": "Coba lagi",
+    "loading": "Memuat riwayat…",
+    "loadMore": "Muat transaksi lama",
+    "end": "Itu semua dari 7 hari terakhir."
   },
   "settings": {
     "title": "Pengaturan",
