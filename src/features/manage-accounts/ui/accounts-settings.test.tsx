@@ -12,6 +12,22 @@ const KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
 const A0 = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const A1 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 
+// Real BIP-39 derivation (pure-JS PBKDF2, ~0.4 s and much more with every Jest worker busy) is
+// covered by entities/wallet/lib/wallet-lib.test.ts; here only the index it is asked for matters.
+jest.mock('@/entities/wallet', () => {
+  const addresses = [
+    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+  ];
+  return {
+    ...jest.requireActual('@/entities/wallet'),
+    deriveAccount: jest.fn(async (_phrase: string, accountIndex: number) => ({
+      address: addresses[accountIndex],
+      accountIndex,
+    })),
+  };
+});
+
 async function setUpWallet(source: 'mnemonic' | 'private-key') {
   await saveWalletSecret(
     source === 'mnemonic'

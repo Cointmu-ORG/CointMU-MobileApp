@@ -25,8 +25,13 @@ beforeEach(async () => {
   useWalletStore.getState().reset();
 });
 
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 describe('MnemonicQuiz', () => {
   it('blocks activation when a word is wrong', async () => {
+    jest.useFakeTimers();
     const [first, second, third] = await renderQuiz();
     await fireEvent.changeText(first, WORDS[0]);
     await fireEvent.changeText(second, 'wrong');
@@ -38,7 +43,7 @@ describe('MnemonicQuiz', () => {
     ).toBeOnTheScreen();
     expect(screen.getAllByText('Correct')).toHaveLength(2);
     // Past the success delay, the wallet must still be waiting for its backup.
-    await act(() => new Promise((resolve) => setTimeout(resolve, MOTION.slowMs * 2)));
+    await act(() => jest.advanceTimersByTime(MOTION.slowMs * 2));
     expect(useWalletStore.getState().status).toBe('pendingBackup');
   });
 

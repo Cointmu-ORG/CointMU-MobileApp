@@ -7,6 +7,10 @@ import { colors } from '@/shared/ui';
 
 import appJson from '../../../app.json';
 
+import { preloadRoutes } from '../../../jest.preload-routes';
+
+preloadRoutes();
+
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(async () => true),
   hide: jest.fn(),
