@@ -39,3 +39,9 @@ export const NATIVE_SCAN_PAGE_BLOCKS = 1_000;
 
 /** History: the native scan never looks further back than this (≈ 7 days at 12.5 s blocks). */
 export const NATIVE_SCAN_WINDOW_BLOCKS = 50_000;
+
+/** Poll backoff after failed polls: the interval doubles per failure, capped here. */
+export const TX_POLL_MAX_BACKOFF_MS = 60_000;
+
+/** Records polled at once, to keep one node from being flooded. */
+export const TX_POLL_CONCURRENCY = 3;

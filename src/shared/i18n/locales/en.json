@@ -110,20 +110,27 @@
     "transactions": {
       "title": "Recent activity",
       "empty": "No transactions yet",
-      "emptyHint": "Transactions you send from Muvo appear here.",
-      "sent": "Sent",
-      "status": {
-        "pending": "Pending",
-        "confirmed": "Confirmed",
-        "final": "Final",
-        "failed": "Failed",
-        "dropped": "Dropped",
-        "replaced": "Replaced"
-      }
+      "emptyHint": "Transactions you send from Muvo appear here."
     }
   },
   "history": {
-    "title": "History"
+    "title": "History",
+    "detail": {
+      "title": "Transaction",
+      "amount": "Amount",
+      "from": "From",
+      "to": "To",
+      "date": "Date",
+      "block": "Block",
+      "notMined": "Not in a block yet",
+      "confirmations": "Confirmations",
+      "confirmationsValue": "{{count}} of {{total}}",
+      "fee": "Network fee paid",
+      "feeUnknown": "Known once the transaction is mined",
+      "hash": "Transaction hash",
+      "explorer": "View in explorer",
+      "missing": "This transaction isn't in your history on this device."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -349,6 +356,32 @@
       "notContract": "There is no contract at this address on CointMU.",
       "notToken": "This contract doesn't look like a token (no symbol or decimals).",
       "network": "Can't reach the CointMU network right now. Try again."
+    }
+  },
+  "tx": {
+    "unknownAsset": "Unknown asset",
+    "rowLabel": "{{amount}}, {{address}}. Open details",
+    "direction": {
+      "in": "Received",
+      "out": "Sent",
+      "self": "To yourself"
+    },
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "confirmedCount": "Confirmed {{count}}/{{total}}",
+      "final": "Final",
+      "failed": "Failed",
+      "dropped": "Dropped",
+      "replaced": "Replaced"
+    },
+    "statusHelp": {
+      "pending": "Waiting to be included in a block.",
+      "confirmed": "In a block. It becomes final after {{total}} blocks, because a recent block can still be undone.",
+      "final": "Deep enough in the chain to be treated as settled.",
+      "failed": "Included in a block but rejected by the contract. Only the network fee was spent.",
+      "dropped": "The network no longer knows this transaction and it was never mined. Nothing was sent; you can send again.",
+      "replaced": "Another transaction with the same nonce was mined instead. This one will never be mined."
     }
   }
 }

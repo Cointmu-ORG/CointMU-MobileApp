@@ -1,3 +1,4 @@
+export { fetchTxFee } from './api/fetch-tx-fee';
 export { observeTx, type TxReader } from './api/observe-tx';
 export {
   LOGS_CHUNK_BLOCKS,
@@ -5,6 +6,7 @@ export {
   NATIVE_SCAN_WINDOW_BLOCKS,
   TX_POLICY,
   TX_POLL_INTERVAL_MS,
+  TX_POLL_MAX_BACKOFF_MS,
   type TxPolicy,
 } from './config/tx-config';
 export {
@@ -15,6 +17,8 @@ export {
   type FeeDataLike,
   type FeeQuote,
 } from './lib/fee';
+export { directionOf, recordToHistoryItem } from './lib/history-item';
+export { nextPollDelayMs } from './lib/poll-schedule';
 export { classifySendError, type SendErrorCode } from './lib/send-error';
 export {
   isTxSettled,
@@ -24,5 +28,14 @@ export {
   type TxObservation,
   type TxProgress,
 } from './lib/tx-status';
+export { pollUnsettledTxs, selectUnsettled } from './model/poll-txs';
 export { migrateTxState, useTxStore } from './model/tx-store';
-export type { LocalTxRecord, TxFeeRecord, TxRecordUpdate, TxStatus } from './model/types';
+export { TxStatusBadge } from './ui/tx-status-badge';
+export type {
+  HistoryItem,
+  LocalTxRecord,
+  TxDirection,
+  TxFeeRecord,
+  TxRecordUpdate,
+  TxStatus,
+} from './model/types';

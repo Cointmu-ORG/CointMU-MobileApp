@@ -38,3 +38,25 @@ export type TxRecordUpdate = Pick<
   LocalTxRecord,
   'status' | 'confirmations' | 'blockNumber' | 'unknownSince'
 >;
+
+export type TxDirection = 'in' | 'out' | 'self';
+
+/**
+ * One row of history, whatever its source: a local record (sent from this app) or a tx found
+ * on chain (block scan, token logs). Public data only.
+ */
+export type HistoryItem = {
+  readonly hash: string;
+  readonly from: string;
+  readonly to: string;
+  /** Amount in the asset's base units, as a decimal string. */
+  readonly value: string;
+  readonly assetKey: string;
+  readonly direction: TxDirection;
+  readonly status: TxStatus;
+  readonly confirmations: number;
+  readonly blockNumber: number | null;
+  /** Epoch ms: block time for chain items, send time for local ones. */
+  readonly timestamp: number;
+  readonly source: 'local' | 'chain';
+};

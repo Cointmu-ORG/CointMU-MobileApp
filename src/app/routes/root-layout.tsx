@@ -12,6 +12,7 @@ import { colors } from '@/shared/ui';
 import { useAppReady } from '../model/use-app-ready';
 import { resolveEntryRoute } from '../model/resolve-entry-route';
 import { useAutoLock } from '../model/use-auto-lock';
+import { useTxPolling } from '../model/use-tx-polling';
 import { SUB_SCREEN_HEADER } from './header-options';
 import { holdNativeSplash, SplashHandoff } from './splash-handoff';
 
@@ -25,6 +26,7 @@ const SETTINGS_SCREENS = [
   { name: 'recovery-phrase', titleKey: 'settings.recoveryPhrase.title' },
   { name: 'remove-wallet', titleKey: 'settings.removeWallet.title' },
   { name: 'tokens', titleKey: 'tokens.title' },
+  { name: 'tx/[hash]', titleKey: 'history.detail.title' },
 ] as const;
 
 /**
@@ -38,6 +40,7 @@ export function RootLayout() {
   const isUnlocked = useSessionStore((state) => state.isUnlocked);
   const isRecoveryRequired = useWalletStore((state) => state.isRecoveryRequired);
   useAutoLock();
+  useTxPolling(isReady && status === 'active');
 
   // The native splash stays up until bootstrap is done, so nothing unstyled ever shows.
   if (!isReady) return null;

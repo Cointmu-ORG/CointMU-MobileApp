@@ -7,6 +7,7 @@ export {
   type AmountInputResult,
   type FormatAmountOptions,
 } from './amount';
+export { dateLocale, formatDateTime } from './date';
 export { logger, redact } from './logger';
 export { secureRandomInt, type RandomInt } from './random';
 export { secureStorage } from './secure-storage';

@@ -110,20 +110,27 @@
     "transactions": {
       "title": "Aktivitas terbaru",
       "empty": "Belum ada transaksi",
-      "emptyHint": "Transaksi yang kamu kirim dari Muvo akan muncul di sini.",
-      "sent": "Terkirim",
-      "status": {
-        "pending": "Menunggu",
-        "confirmed": "Terkonfirmasi",
-        "final": "Final",
-        "failed": "Gagal",
-        "dropped": "Dibatalkan jaringan",
-        "replaced": "Digantikan"
-      }
+      "emptyHint": "Transaksi yang kamu kirim dari Muvo akan muncul di sini."
     }
   },
   "history": {
-    "title": "Riwayat"
+    "title": "Riwayat",
+    "detail": {
+      "title": "Transaksi",
+      "amount": "Jumlah",
+      "from": "Dari",
+      "to": "Ke",
+      "date": "Tanggal",
+      "block": "Blok",
+      "notMined": "Belum masuk blok",
+      "confirmations": "Konfirmasi",
+      "confirmationsValue": "{{count}} dari {{total}}",
+      "fee": "Biaya jaringan yang dibayar",
+      "feeUnknown": "Diketahui setelah transaksi ditambang",
+      "hash": "Hash transaksi",
+      "explorer": "Lihat di explorer",
+      "missing": "Transaksi ini tidak ada di riwayat di perangkat ini."
+    }
   },
   "settings": {
     "title": "Pengaturan",
@@ -349,6 +356,32 @@
       "notContract": "Tidak ada kontrak di alamat ini di CointMU.",
       "notToken": "Kontrak ini tidak terlihat seperti token (tidak ada simbol atau desimal).",
       "network": "Jaringan CointMU tidak bisa dihubungi sekarang. Coba lagi."
+    }
+  },
+  "tx": {
+    "unknownAsset": "Aset tidak dikenal",
+    "rowLabel": "{{amount}}, {{address}}. Buka detail",
+    "direction": {
+      "in": "Diterima",
+      "out": "Dikirim",
+      "self": "Ke diri sendiri"
+    },
+    "status": {
+      "pending": "Tertunda",
+      "confirmed": "Terkonfirmasi",
+      "confirmedCount": "Terkonfirmasi {{count}}/{{total}}",
+      "final": "Final",
+      "failed": "Gagal",
+      "dropped": "Dibatalkan jaringan",
+      "replaced": "Digantikan"
+    },
+    "statusHelp": {
+      "pending": "Menunggu dimasukkan ke dalam blok.",
+      "confirmed": "Sudah masuk blok. Menjadi final setelah {{total}} blok, karena blok terbaru masih bisa dibatalkan.",
+      "final": "Sudah cukup dalam di rantai untuk dianggap selesai.",
+      "failed": "Masuk blok tetapi ditolak oleh kontrak. Hanya biaya jaringan yang terpakai.",
+      "dropped": "Jaringan tidak lagi mengenal transaksi ini dan tidak pernah ditambang. Tidak ada yang terkirim; kamu bisa mengirim lagi.",
+      "replaced": "Transaksi lain dengan nonce yang sama yang ditambang. Transaksi ini tidak akan pernah ditambang."
     }
   }
 }

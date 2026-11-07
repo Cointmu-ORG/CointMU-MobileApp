@@ -19,6 +19,7 @@ export const ROUTES = {
   changePin: '/change-pin',
   recoveryPhrase: '/recovery-phrase',
   removeWallet: '/remove-wallet',
+  txDetail: '/tx/[hash]',
   tokens: '/tokens',
 } as const;
 
