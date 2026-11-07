@@ -1,21 +1,22 @@
+import { logger } from '@/shared/lib';
+
 import {
-  authenticateWithBiometrics,
-  pinHasher,
   readLockoutState,
   readPinRecord,
+  writeLockoutState,
+  writePinRecord,
+} from '../api/auth-storage';
+import { authenticateWithBiometrics } from '../api/biometrics';
+import {
   reconcileClock,
   registerFailure,
   registerSuccess,
   remainingLockoutMs,
-  useSessionStore,
-  writeLockoutState,
-  writePinRecord,
   type LockoutState,
-  type PinRecord,
-} from '@/entities/auth';
-import { logger } from '@/shared/lib';
+} from '../lib/lockout';
+import { pinHasher, type PinRecord } from '../lib/pin-hasher';
 
-export type UnlockAttempt =
+export type PinAttempt =
   | { readonly status: 'verified' }
   | { readonly status: 'wrong-pin' | 'locked-out'; readonly lockout: LockoutState };
 
@@ -38,10 +39,11 @@ async function rehashIfOutdated(pin: string, record: PinRecord): Promise<void> {
 
 /**
  * Checks a PIN against the stored record, using the record's own KDF params, and updates the
- * lockout. On success, records made with outdated params are rehashed with the current config.
- * Does not unlock the session: the caller calls completeUnlock() after its success animation.
+ * lockout. Every PIN check in the app (unlock, change PIN, reveal phrase, remove wallet) goes
+ * through here, so they all share one failure count. On success, records made with outdated
+ * params are rehashed with the current config. Does not unlock the session.
  */
-export async function attemptPinUnlock(pin: string, now = Date.now()): Promise<UnlockAttempt> {
+export async function attemptPin(pin: string, now = Date.now()): Promise<PinAttempt> {
   const lockout = await loadLockout(now);
   if (remainingLockoutMs(lockout, now) > 0) return { status: 'locked-out', lockout };
 
@@ -59,14 +61,10 @@ export async function attemptPinUnlock(pin: string, now = Date.now()): Promise<U
 }
 
 /** Biometrics are not offered while a PIN lockout runs. Success also clears the failure count. */
-export async function attemptBiometricUnlock(prompt: string, now = Date.now()): Promise<boolean> {
+export async function attemptBiometrics(prompt: string, now = Date.now()): Promise<boolean> {
   const lockout = await loadLockout(now);
   if (remainingLockoutMs(lockout, now) > 0) return false;
   if (!(await authenticateWithBiometrics(prompt))) return false;
   await writeLockoutState(registerSuccess(now));
   return true;
-}
-
-export function completeUnlock(): void {
-  useSessionStore.getState().unlock();
 }

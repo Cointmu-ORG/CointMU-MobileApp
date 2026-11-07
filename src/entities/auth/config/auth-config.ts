@@ -1,14 +1,15 @@
 export const PIN_LENGTH = 6;
 
 /**
- * PIN KDF parameters. PLACEHOLDER (Q-32): algorithm and cost are not final. A 6-digit PIN has
- * only 10^6 values, so the KDF must be slow; tune iterations on a real device (~300 ms target).
+ * PIN KDF parameters. PLACEHOLDER (Q-32): algorithm and cost are not final.
+ * v2 (D-41): 20,000 → 2,000 iterations. Pure-JS PBKDF2 runs on the JS thread; 20,000 took
+ * ~4.7 s per hash in an interpreter (no JIT, like Hermes), on setup and on every unlock.
  * Changing these is safe: stored records keep their own params and are rehashed on next unlock.
  */
 export const PIN_KDF = {
-  version: 1,
+  version: 2,
   algo: 'pbkdf2-sha256',
-  iterations: 20_000,
+  iterations: 2_000,
   saltBytes: 16,
   keyBytes: 32,
 } as const;
@@ -24,5 +25,7 @@ export const LOCKOUT_POLICY = {
   resetOfferAfterFailures: 10,
 } as const;
 
-/** D-16. User-adjustable later (lock-settings feature). */
-export const AUTO_LOCK_DEFAULT_MS = MINUTE_MS;
+/** D-16: choices in Settings > Security. 0 locks as soon as the app leaves the foreground. */
+export const AUTO_LOCK_OPTIONS_MS = [0, MINUTE_MS, 5 * MINUTE_MS, 15 * MINUTE_MS] as const;
+export type AutoLockMs = (typeof AUTO_LOCK_OPTIONS_MS)[number];
+export const AUTO_LOCK_DEFAULT_MS: AutoLockMs = MINUTE_MS;

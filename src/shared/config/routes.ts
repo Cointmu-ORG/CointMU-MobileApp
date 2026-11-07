@@ -12,6 +12,11 @@ export const ROUTES = {
   send: '/send',
   receive: '/receive',
   scan: '/scan',
+  network: '/network',
+  accounts: '/accounts',
+  changePin: '/change-pin',
+  recoveryPhrase: '/recovery-phrase',
+  removeWallet: '/remove-wallet',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

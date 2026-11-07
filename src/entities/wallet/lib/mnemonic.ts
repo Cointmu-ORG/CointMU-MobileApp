@@ -8,9 +8,12 @@ export function generateMnemonic(): string {
   return Mnemonic.fromEntropy(randomBytes(ENTROPY_BYTES_12_WORDS)).phrase;
 }
 
-/** Lowercases and collapses whitespace so pasted phrases validate. */
+// Zero-width space/joiners, word joiner and BOM: invisible, but they ride along with copy-paste.
+const INVISIBLE_CHARS = /[\u200B-\u200D\u2060\uFEFF]/g;
+
+/** Lowercases, drops invisible characters and collapses whitespace so pasted phrases validate. */
 export function normalizePhrase(input: string): string {
-  return input.trim().toLowerCase().split(/\s+/).join(' ');
+  return input.replace(INVISIBLE_CHARS, ' ').trim().toLowerCase().split(/\s+/).join(' ');
 }
 
 export function splitWords(phrase: string): string[] {

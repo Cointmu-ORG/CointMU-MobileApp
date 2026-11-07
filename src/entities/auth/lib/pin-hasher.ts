@@ -1,5 +1,7 @@
 import { hexlify, pbkdf2, randomBytes, toUtf8Bytes } from 'ethers';
 
+import { waitForPaint } from '@/shared/lib';
+
 import { PIN_KDF } from '../config/auth-config';
 
 /** Versioned record stored in SecureStore. Verification always uses the record's own params. */
@@ -28,7 +30,6 @@ export interface PinHasher {
 }
 
 const HEX_PREFIX_LENGTH = 2;
-const yieldToUi = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
 function constantTimeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
@@ -42,9 +43,9 @@ function keyLengthOf(record: PinRecord): number {
 }
 
 export function createPbkdf2PinHasher(params: PinKdfParams): PinHasher {
-  // Synchronous pure-JS PBKDF2; yield first so pending UI updates paint.
+  // Synchronous pure-JS PBKDF2; wait for a frame first so the caller's progress UI is painted.
   const derive = async (pin: string, salt: string, iterations: number, keyBytes: number) => {
-    await yieldToUi();
+    await waitForPaint();
     return pbkdf2(toUtf8Bytes(pin), salt, iterations, keyBytes, 'sha256');
   };
 

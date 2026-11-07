@@ -1,1 +1,2 @@
-export { detectLanguage, i18n } from './i18n';
+export { detectLanguage, i18n, isSupportedLanguage } from './i18n';
+export { restoreLanguage, setLanguage } from './language';

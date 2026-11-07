@@ -2,7 +2,8 @@
   "common": {
     "continue": "Continue",
     "cancel": "Cancel",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon. This part of Muvo arrives in a later version.",
+    "done": "Done"
   },
   "onboarding": {
     "welcome": {
@@ -36,20 +37,20 @@
       "modeMnemonic": "Recovery phrase",
       "modePrivateKey": "Private key",
       "mnemonicLabel": "Recovery phrase (12 or 24 words)",
-      "privateKeyLabel": "Private key",
+      "privateKeyLabel": "Private key (64 hex characters)",
       "invalidMnemonic": "That isn't a valid 12- or 24-word recovery phrase.",
       "invalidPrivateKey": "That isn't a valid private key.",
       "privateKeyWarningTitle": "Back up this key yourself",
       "privateKeyWarningBody": "A wallet imported from a private key has no recovery phrase. The key is stored only on this phone. If you lose the phone or reset the app without your own backup of the key, the funds are gone.",
       "privateKeyAck": "I have my own backup of this private key",
       "submit": "Import wallet",
-      "error": "Couldn't import the wallet. Please try again."
+      "error": "Couldn't import the wallet. Please try again.",
+      "modeLabel": "Import with"
     },
     "setPin": {
       "titleCreate": "Create a 6-digit PIN",
       "titleConfirm": "Enter the PIN again",
       "subtitle": "You'll use it to unlock Muvo and approve transactions.",
-      "mismatch": "The PINs don't match. Start again.",
       "error": "Couldn't save your PIN. Please try again.",
       "biometricsTitle": "Unlock with biometrics?",
       "biometricsBody": "Use your fingerprint or face to unlock Muvo. Your PIN always works too.",
@@ -93,7 +94,8 @@
       "error": "Can't reach the CointMU network right now. Pull down to refresh or try again.",
       "retry": "Try again",
       "copyAddress": "Copy address",
-      "copied": "Address copied"
+      "copied": "Address copied",
+      "switchAccount": "Switch account"
     },
     "actions": {
       "send": "Send",
@@ -120,8 +122,134 @@
     }
   },
   "history": { "title": "History" },
-  "settings": { "title": "Settings" },
+  "settings": {
+    "title": "Settings",
+    "network": {
+      "title": "Network",
+      "subtitle": "Which CointMU node Muvo talks to. Your keys never leave this phone; a node only sees your public address and the requests Muvo sends.",
+      "nodesTitle": "CointMU nodes",
+      "nodesFooter": "Muvo only switches to a node that reports chain ID {{chainId}}.",
+      "nodeName": "Node {{number}}",
+      "customName": "Your node",
+      "checkAll": "Check all",
+      "status": {
+        "unchecked": "Not checked",
+        "checking": "Checking…",
+        "reachable": "Reachable · {{ms}} ms",
+        "unreachable": "Unreachable",
+        "wrongChain": "Wrong network (chain {{chainId}})"
+      },
+      "refusedUnreachable": "Couldn't reach that node. Muvo keeps using the current one.",
+      "refusedWrongChain": "That node is on chain {{chainId}}, not CointMU ({{expected}}). Muvo keeps using the current one.",
+      "addTitle": "Add a node",
+      "urlField": "RPC URL",
+      "urlPlaceholder": "https://",
+      "addHint": "Use https://. Plain http:// is blocked in release builds.",
+      "add": "Add and use",
+      "invalidUrl": "Enter an http:// or https:// URL.",
+      "alreadyListed": "That node is already in the list.",
+      "remove": "Remove your node",
+      "row": "Node in use"
+    },
+    "accounts": {
+      "title": "Accounts",
+      "listTitle": "Accounts in this wallet",
+      "add": "Add account",
+      "addHint": "New accounts come from your recovery phrase, so it restores all of them.",
+      "privateKeyHint": "This wallet was imported from a private key, so it has no recovery phrase to create more accounts from. To use several accounts, use a wallet with a recovery phrase.",
+      "addFailed": "Couldn't add an account. Please try again.",
+      "nameField": "Name for {{account}}",
+      "nameHint": "Only shown on this phone.",
+      "save": "Save name",
+      "saved": "Name saved",
+      "row": "Active account"
+    },
+    "general": {
+      "title": "General",
+      "language": "Language",
+      "languageDesc": "Application language"
+    },
+    "security": {
+      "title": "Security",
+      "changePin": "Change PIN",
+      "biometricsTitle": "Unlock with biometrics",
+      "biometricsDesc": "Fingerprint or face. Your PIN always works too.",
+      "biometricsUnavailable": "No fingerprint or face is set up on this phone.",
+      "biometricsPrompt": "Turn on biometric unlock",
+      "autoLockTitle": "Auto-lock wallet",
+      "autoLockDesc": "Lock Muvo after it has been in the background this long; you then need your PIN again.",
+      "immediately": "Immediately",
+      "minutes_one": "{{count}} min",
+      "minutes_other": "{{count}} min",
+      "recoveryPhraseTitle": "Recovery phrase",
+      "recoveryPhraseDesc": "The words that restore your wallet"
+    },
+    "changePin": {
+      "title": "Change PIN",
+      "currentTitle": "Enter your current PIN",
+      "currentSubtitle": "Wrong attempts count toward the lockout.",
+      "newTitle": "Choose a new PIN",
+      "confirmTitle": "Enter the new PIN again",
+      "newSubtitle": "6 digits. You'll use it to unlock Muvo and approve transactions.",
+      "error": "Couldn't save the new PIN. Your old PIN still works. Please try again.",
+      "done": "PIN changed"
+    },
+    "recoveryPhrase": {
+      "title": "Recovery phrase",
+      "description": "Your recovery phrase restores full access to this wallet.",
+      "warning": "Never share your recovery phrase. Anyone who has it can take full control of your wallet and steal all of your funds. Store it offline and never type it into a website.",
+      "reveal": "Reveal recovery phrase",
+      "authTitle": "Enter your PIN",
+      "authSubtitle": "to show your recovery phrase",
+      "hide": "Hide",
+      "autoHide": "It is also hidden when you leave this screen or Muvo goes to the background.",
+      "failed": "Failed to reveal recovery phrase.",
+      "privateKey": "This wallet was imported from a private key, so it has no recovery phrase. Keep your own backup of the key: it is the only way to restore this wallet."
+    },
+    "logout": {
+      "title": "Log out",
+      "lockNow": "Lock now",
+      "lockNowDesc": "Lock Muvo until you enter your PIN. Nothing is deleted.",
+      "remove": "Remove wallet from this device",
+      "removeDesc": "Deletes the keys from this phone. You need your recovery phrase to get the wallet back."
+    },
+    "removeWallet": {
+      "title": "Remove wallet",
+      "warningTitle": "Make sure you have your recovery phrase",
+      "warning": "This action is irreversible. If you have not backed up your recovery phrase or private key, your funds will be lost forever. CointMU cannot recover them for you.",
+      "description": "This permanently removes all accounts and keys from this device. Your funds stay on the CointMU network; you can restore the wallet later with your recovery phrase or private key.",
+      "ack": "I have my recovery phrase or private key written down",
+      "continue": "Remove wallet",
+      "authTitle": "Enter your PIN",
+      "authSubtitle": "to remove the wallet from this phone",
+      "finalTitle": "Remove the wallet now?",
+      "confirm": "Remove"
+    },
+    "about": {
+      "title": "About",
+      "versionLine": "Version {{version}} (build {{build}})",
+      "devBuild": "development",
+      "chainId": "Chain ID",
+      "rpcNode": "RPC node",
+      "links": "Links",
+      "opensBrowser": "Opens in your browser",
+      "documentationTitle": "Documentation",
+      "documentationDesc": "Guides, API reference, RPC schema",
+      "githubTitle": "GitHub",
+      "reportIssueTitle": "Report an issue",
+      "reportIssueDesc": "Send a bug report or feature request",
+      "licenseTitle": "License",
+      "licenseDesc": "Open source under the MIT License"
+    }
+  },
   "send": { "title": "Send" },
   "receive": { "title": "Receive" },
-  "scan": { "title": "Scan" }
+  "scan": { "title": "Scan" },
+  "pinPrompt": {
+    "checking": "Checking your PIN",
+    "error": "Couldn't check the PIN. Please try again.",
+    "mismatch": "The PINs don't match. Start again.",
+    "saving": "Securing your PIN…"
+  },
+  "accounts": { "defaultName": "Account {{number}}" }
 }

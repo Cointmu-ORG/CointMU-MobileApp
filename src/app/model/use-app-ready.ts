@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 
 import { useWalletStore } from '@/entities/wallet';
+import { restoreLanguage } from '@/shared/i18n';
 import { logger } from '@/shared/lib';
 
 import { ensureFreshInstallState } from './fresh-install';
 import { recoverIfWalletDataMissing } from './wallet-integrity';
 
 /**
- * True once startup checks are done: the fresh-install wipe (D-33), store hydration, then the
- * wallet data integrity check (D-39), so the guard never routes on stale status.
+ * True once startup checks are done: the fresh-install wipe (D-33) and the stored language, store
+ * hydration, then the wallet data integrity check (D-39), so the guard never routes on stale
+ * status and the first screen is already in the right language. The splash covers all of it.
  */
 export function useAppReady(): boolean {
   const [isInstallChecked, setIsInstallChecked] = useState(false);
@@ -16,10 +18,13 @@ export function useAppReady(): boolean {
   const hasHydrated = useWalletStore((state) => state.hasHydrated);
 
   useEffect(() => {
-    ensureFreshInstallState()
+    const install = ensureFreshInstallState()
       // Safe to continue: a fresh install starts at onboarding, which overwrites every key.
-      .catch((error: unknown) => logger.error('Fresh-install check failed', { error }))
-      .finally(() => setIsInstallChecked(true));
+      .catch((error: unknown) => logger.error('Fresh-install check failed', { error }));
+    const language = restoreLanguage()
+      // Safe to continue in the device language.
+      .catch((error: unknown) => logger.warn('Restoring the language failed', { error }));
+    void Promise.all([install, language]).finally(() => setIsInstallChecked(true));
   }, []);
 
   useEffect(() => {

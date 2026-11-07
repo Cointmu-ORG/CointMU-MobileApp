@@ -12,7 +12,7 @@ export function ScrollScreen({ children, refreshControl }: ScrollScreenProps) {
   return (
     <SafeAreaView className="flex-1 bg-surface" edges={['top', 'left', 'right']}>
       <ScrollView
-        contentContainerClassName="gap-4 px-6 py-4"
+        contentContainerClassName="gap-6 px-6 pb-8 pt-4"
         refreshControl={refreshControl}
         keyboardShouldPersistTaps="handled"
       >

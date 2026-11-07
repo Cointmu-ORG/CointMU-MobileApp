@@ -10,6 +10,7 @@ import { formatAmount } from '@/shared/lib';
 import { Button, Card, MOTION, Skeleton, Text } from '@/shared/ui';
 
 import { useBalancePolling } from '../model/use-balance-polling';
+import { AccountChip } from './account-chip';
 import { CopyAddress } from './copy-address';
 
 function BalanceValue({ wei }: { wei: bigint }) {
@@ -43,9 +44,12 @@ export function BalanceCard({ enterIndex = 0 }: { enterIndex?: number }) {
   const isUnreachable = status === 'error';
   return (
     <Card enterIndex={enterIndex} className="gap-4">
-      <Text variant="label" tone="secondary">
-        {t('home.balance.label')}
-      </Text>
+      <View className="gap-1">
+        <AccountChip />
+        <Text variant="label" tone="secondary">
+          {t('home.balance.label')}
+        </Text>
+      </View>
       {wei !== null ? <BalanceValue wei={wei} /> : null}
       {wei === null && !isUnreachable ? <Skeleton className="h-10 w-48 rounded-lg" /> : null}
       {isUnreachable ? (

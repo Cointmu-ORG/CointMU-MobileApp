@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
-import { AUTO_LOCK_DEFAULT_MS, useSessionStore } from '@/entities/auth';
+import { useAuthPrefsStore, useSessionStore } from '@/entities/auth';
 
 /**
- * D-16: lock after the app was in the background for at least `timeoutMs`.
- * A negative elapsed time (clock set backwards) also locks, rather than skipping the check.
+ * D-16: lock after the app was in the background for at least the user's auto-lock timeout
+ * (0 = immediately). A negative elapsed time (clock set backwards) also locks.
  */
-export function useAutoLock(timeoutMs: number = AUTO_LOCK_DEFAULT_MS): void {
+export function useAutoLock(): void {
+  const timeoutMs = useAuthPrefsStore((state) => state.autoLockMs);
   const backgroundedAt = useRef<number | null>(null);
 
   useEffect(() => {

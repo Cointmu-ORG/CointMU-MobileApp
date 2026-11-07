@@ -8,7 +8,8 @@ import { colors } from './theme/colors';
 export type InputStatus = 'default' | 'success' | 'error';
 
 const BORDER_CLASS: Record<InputStatus, string> = {
-  default: 'border-border',
+  // 3.4:1 against the field and the screen, so the field outline is visible (WCAG 1.4.11).
+  default: 'border-border-strong',
   success: 'border-success',
   error: 'border-danger',
 };
@@ -35,7 +36,7 @@ export function Input({ label, status = 'default', message, animatedStyle, ...pr
       <Animated.View style={animatedStyle}>
         <TextInput
           accessibilityLabel={label}
-          placeholderTextColor={colors.content.muted}
+          placeholderTextColor={colors.content.secondary}
           className={`min-h-14 rounded-control border bg-surface-card px-4 py-3 text-base text-content ${borderClass}`}
           {...props}
           onFocus={(event) => {

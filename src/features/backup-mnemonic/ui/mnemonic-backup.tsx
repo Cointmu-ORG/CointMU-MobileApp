@@ -1,29 +1,13 @@
 import { usePreventScreenCapture } from 'expo-screen-capture';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { useMnemonicWords } from '@/entities/wallet';
-import { Button, colors, MOTION, Text } from '@/shared/ui';
+import { Button, colors, Text, WordGrid } from '@/shared/ui';
 
 type MnemonicBackupProps = {
   onConfirmed: () => void;
 };
-
-function WordChip({ index, word }: { index: number; word: string }) {
-  return (
-    <View className="w-1/2 p-1">
-      <Animated.View entering={FadeIn.delay(index * MOTION.staggerMs).duration(MOTION.baseMs)}>
-        <View className="flex-row items-center gap-2 rounded-control border border-border bg-surface-card px-3 py-3">
-          <Text variant="caption" tone="muted">
-            {index + 1}
-          </Text>
-          <Text variant="body">{word}</Text>
-        </View>
-      </Animated.View>
-    </View>
-  );
-}
 
 /**
  * Shows the recovery phrase with screenshots blocked (D-14).
@@ -45,11 +29,7 @@ export function MnemonicBackup({ onConfirmed }: MnemonicBackupProps) {
 
   return (
     <View className="gap-6">
-      <View className="flex-row flex-wrap">
-        {state.words.map((word, index) => (
-          <WordChip key={`${index}-${word}`} index={index} word={word} />
-        ))}
-      </View>
+      <WordGrid words={state.words} />
       <Button label={t('onboarding.backup.confirm')} onPress={onConfirmed} />
     </View>
   );

@@ -65,7 +65,7 @@ jobs:
       - name: Bundle (expo export)
         run: npx --no expo export --platform android --platform ios --output-dir dist
         env:
-          EXPO_PUBLIC_RPC_URL: http://rpc.ci.invalid
+          EXPO_PUBLIC_RPC_URLS: http://rpc.ci.invalid
           EXPO_PUBLIC_CHAIN_ID: "1912"
 
   lint:

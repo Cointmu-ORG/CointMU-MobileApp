@@ -3,7 +3,7 @@ import { setUpTests } from 'react-native-reanimated';
 // Global test setup: no test touches real native storage or a real RPC (conventions: testing).
 
 // Public test values only; RPC calls are mocked wherever a provider is used.
-process.env.EXPO_PUBLIC_RPC_URL = 'http://rpc.test.invalid';
+process.env.EXPO_PUBLIC_RPC_URLS = 'http://rpc.test.invalid,https://rpc2.test.invalid';
 process.env.EXPO_PUBLIC_CHAIN_ID = '1912';
 
 jest.mock('expo-secure-store', () => {

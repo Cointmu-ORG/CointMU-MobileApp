@@ -19,9 +19,11 @@ Keys live on the device only. There is no "forgot password" and no server-side r
 | Symbol | CMU |
 | Decimals | 18 (assumed, VERIFY against the chain) |
 | Consensus | Proof of Work (geth-based) |
-| RPC | from `EXPO_PUBLIC_RPC_URL` (see decisions.md, open questions) |
+| RPC | preset node list from `EXPO_PUBLIC_RPC_URLS` (comma-separated, first is the default) plus one user-added node; see below and D-43 |
 
 Chain config lives in one place (`src/entities/network`). Never hardcode chain ID or RPC elsewhere.
+
+Node selection (D-43): Settings > Network lists the preset nodes and at most one node the user added. Before a node is used (selected or added) the app calls `eth_chainId` and refuses anything that is not 1912, so balances and signatures can never go to another chain. Each node shows its status and latency. The choice (`muvo.network`: selected URL and custom URL) is persisted; it is not a secret. A stored choice that no longer exists falls back to the first preset. `getProvider()` follows the selection.
 
 ## 3. Stack
 
@@ -85,7 +87,7 @@ export { HomePage as default } from '@/pages/home';
 ```
 
 ### Features
-`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `change-language`, `lock-settings`, `reset-wallet`.
+`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `change-language`, `lock-settings`, `reset-wallet`, `select-network`, `manage-accounts`.
 
 ### Slice segments
 `ui/`, `model/` (Zustand store, selectors, types), `api/` (RPC calls), `lib/` (pure helpers), `config/`. Each slice exposes only `index.ts`.
@@ -98,8 +100,8 @@ export { HomePage as default } from '@/pages/home';
 
 ## 5. Wallet and key handling
 
-- Derivation: BIP-39 mnemonic (12 words), BIP-44 path `m/44'/60'/0'/0/{index}`. MVP uses index 0 only, but the data model stores `accountIndex` so multi-account can be added later.
-- Derivation wrapper: all mnemonic → account derivation goes through `deriveAccount()` in `entities/wallet/lib/derive.ts`. ethers v6 `fromPhrase` runs PBKDF2 in pure JS and blocks the Hermes JS thread, so the wrapper yields one frame first and the UI shows a Reanimated (UI-thread) progress animation. Swapping the PBKDF2 backend later only touches this function (Q-30).
+- Derivation: BIP-39 mnemonic (12 words), BIP-44 path `m/44'/60'/0'/0/{index}`. A wallet starts with index 0; the user can add more accounts (index 1, 2, …) from the same mnemonic, switch between them and name them (D-44). The wallet store keeps `accounts` (index, address, name) and the active `accountIndex`/`address`; names are local and public. Private-key wallets have exactly one account. Multiple separate wallets (several secrets) are out of scope (Q-34).
+- Derivation wrapper: all mnemonic → account derivation goes through `deriveAccount()` in `entities/wallet/lib/derive.ts`. ethers v6 `fromPhrase` runs PBKDF2 in pure JS and blocks the Hermes JS thread, so the wrapper waits for a painted frame first and the UI shows a Reanimated (UI-thread) progress animation. Swapping the PBKDF2 backend later only touches this function (Q-30).
 - Import: mnemonic (12 or 24 words) or raw private key. A private-key import has no mnemonic and cannot derive more accounts. The import screen shows a mandatory "back up this key yourself" warning that the user must acknowledge (D-28).
 - Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params. The clipboard is used only for the user's own address; there is no copy action for the mnemonic or a private key.
 - Onboarding state (D-32): a new mnemonic goes to SecureStore immediately, and the wallet status (persisted, non-secret) moves `none` → `pendingBackup` → `pendingPin` → `active`; imports go `none` → `pendingPin` → `active`. A killed app resumes at the step for its status.
@@ -112,7 +114,8 @@ export { HomePage as default } from '@/pages/home';
 - Auth is required: on app open, after returning from background past the auto-lock timeout, and **before every transaction signature** and before revealing the mnemonic.
 - Auto-lock: 1 minute default, user-adjustable (immediately, 1, 5, 15 min).
 - PIN brute force: escalating lockout after failed attempts. After 10 failures, offer wallet reset (this wipes local keys; recovery requires the mnemonic). The failed count, lockout-until and lastSeenAt live in SecureStore, not in a persisted store (D-27). If the clock goes backwards during a lockout, the lockout restarts from now. Biometrics are not offered while a lockout runs.
-- Reset wallet: confirm twice, wipe SecureStore and persisted stores, return to onboarding.
+- Reset wallet: confirm twice, wipe SecureStore and persisted stores, return to onboarding. From the lock screen (after 10 failures) it is two confirmations. From Settings it is "Remove wallet from this device" (D-45): a strong warning with a "I have my recovery phrase" acknowledgement, the PIN, then a final confirmation. "Lock now" only locks the session.
+- Settings (D-46): Security holds change PIN (current PIN, then the new one twice), the biometrics switch (turning it on needs one successful biometric check), the auto-lock timeout (persisted in `muvo.auth.prefs`), and the recovery phrase. The phrase is read only after a PIN or biometric check, screenshots are blocked on that screen, and the words are dropped on Hide, on leaving the screen and when the app leaves the foreground. Private-key wallets show no phrase and no key (Q-35). Every PIN check, including these, shares the lockout.
 
 ## 6. Transaction flow
 
@@ -147,9 +150,9 @@ No indexer is assumed. Plan (see decisions.md Q-11):
 ## 9. UI and i18n
 
 - White and blue theme, matching the desktop app. Light mode only for MVP. Design tokens in Tailwind config.
-- Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`. No hardcoded user-facing strings.
+- Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`; a language picked in Settings is stored (`muvo.language`, AsyncStorage) and restored during bootstrap, before the splash hides. No hardcoded user-facing strings.
 - Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting. No fiat.
 
 ## 10. Config
 
-Only non-secret values via `EXPO_PUBLIC_*` (RPC URL, chain ID, explorer URL). Anything in the app bundle is public. Never put API keys or credentials in the app.
+Only non-secret values via `EXPO_PUBLIC_*`: `EXPO_PUBLIC_RPC_URLS` (comma-separated preset nodes), `EXPO_PUBLIC_CHAIN_ID`, later the explorer URL. Anything in the app bundle is public. Never put API keys or credentials in the app.
