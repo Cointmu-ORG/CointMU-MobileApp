@@ -44,7 +44,12 @@ export function classifySendError(error: unknown): SendErrorCode {
   for (const [code, mapped] of ETHERS_CODES) {
     if (isError(error, code)) return mapped;
   }
-  if (error instanceof Error && error.name === 'RpcUnavailableError') return 'network';
+  if (error instanceof Error && error.name === 'RpcUnavailableError') {
+    // callRpc wraps every failure; the node's own answer (a revert, insufficient funds) is the
+    // cause. Only a cause with no recognisable answer is a network problem.
+    const cause = classifySendError(error.cause);
+    return cause === 'unknown' ? 'network' : cause;
+  }
   const text = collectMessages(error);
   return MESSAGE_PATTERNS.find(([pattern]) => pattern.test(text))?.[1] ?? 'unknown';
 }

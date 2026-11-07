@@ -1,4 +1,4 @@
-import { parseAmountInput } from './amount-input';
+import { formatAmountInput, parseAmountInput } from './amount-input';
 
 const DECIMALS = 18;
 const ONE = 10n ** 18n;
@@ -50,5 +50,18 @@ describe('parseAmountInput', () => {
       ok: true,
       value: 3n * 10n ** 17n,
     });
+  });
+});
+
+describe('formatAmountInput', () => {
+  it.each([
+    ['en-US', 1_234n * ONE + ONE / 2n, '1234.5'],
+    ['id-ID', 1_234n * ONE + ONE / 2n, '1234,5'],
+    ['en-US', 2n * ONE, '2'],
+    ['en-US', 1n, '0.000000000000000001'],
+  ])('%s formats %p as %p and parses it back', (locale, value, expected) => {
+    const text = formatAmountInput(value, DECIMALS, locale);
+    expect(text).toBe(expected);
+    expect(parseAmountInput(text, DECIMALS, locale)).toEqual({ ok: true, value });
   });
 });

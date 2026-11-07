@@ -246,7 +246,68 @@
     }
   },
   "send": {
-    "title": "Kirim"
+    "title": "Kirim",
+    "form": {
+      "asset": "Aset",
+      "recipient": "Alamat penerima",
+      "scan": "Pindai QR",
+      "amount": "Jumlah ({{symbol}})",
+      "available": "Tersedia: {{amount}} {{symbol}}",
+      "balanceLoading": "Memuat saldo kamu…",
+      "max": "Maks",
+      "maxHint": "Mengisi jumlah terbesar yang bisa dikirim setelah biaya jaringan",
+      "continue": "Tinjau",
+      "errors": {
+        "invalid": "Itu bukan alamat CointMU yang valid.",
+        "badChecksum": "Alamat ini salah ketik (huruf besarnya tidak cocok). Periksa lalu coba lagi.",
+        "empty": "Masukkan jumlah.",
+        "zero": "Masukkan jumlah lebih dari nol.",
+        "tooManyDecimals": "{{symbol}} maksimal {{decimals}} angka di belakang koma."
+      }
+    },
+    "review": {
+      "title": "Tinjau",
+      "from": "Dari",
+      "to": "Ke",
+      "amount": "Jumlah",
+      "fee": "Biaya jaringan (maksimal)",
+      "tokenFeeNote": "Biaya dibayar dengan CMU.",
+      "total": "Total",
+      "node": "Node jaringan",
+      "selfWarning": "Kamu mengirim ke alamatmu sendiri. Kamu hanya membayar biaya jaringan.",
+      "contractWarning": "Alamat ini adalah kontrak, bukan dompet pribadi. Pastikan alamat ini bisa menerima aset ini, atau dananya bisa hilang.",
+      "confirm": "Konfirmasi dan kirim",
+      "authTitle": "Konfirmasi dengan PIN",
+      "authSubtitle": "PIN kamu menandatangani transaksi ini di perangkat ini.",
+      "missing": "Transfer ini sudah tidak tersedia. Kembali dan mulai lagi."
+    },
+    "stage": {
+      "checkingNetwork": "Memeriksa jaringan…",
+      "signing": "Menandatangani di perangkat ini…",
+      "broadcasting": "Mengirim ke jaringan…"
+    },
+    "result": {
+      "sentTitle": "Terkirim",
+      "sentBody": "Transaksimu sedang diproses. Statusnya tertunda sampai ditambang, lalu terkonfirmasi, lalu final setelah 12 blok.",
+      "uncertainTitle": "Terkirim, menunggu jaringan",
+      "uncertainBody": "Jaringan tidak menjawab tepat waktu, jadi transaksi ini mungkin sudah atau belum diterima. Muvo terus memeriksanya. Jangan kirim ulang sampai statusnya berubah.",
+      "failedTitle": "Tidak terkirim",
+      "hash": "Hash transaksi",
+      "explorer": "Lihat di explorer",
+      "tryAgain": "Ubah dan coba lagi"
+    },
+    "errors": {
+      "insufficientFunds": "Saldo tidak cukup untuk jumlah ini ditambah biaya jaringan.",
+      "insufficientGas": "CMU tidak cukup untuk biaya jaringan. Transfer token membayar biayanya dengan CMU.",
+      "balanceUnknown": "Saldomu belum termuat. Tunggu sebentar lalu coba lagi.",
+      "nonceTooLow": "Transaksi lain dari akun ini diproses lebih dulu. Kembali lalu coba lagi.",
+      "underpriced": "Biaya jaringan terlalu rendah saat ini. Coba lagi untuk mendapat biaya baru.",
+      "replacement": "Masih ada transaksi tertunda dari akun ini. Tunggu sampai terkonfirmasi, lalu coba lagi.",
+      "network": "Jaringan CointMU tidak bisa dihubungi sekarang. Periksa koneksimu lalu coba lagi.",
+      "wrongChain": "Node yang dipilih bukan jaringan CointMU. Pilih node lain di Pengaturan > Jaringan.",
+      "reverted": "Jaringan akan menolak transfer ini (untuk token, kontraknya menolak). Tidak ada yang terkirim.",
+      "unknown": "Terjadi kesalahan dan tidak ada yang terkirim. Coba lagi."
+    }
   },
   "receive": {
     "title": "Terima"

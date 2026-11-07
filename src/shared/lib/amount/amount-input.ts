@@ -1,4 +1,4 @@
-import { parseUnits } from 'ethers';
+import { formatUnits, parseUnits } from 'ethers';
 
 import { getSeparators } from './amount';
 
@@ -39,4 +39,14 @@ export function parseAmountInput(
   if (fraction.length > decimals) return { ok: false, error: 'tooManyDecimals' };
 
   return { ok: true, value: parseUnits(`${whole || '0'}.${fraction || '0'}`, decimals) };
+}
+
+/**
+ * The inverse, for filling an input (e.g. "Max"): exact digits, the locale's decimal separator,
+ * no thousands separators and no trailing zeros, so parseAmountInput reads it back unchanged.
+ */
+export function formatAmountInput(value: bigint, decimals: number, locale: string): string {
+  const [whole, fraction = ''] = formatUnits(value, decimals).split('.');
+  const trimmed = fraction.replace(/0+$/, '');
+  return trimmed === '' ? whole : `${whole}${getSeparators(locale).decimal}${trimmed}`;
 }

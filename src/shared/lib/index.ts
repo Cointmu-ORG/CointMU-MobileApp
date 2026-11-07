@@ -1,6 +1,7 @@
 export { checkAddress, isSameAddress, shortenAddress, type AddressCheck } from './address';
 export {
   formatAmount,
+  formatAmountInput,
   parseAmountInput,
   type AmountInputError,
   type AmountInputResult,

@@ -12,17 +12,10 @@ import { colors } from '@/shared/ui';
 import { useAppReady } from '../model/use-app-ready';
 import { resolveEntryRoute } from '../model/resolve-entry-route';
 import { useAutoLock } from '../model/use-auto-lock';
+import { SUB_SCREEN_HEADER } from './header-options';
 import { holdNativeSplash, SplashHandoff } from './splash-handoff';
 
 holdNativeSplash();
-
-const SUB_SCREEN_HEADER = {
-  headerShown: true,
-  headerTitle: '',
-  headerShadowVisible: false,
-  headerTintColor: colors.primary[600],
-  headerStyle: { backgroundColor: colors.surface.DEFAULT },
-} as const;
 
 /** Sub-screens (Settings, token management), each below a native header with a back button. */
 const SETTINGS_SCREENS = [
@@ -69,7 +62,7 @@ export function RootLayout() {
         </Stack.Protected>
         <Stack.Protected guard={isActive && isUnlocked} redirectTo={entryRoute}>
           <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="send" options={SUB_SCREEN_HEADER} />
+          <Stack.Screen name="send" />
           <Stack.Screen name="receive" options={SUB_SCREEN_HEADER} />
           <Stack.Screen name="scan" options={SUB_SCREEN_HEADER} />
           {SETTINGS_SCREENS.map(({ name, titleKey }) => (

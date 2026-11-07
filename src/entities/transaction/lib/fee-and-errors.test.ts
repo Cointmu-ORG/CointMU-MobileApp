@@ -70,7 +70,24 @@ describe('classifySendError', () => {
   });
 
   it('treats the RPC wrapper error as a network problem', () => {
-    const error = Object.assign(new Error('RPC request failed'), { name: 'RpcUnavailableError' });
+    const error = Object.assign(new Error('RPC request failed', { cause: new Error('timeout') }), {
+      name: 'RpcUnavailableError',
+    });
     expect(classifySendError(error)).toBe('network');
+  });
+
+  it("looks inside the RPC wrapper for the node's own answer", () => {
+    const cause = makeError('x', 'CALL_EXCEPTION', {
+      action: 'estimateGas',
+      data: null,
+      reason: null,
+      transaction: { to: null, data: '0x' },
+      invocation: null,
+      revert: null,
+    });
+    const error = Object.assign(new Error('RPC request failed', { cause }), {
+      name: 'RpcUnavailableError',
+    });
+    expect(classifySendError(error)).toBe('reverted');
   });
 });

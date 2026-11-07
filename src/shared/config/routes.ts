@@ -10,6 +10,8 @@ export const ROUTES = {
   lock: '/lock',
   home: '/',
   send: '/send',
+  sendReview: '/send/review',
+  sendResult: '/send/result',
   receive: '/receive',
   scan: '/scan',
   network: '/network',

@@ -19,11 +19,15 @@ export type DerivedAccount = {
  * this function; the HD wallet object is dropped on return.
  */
 export async function deriveAccount(phrase: string, accountIndex = 0): Promise<DerivedAccount> {
-  await waitForPaint();
-  const wallet = HDNodeWallet.fromPhrase(
-    phrase,
-    undefined,
-    `${DERIVATION_PATH_PREFIX}/${accountIndex}`,
-  );
+  const wallet = await deriveHdWallet(phrase, accountIndex);
   return { address: wallet.address, accountIndex };
+}
+
+/**
+ * Same derivation, returning the signing wallet. Only the signer factory calls this; the caller
+ * must drop the object right after signing (architecture §5).
+ */
+export async function deriveHdWallet(phrase: string, accountIndex: number): Promise<HDNodeWallet> {
+  await waitForPaint();
+  return HDNodeWallet.fromPhrase(phrase, undefined, `${DERIVATION_PATH_PREFIX}/${accountIndex}`);
 }

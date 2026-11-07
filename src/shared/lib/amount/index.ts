@@ -1,5 +1,6 @@
 export { formatAmount, getSeparators, type FormatAmountOptions, type Separators } from './amount';
 export {
+  formatAmountInput,
   parseAmountInput,
   type AmountInputError,
   type AmountInputResult,
