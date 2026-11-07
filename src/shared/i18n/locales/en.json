@@ -325,7 +325,48 @@
     "note": "Only send CMU or CointMU tokens to this address. Coins from other networks sent here may be lost."
   },
   "scan": {
-    "title": "Scan"
+    "title": "Scan",
+    "hint": "Point the camera at a CointMU address or payment QR code. Nothing is sent until you review and confirm.",
+    "cameraLabel": "Camera viewfinder for QR codes",
+    "again": "Scan again",
+    "permission": {
+      "checking": "Checking camera access…",
+      "title": "Camera access",
+      "body": "Muvo uses the camera only to read QR codes. Nothing is recorded or saved.",
+      "denied": "Camera access is off for Muvo. Turn it on in your phone's settings to scan QR codes.",
+      "allow": "Allow camera",
+      "openSettings": "Open settings"
+    },
+    "errors": {
+      "secret": {
+        "title": "Never share this code",
+        "body": "This QR code holds a recovery phrase or private key. Anyone who sees it can take your funds. Muvo did not keep it. Never show it to anyone or scan it into another app."
+      },
+      "wrongChain": {
+        "title": "Different network",
+        "body": "This request is for another blockchain. Muvo only sends on CointMU (chain {{chainId}})."
+      },
+      "badChecksum": {
+        "title": "Address has a typo",
+        "body": "The address in this code doesn't match its checksum. Ask for a new code."
+      },
+      "invalidAddress": {
+        "title": "No valid address",
+        "body": "This code doesn't contain a valid CointMU address."
+      },
+      "invalidAmount": {
+        "title": "Invalid amount",
+        "body": "The amount in this code can't be read. Ask for a new code."
+      },
+      "unsupported": {
+        "title": "Not a payment code",
+        "body": "This QR code isn't a CointMU address or payment request."
+      },
+      "unknownToken": {
+        "title": "Unknown token",
+        "body": "This request is for a token that isn't in your list. Add the token first in Home > Manage, then scan again."
+      }
+    }
   },
   "pinPrompt": {
     "checking": "Checking your PIN",

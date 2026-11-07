@@ -325,7 +325,48 @@
     "note": "Kirim hanya CMU atau token CointMU ke alamat ini. Koin dari jaringan lain yang dikirim ke sini bisa hilang."
   },
   "scan": {
-    "title": "Pindai"
+    "title": "Pindai",
+    "hint": "Arahkan kamera ke kode QR alamat atau pembayaran CointMU. Tidak ada yang terkirim sebelum kamu meninjau dan mengonfirmasi.",
+    "cameraLabel": "Jendela kamera untuk kode QR",
+    "again": "Pindai lagi",
+    "permission": {
+      "checking": "Memeriksa akses kamera…",
+      "title": "Akses kamera",
+      "body": "Muvo memakai kamera hanya untuk membaca kode QR. Tidak ada yang direkam atau disimpan.",
+      "denied": "Akses kamera untuk Muvo mati. Nyalakan di pengaturan ponsel untuk memindai kode QR.",
+      "allow": "Izinkan kamera",
+      "openSettings": "Buka pengaturan"
+    },
+    "errors": {
+      "secret": {
+        "title": "Jangan pernah bagikan kode ini",
+        "body": "Kode QR ini berisi frasa pemulihan atau kunci privat. Siapa pun yang melihatnya bisa mengambil dana kamu. Muvo tidak menyimpannya. Jangan tunjukkan ke siapa pun atau pindai ke aplikasi lain."
+      },
+      "wrongChain": {
+        "title": "Jaringan berbeda",
+        "body": "Permintaan ini untuk blockchain lain. Muvo hanya mengirim di CointMU (chain {{chainId}})."
+      },
+      "badChecksum": {
+        "title": "Alamat salah ketik",
+        "body": "Alamat di kode ini tidak cocok dengan checksum-nya. Minta kode baru."
+      },
+      "invalidAddress": {
+        "title": "Alamat tidak valid",
+        "body": "Kode ini tidak berisi alamat CointMU yang valid."
+      },
+      "invalidAmount": {
+        "title": "Jumlah tidak valid",
+        "body": "Jumlah di kode ini tidak bisa dibaca. Minta kode baru."
+      },
+      "unsupported": {
+        "title": "Bukan kode pembayaran",
+        "body": "Kode QR ini bukan alamat atau permintaan pembayaran CointMU."
+      },
+      "unknownToken": {
+        "title": "Token tidak dikenal",
+        "body": "Permintaan ini untuk token yang belum ada di daftarmu. Tambahkan tokennya dulu di Beranda > Kelola, lalu pindai lagi."
+      }
+    }
   },
   "pinPrompt": {
     "checking": "Memeriksa PIN Anda",
