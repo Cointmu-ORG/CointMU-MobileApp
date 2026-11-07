@@ -1,4 +1,5 @@
 import { useBalanceStore } from '@/entities/account';
+import { useTokenBalanceStore } from '@/entities/asset';
 import { deriveAccount, readWalletSecret, useWalletStore } from '@/entities/wallet';
 
 export const MAX_ACCOUNT_NAME_LENGTH = 24;
@@ -7,12 +8,13 @@ export type AddAccountResult =
   | { readonly ok: true; readonly index: number }
   | { readonly ok: false; readonly error: 'noMnemonic' };
 
-/** Makes `index` the active account. The balance is cleared so the old one never shows. */
+/** Makes `index` the active account. Balances are cleared so the old ones never show. */
 export function switchToAccount(index: number): void {
   const wallet = useWalletStore.getState();
   if (wallet.accountIndex === index) return;
   wallet.switchAccount(index);
   useBalanceStore.getState().clear();
+  useTokenBalanceStore.getState().clear();
 }
 
 /**

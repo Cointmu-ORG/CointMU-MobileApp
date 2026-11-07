@@ -5,9 +5,11 @@
   "packageManager": "npm@12.2.0",
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
+    "date-fns": "^4.4.0",
     "ethers": "^6.17.0",
     "expo": "~58.0.23",
     "expo-application": "~58.1.2",
+    "expo-camera": "~58.0.14",
     "expo-clipboard": "~58.0.4",
     "expo-constants": "~58.0.15",
     "expo-haptics": "~58.0.7",
@@ -27,6 +29,7 @@
     "react-i18next": "^17.1.13",
     "react-native": "0.88.1",
     "react-native-get-random-values": "^2.1.0",
+    "react-native-qrcode-svg": "^6.3.54",
     "react-native-reanimated": "4.7.1",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
@@ -60,6 +63,8 @@
     "test": "jest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "probe:nodes": "node --env-file-if-exists=.env scripts/probe-nodes.js",
+    "watch:tx": "node --env-file-if-exists=.env scripts/watch-tx.js",
     "version": "node scripts/sync-release-files.js"
   },
   "private": true

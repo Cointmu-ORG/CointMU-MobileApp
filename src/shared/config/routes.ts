@@ -10,6 +10,8 @@ export const ROUTES = {
   lock: '/lock',
   home: '/',
   send: '/send',
+  sendReview: '/send/review',
+  sendResult: '/send/result',
   receive: '/receive',
   scan: '/scan',
   network: '/network',
@@ -17,6 +19,8 @@ export const ROUTES = {
   changePin: '/change-pin',
   recoveryPhrase: '/recovery-phrase',
   removeWallet: '/remove-wallet',
+  txDetail: '/tx/[hash]',
+  tokens: '/tokens',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

@@ -4,6 +4,10 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { readWalletSecret, saveWalletSecret, useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
+import { preloadRoutes } from '../../../jest.preload-routes';
+
+preloadRoutes();
+
 const PHRASE = 'test test test test test test test test test test test junk';
 const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 

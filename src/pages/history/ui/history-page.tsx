@@ -1,9 +1,11 @@
-import HistoryIcon from 'lucide-react-native/icons/history';
-import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { PlaceholderScreen } from '@/shared/ui';
+import { HistoryList } from '@/widgets/history-list';
 
 export function HistoryPage() {
-  const { t } = useTranslation();
-  return <PlaceholderScreen title={t('history.title')} icon={HistoryIcon} />;
+  return (
+    <SafeAreaView className="flex-1 bg-surface" edges={['top', 'left', 'right']}>
+      <HistoryList />
+    </SafeAreaView>
+  );
 }

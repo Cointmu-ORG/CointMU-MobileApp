@@ -3,7 +3,8 @@
     "continue": "Continue",
     "cancel": "Cancel",
     "comingSoon": "Coming soon. This part of Muvo arrives in a later version.",
-    "done": "Done"
+    "done": "Done",
+    "paste": "Paste"
   },
   "onboarding": {
     "welcome": {
@@ -109,19 +110,38 @@
     "transactions": {
       "title": "Recent activity",
       "empty": "No transactions yet",
-      "emptyHint": "Transactions you send from Muvo appear here.",
-      "sent": "Sent",
-      "status": {
-        "pending": "Pending",
-        "confirmed": "Confirmed",
-        "final": "Final",
-        "failed": "Failed",
-        "dropped": "Dropped",
-        "replaced": "Replaced"
-      }
+      "emptyHint": "Transactions you send from Muvo appear here."
     }
   },
-  "history": { "title": "History" },
+  "history": {
+    "title": "History",
+    "detail": {
+      "title": "Transaction",
+      "amount": "Amount",
+      "from": "From",
+      "to": "To",
+      "date": "Date",
+      "block": "Block",
+      "notMined": "Not in a block yet",
+      "confirmations": "Confirmations",
+      "confirmationsValue": "{{count}} of {{total}}",
+      "fee": "Network fee paid",
+      "feeUnknown": "Known once the transaction is mined",
+      "hash": "Transaction hash",
+      "explorer": "View in explorer",
+      "missing": "This transaction isn't in your history on this device."
+    },
+    "help": "Shows the last 7 days of transfers for this account, plus everything sent from Muvo. Transfers made by smart contracts on your behalf (internal transfers) don't appear here.",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "rowLabel": "{{direction}} {{amount}}, {{address}}, {{status}}. Open details",
+    "empty": "No transactions in the last 7 days.",
+    "error": "Couldn't load your history from the CointMU network.",
+    "retry": "Try again",
+    "loading": "Loading history…",
+    "loadMore": "Load older transactions",
+    "end": "That's everything from the last 7 days."
+  },
   "settings": {
     "title": "Settings",
     "network": {
@@ -242,14 +262,182 @@
       "licenseDesc": "Open source under the MIT License"
     }
   },
-  "send": { "title": "Send" },
-  "receive": { "title": "Receive" },
-  "scan": { "title": "Scan" },
+  "send": {
+    "title": "Send",
+    "form": {
+      "asset": "Asset",
+      "recipient": "Recipient address",
+      "scan": "Scan QR",
+      "amount": "Amount ({{symbol}})",
+      "available": "Available: {{amount}} {{symbol}}",
+      "balanceLoading": "Loading your balance…",
+      "max": "Max",
+      "maxHint": "Fills in the most you can send after the network fee",
+      "continue": "Review",
+      "errors": {
+        "invalid": "That isn't a valid CointMU address.",
+        "badChecksum": "This address has a typo (its capital letters don't match). Check it and try again.",
+        "empty": "Enter an amount.",
+        "zero": "Enter an amount above zero.",
+        "tooManyDecimals": "{{symbol}} allows at most {{decimals}} decimal places."
+      }
+    },
+    "review": {
+      "title": "Review",
+      "from": "From",
+      "to": "To",
+      "amount": "Amount",
+      "fee": "Network fee (at most)",
+      "tokenFeeNote": "The fee is paid in CMU.",
+      "total": "Total",
+      "node": "Network node",
+      "selfWarning": "You are sending to your own address. You will only pay the network fee.",
+      "contractWarning": "This address is a contract, not a personal wallet. Make sure it can receive this asset, or the funds may be lost.",
+      "confirm": "Confirm and send",
+      "authTitle": "Confirm with your PIN",
+      "authSubtitle": "Your PIN signs this transaction on this device.",
+      "missing": "This transfer is no longer available. Go back and start again."
+    },
+    "stage": {
+      "checkingNetwork": "Checking the network…",
+      "signing": "Signing on this device…",
+      "broadcasting": "Sending to the network…"
+    },
+    "result": {
+      "sentTitle": "Sent",
+      "sentBody": "Your transaction is on its way. It shows as pending until it is mined, then confirmed, then final after 12 blocks.",
+      "uncertainTitle": "Sent, waiting for the network",
+      "uncertainBody": "The network didn't answer in time, so it may or may not have the transaction. Muvo keeps checking. Don't send again until its status updates.",
+      "failedTitle": "Not sent",
+      "hash": "Transaction hash",
+      "explorer": "View in explorer",
+      "tryAgain": "Edit and try again"
+    },
+    "errors": {
+      "insufficientFunds": "Not enough balance for this amount plus the network fee.",
+      "insufficientGas": "Not enough CMU for the network fee. Token transfers pay their fee in CMU.",
+      "balanceUnknown": "Your balance hasn't loaded yet. Wait a moment and try again.",
+      "nonceTooLow": "Another transaction from this account was processed first. Go back and try again.",
+      "underpriced": "The network fee is too low right now. Try again to get a new fee.",
+      "replacement": "A transaction from this account is still pending. Wait for it to confirm, then try again.",
+      "network": "Can't reach the CointMU network right now. Check your connection and try again.",
+      "wrongChain": "The selected node is not on the CointMU network. Pick another node in Settings > Network.",
+      "reverted": "The network would reject this transfer (for a token, the contract refused it). Nothing was sent.",
+      "unknown": "Something went wrong and nothing was sent. Try again."
+    }
+  },
+  "receive": {
+    "title": "Receive",
+    "qrLabel": "QR code of your address",
+    "copy": "Copy address",
+    "copied": "Address copied",
+    "share": "Share address",
+    "note": "Only send CMU or CointMU tokens to this address. Coins from other networks sent here may be lost."
+  },
+  "scan": {
+    "title": "Scan",
+    "hint": "Point the camera at a CointMU address or payment QR code. Nothing is sent until you review and confirm.",
+    "cameraLabel": "Camera viewfinder for QR codes",
+    "again": "Scan again",
+    "permission": {
+      "checking": "Checking camera access…",
+      "title": "Camera access",
+      "body": "Muvo uses the camera only to read QR codes. Nothing is recorded or saved.",
+      "denied": "Camera access is off for Muvo. Turn it on in your phone's settings to scan QR codes.",
+      "allow": "Allow camera",
+      "openSettings": "Open settings"
+    },
+    "errors": {
+      "secret": {
+        "title": "Never share this code",
+        "body": "This QR code holds a recovery phrase or private key. Anyone who sees it can take your funds. Muvo did not keep it. Never show it to anyone or scan it into another app."
+      },
+      "wrongChain": {
+        "title": "Different network",
+        "body": "This request is for another blockchain. Muvo only sends on CointMU (chain {{chainId}})."
+      },
+      "badChecksum": {
+        "title": "Address has a typo",
+        "body": "The address in this code doesn't match its checksum. Ask for a new code."
+      },
+      "invalidAddress": {
+        "title": "No valid address",
+        "body": "This code doesn't contain a valid CointMU address."
+      },
+      "invalidAmount": {
+        "title": "Invalid amount",
+        "body": "The amount in this code can't be read. Ask for a new code."
+      },
+      "unsupported": {
+        "title": "Not a payment code",
+        "body": "This QR code isn't a CointMU address or payment request."
+      },
+      "unknownToken": {
+        "title": "Unknown token",
+        "body": "This request is for a token that isn't in your list. Add the token first in Home > Manage, then scan again."
+      }
+    }
+  },
   "pinPrompt": {
     "checking": "Checking your PIN",
     "error": "Couldn't check the PIN. Please try again.",
     "mismatch": "The PINs don't match. Start again.",
     "saving": "Securing your PIN…"
   },
-  "accounts": { "defaultName": "Account {{number}}" }
+  "accounts": {
+    "defaultName": "Account {{number}}"
+  },
+  "tokens": {
+    "title": "Tokens",
+    "manage": "Manage",
+    "subtitle": "Add a CointMU token by its contract address, or hide tokens you don't use.",
+    "addTitle": "Add a token",
+    "listTitle": "Your tokens",
+    "addressField": "Token contract address",
+    "lookUp": "Look up",
+    "add": "Add token",
+    "decimals_one": "{{count}} decimal",
+    "decimals_other": "{{count}} decimals",
+    "unverified": "Unverified",
+    "unverifiedTitle": "Unverified token",
+    "unverifiedBody": "Anyone can create a token with any name or symbol. Only add tokens you trust, and check the contract address with the project that issued it.",
+    "builtin": "Built in",
+    "showOnHome": "Show {{symbol}} on Home",
+    "remove": "Remove {{symbol}}",
+    "empty": "No tokens yet. Add one with its contract address.",
+    "errors": {
+      "invalidAddress": "That isn't a valid contract address.",
+      "badChecksum": "This address has a typo (its capital letters don't match). Check it and try again.",
+      "alreadyAdded": "This token is already in your list.",
+      "notContract": "There is no contract at this address on CointMU.",
+      "notToken": "This contract doesn't look like a token (no symbol or decimals).",
+      "network": "Can't reach the CointMU network right now. Try again."
+    }
+  },
+  "tx": {
+    "unknownAsset": "Unknown asset",
+    "rowLabel": "{{amount}}, {{address}}. Open details",
+    "direction": {
+      "in": "Received",
+      "out": "Sent",
+      "self": "To yourself"
+    },
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "confirmedCount": "Confirmed {{count}}/{{total}}",
+      "final": "Final",
+      "failed": "Failed",
+      "dropped": "Dropped",
+      "replaced": "Replaced"
+    },
+    "statusHelp": {
+      "pending": "Waiting to be included in a block.",
+      "confirmed": "In a block. It becomes final after {{total}} blocks, because a recent block can still be undone.",
+      "final": "Deep enough in the chain to be treated as settled.",
+      "failed": "Included in a block but rejected by the contract. Only the network fee was spent.",
+      "dropped": "The network no longer knows this transaction and it was never mined. Nothing was sent; you can send again.",
+      "replaced": "Another transaction with the same nonce was mined instead. This one will never be mined."
+    }
+  }
 }

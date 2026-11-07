@@ -17,7 +17,7 @@ Keys live on the device only. There is no "forgot password" and no server-side r
 | Name | CointMU |
 | Chain ID | 1912 |
 | Symbol | CMU |
-| Decimals | 18 (assumed, VERIFY against the chain) |
+| Decimals | 18 (wei is protocol-level in geth; Q-01 closed, D-49) |
 | Consensus | Proof of Work (geth-based) |
 | RPC | preset node list from `EXPO_PUBLIC_RPC_URLS` (comma-separated, first is the default) plus one user-added node; see below and D-43 |
 
@@ -59,14 +59,16 @@ app/                         # Expo Router routes ONLY. No logic.
   _layout.tsx                # re-exports src/app root layout (auth guard)
   (onboarding)/...           # welcome, create, import, backup, verify, set-pin, recover (D-39)
   (tabs)/                    # home (index, owns `/`), history, settings
-  send/ ...                  # send, confirm, result
+  send/                      # nested stack: index (form), review, result (D-53)
   receive.tsx
-  scan.tsx
+  scan.tsx                   # ?from=send returns to the form; otherwise opens Send
+  tokens.tsx                 # add, hide and remove ERC-20 tokens
+  tx/[hash].tsx              # tx detail (local or scanned)
   lock.tsx
 src/
   app/        routes/ (navigator layouts + auth guard), model/ (bootstrap, auto-lock), styles/
   pages/      full-screen compositions, one slice per screen
-  widgets/    composite blocks (balance-card, tx-list, asset-list)
+  widgets/    composite blocks (balance-card, tx-list, asset-list, history-list)
   features/   user actions (see below)
   entities/   business objects (wallet, account, asset, network, transaction)
   shared/
@@ -87,7 +89,9 @@ export { HomePage as default } from '@/pages/home';
 ```
 
 ### Features
-`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `change-language`, `lock-settings`, `reset-wallet`, `select-network`, `manage-accounts`.
+`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `manage-tokens`, `change-language`, `change-pin`, `lock-settings`, `reveal-mnemonic`, `reset-wallet`, `select-network`, `manage-accounts`.
+
+A page slice may hold the screens of one flow: `pages/send` (form, review, result) and `pages/history` (list, tx detail). This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
 
 ### Slice segments
 `ui/`, `model/` (Zustand store, selectors, types), `api/` (RPC calls), `lib/` (pure helpers), `config/`. Each slice exposes only `index.ts`.
@@ -119,40 +123,41 @@ export { HomePage as default } from '@/pages/home';
 
 ## 6. Transaction flow
 
-1. User enters address (validate with `isAddress`, checksum) and amount (parse with `parseUnits`, never floats).
-2. Estimate gas (`estimateGas`) and fee. Detect fee mode at runtime: if `getFeeData()` returns `maxFeePerGas`, use EIP-1559; otherwise use legacy `gasPrice` (`type: 0`).
-3. Review screen: recipient, amount, fee, total. Balance check includes fee.
-4. Authenticate (PIN or biometric).
-5. Sign and broadcast. Persist a local `pending` record with the hash right away. The record includes the nonce, fetched with `getTransactionCount(addr, 'pending')`, so replaced or dropped transactions can be detected (D-29).
-6. Poll the receipt. Status: `pending` (0 conf) -> `confirmed` (1 conf) -> `final` (N conf, `FINAL_CONFIRMATIONS` in config).
-7. Handle replaced, dropped, and reverted (status 0) transactions explicitly in the UI.
+1. Form: recipient (`checkAddress`: lowercase or a valid EIP-55 checksum; a bad mixed-case checksum is refused) and a locale-aware amount (`parseAmountInput`: bigint base units, never floats, D-51). Paste, scan (prefill only) and "Max" (CMU: balance minus the quoted fee; token: the whole balance).
+2. Quote: `estimateGas` (a revert fails early with a friendly message) and `getFeeData()`. Fee mode at runtime: `maxFeePerGas` → EIP-1559 (type 2), else legacy `gasPrice` (type 0) (D-22; the nodes support EIP-1559, D-47). Warnings (never blocking): sending to yourself, recipient is a contract (`getCode` ≠ `0x`).
+3. Review: from (account name + address), to (full), amount, fee (max), total, node. The fee is refetched when the screen opens and again before signing if older than 30 s. The balance check includes the fee; a token send needs CMU for gas separately.
+4. Authenticate (PIN or biometric) right before signing, every time.
+5. `eth_chainId` must be 1912 on the selected node. Nonce from `getTransactionCount(addr, 'pending')`. Read the secret, sign with `chainId` set via `signWithSecret` (derivation wrapper; the signer is dropped before it returns), broadcast once (no retry). Persist the local `pending` record (hash, nonce, from, to, asset, amount, fee fields, node, createdAt) before navigating. A broadcast that times out is saved as uncertain so the poller settles it (D-53).
+6. Poll (app-level, foreground only, backoff on errors): `pending` → `confirmed` (1 conf, shown as n/12) → `final` (`FINAL_CONFIRMATIONS`). Only `eth_getTransactionCount('latest')` (read first), `eth_getTransactionReceipt`, `eth_getTransactionByHash` and `eth_blockNumber` are used; txpool and debug are off on the nodes (D-48).
+7. Replaced: no receipt for our hash but the nonce is used. Dropped: the node no longer returns the tx, the nonce is unused, and both held for 3 minutes since it first went unknown; a tx still in the pool stays pending however long. Reverted (receipt status 0): failed. Each state has a badge and an explanation.
 
-PoW chains can reorg, so never show a transaction as final at 1 confirmation.
+Speed up and cancel of a pending tx are out of scope (Q-36).
 
 ## 7. Assets (multi-coin ready)
 
 ```ts
 type Asset =
   | { kind: 'native'; symbol: string; decimals: number }
-  | { kind: 'erc20'; address: string; symbol: string; decimals: number };
+  | { kind: 'erc20'; address: string; symbol: string; decimals: number; name: string | null; source: 'builtin' | 'custom' };
 ```
-Native CMU is the default asset. ERC-20 uses a minimal ABI (`balanceOf`, `transfer`, `decimals`, `symbol`, `Transfer` event). Asset list is a registry in `entities/asset`.
+Native CMU is the default asset. ERC-20 uses a minimal ABI (`balanceOf`, `transfer`, `decimals`, `symbol`, `name`, `Transfer` event). The registry in `entities/asset` is native CMU + `BUILTIN_TOKENS` (config, empty until official tokens exist) + custom tokens the user adds, persisted per chain (`muvo.tokens`, not secret). Adding a token checks `getCode`, reads `symbol`/`decimals`/`name` (ABI string or bytes32) and shows an "unverified token" warning first. Tokens can be hidden (built-in) or removed (custom). Balances use `balanceOf`, four at a time, polled with the native balance and cleared on account or node change (D-55).
 
 ## 8. History
 
-No indexer is assumed. Plan (see decisions.md Q-11):
-- Local records for transactions sent from this app (reliable, instant).
-- ERC-20: `getLogs` filtered by `Transfer` topic for the user's address.
-- Native incoming transfers: bounded block scan over recent blocks, cached, lazy-loaded with pagination.
-- Isolated behind one interface (`TransactionSource`) so an indexer or explorer API can replace it later without touching UI.
-- Known limitation: a block scan only sees top-level transactions. Native value moved by contract calls (internal transfers) is invisible without tracing or an indexer (Q-33).
+No indexer is assumed (Q-11). Three `TransactionSource`s (`entities/transaction/api/history-sources.ts`), merged and deduped by hash (D-54):
+- Local records for transactions sent from this app (instant, live status from the poller).
+- Native transfers: bounded block scan, `NATIVE_SCAN_PAGE_BLOCKS` (1,000) full blocks per page within `NATIVE_SCAN_WINDOW_BLOCKS` (50,000, about 7 days), fetched 50 at a time so ethers batches them. Only top-level txs with a value, to or from the owner.
+- ERC-20: `getLogs` on the `Transfer` topic for the listed tokens, owner as sender or recipient, in `LOGS_CHUNK_BLOCKS` (10,000) ranges that halve (down to 500) when a node refuses one.
+- Cursors are cached in memory per account and chain; pages load lazily (scroll or "load older"); pull to refresh starts from the new head. Values come from the node probe (D-47).
+- Known limitation: a block scan only sees top-level transactions. Native value moved by contract calls (internal transfers) is invisible without tracing or an indexer (Q-33); the History help text says so.
 
 ## 9. UI and i18n
 
 - White and blue theme, matching the desktop app. Light mode only for MVP. Design tokens in Tailwind config.
 - Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`; a language picked in Settings is stored (`muvo.language`, AsyncStorage) and restored during bootstrap, before the splash hides. No hardcoded user-facing strings.
-- Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting. No fiat.
+- Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting; amount input accepts the locale's decimal separator (D-51). Dates via date-fns with the `id`/`en` locale. No fiat.
+- Status and warnings never rely on color alone: badges and notices carry an icon and text.
 
 ## 10. Config
 
-Only non-secret values via `EXPO_PUBLIC_*`: `EXPO_PUBLIC_RPC_URLS` (comma-separated preset nodes), `EXPO_PUBLIC_CHAIN_ID`, later the explorer URL. Anything in the app bundle is public. Never put API keys or credentials in the app.
+Only non-secret values via `EXPO_PUBLIC_*`: `EXPO_PUBLIC_RPC_URLS` (comma-separated preset nodes), `EXPO_PUBLIC_CHAIN_ID`, and the optional `EXPO_PUBLIC_EXPLORER_URL` (tx links appear only when it is set, Q-27). Anything in the app bundle is public. Never put API keys or credentials in the app.

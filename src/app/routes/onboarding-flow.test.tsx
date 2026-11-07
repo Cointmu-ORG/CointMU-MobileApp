@@ -3,6 +3,10 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { readWalletSecret, splitWords, useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
+import { preloadRoutes } from '../../../jest.preload-routes';
+
+preloadRoutes();
+
 // No test hits a real RPC: the provider factory returns a stub with a fixed balance.
 const ONE_CMU = 10n ** 18n;
 jest.mock('@/shared/api', () => ({

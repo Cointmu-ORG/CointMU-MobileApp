@@ -5,13 +5,13 @@ export type FormatAmountOptions = {
   readonly maxFractionDigits: number;
 };
 
-type Separators = { readonly group: string; readonly decimal: string };
+export type Separators = { readonly group: string; readonly decimal: string };
 
 const SEPARATOR_PROBE = 1000.5;
 const DEFAULT_SEPARATORS: Separators = { group: ',', decimal: '.' };
 const THOUSANDS_PATTERN = /\B(?=(\d{3})+(?!\d))/g;
 
-function getSeparators(locale: string): Separators {
+export function getSeparators(locale: string): Separators {
   try {
     const parts = new Intl.NumberFormat(locale).formatToParts(SEPARATOR_PROBE);
     return {

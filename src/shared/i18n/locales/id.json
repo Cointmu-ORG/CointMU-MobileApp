@@ -3,7 +3,8 @@
     "continue": "Lanjut",
     "cancel": "Batal",
     "comingSoon": "Segera hadir. Bagian Muvo ini hadir di versi berikutnya.",
-    "done": "Selesai"
+    "done": "Selesai",
+    "paste": "Tempel"
   },
   "onboarding": {
     "welcome": {
@@ -109,19 +110,38 @@
     "transactions": {
       "title": "Aktivitas terbaru",
       "empty": "Belum ada transaksi",
-      "emptyHint": "Transaksi yang kamu kirim dari Muvo akan muncul di sini.",
-      "sent": "Terkirim",
-      "status": {
-        "pending": "Menunggu",
-        "confirmed": "Terkonfirmasi",
-        "final": "Final",
-        "failed": "Gagal",
-        "dropped": "Dibatalkan jaringan",
-        "replaced": "Digantikan"
-      }
+      "emptyHint": "Transaksi yang kamu kirim dari Muvo akan muncul di sini."
     }
   },
-  "history": { "title": "Riwayat" },
+  "history": {
+    "title": "Riwayat",
+    "detail": {
+      "title": "Transaksi",
+      "amount": "Jumlah",
+      "from": "Dari",
+      "to": "Ke",
+      "date": "Tanggal",
+      "block": "Blok",
+      "notMined": "Belum masuk blok",
+      "confirmations": "Konfirmasi",
+      "confirmationsValue": "{{count}} dari {{total}}",
+      "fee": "Biaya jaringan yang dibayar",
+      "feeUnknown": "Diketahui setelah transaksi ditambang",
+      "hash": "Hash transaksi",
+      "explorer": "Lihat di explorer",
+      "missing": "Transaksi ini tidak ada di riwayat di perangkat ini."
+    },
+    "help": "Menampilkan transfer 7 hari terakhir untuk akun ini, ditambah semua yang dikirim dari Muvo. Transfer yang dilakukan kontrak pintar atas namamu (transfer internal) tidak muncul di sini.",
+    "today": "Hari ini",
+    "yesterday": "Kemarin",
+    "rowLabel": "{{direction}} {{amount}}, {{address}}, {{status}}. Buka detail",
+    "empty": "Tidak ada transaksi dalam 7 hari terakhir.",
+    "error": "Riwayat tidak bisa dimuat dari jaringan CointMU.",
+    "retry": "Coba lagi",
+    "loading": "Memuat riwayat…",
+    "loadMore": "Muat transaksi lama",
+    "end": "Itu semua dari 7 hari terakhir."
+  },
   "settings": {
     "title": "Pengaturan",
     "network": {
@@ -242,14 +262,182 @@
       "licenseDesc": "Sumber terbuka dengan Lisensi MIT"
     }
   },
-  "send": { "title": "Kirim" },
-  "receive": { "title": "Terima" },
-  "scan": { "title": "Pindai" },
+  "send": {
+    "title": "Kirim",
+    "form": {
+      "asset": "Aset",
+      "recipient": "Alamat penerima",
+      "scan": "Pindai QR",
+      "amount": "Jumlah ({{symbol}})",
+      "available": "Tersedia: {{amount}} {{symbol}}",
+      "balanceLoading": "Memuat saldo kamu…",
+      "max": "Maks",
+      "maxHint": "Mengisi jumlah terbesar yang bisa dikirim setelah biaya jaringan",
+      "continue": "Tinjau",
+      "errors": {
+        "invalid": "Itu bukan alamat CointMU yang valid.",
+        "badChecksum": "Alamat ini salah ketik (huruf besarnya tidak cocok). Periksa lalu coba lagi.",
+        "empty": "Masukkan jumlah.",
+        "zero": "Masukkan jumlah lebih dari nol.",
+        "tooManyDecimals": "{{symbol}} maksimal {{decimals}} angka di belakang koma."
+      }
+    },
+    "review": {
+      "title": "Tinjau",
+      "from": "Dari",
+      "to": "Ke",
+      "amount": "Jumlah",
+      "fee": "Biaya jaringan (maksimal)",
+      "tokenFeeNote": "Biaya dibayar dengan CMU.",
+      "total": "Total",
+      "node": "Node jaringan",
+      "selfWarning": "Kamu mengirim ke alamatmu sendiri. Kamu hanya membayar biaya jaringan.",
+      "contractWarning": "Alamat ini adalah kontrak, bukan dompet pribadi. Pastikan alamat ini bisa menerima aset ini, atau dananya bisa hilang.",
+      "confirm": "Konfirmasi dan kirim",
+      "authTitle": "Konfirmasi dengan PIN",
+      "authSubtitle": "PIN kamu menandatangani transaksi ini di perangkat ini.",
+      "missing": "Transfer ini sudah tidak tersedia. Kembali dan mulai lagi."
+    },
+    "stage": {
+      "checkingNetwork": "Memeriksa jaringan…",
+      "signing": "Menandatangani di perangkat ini…",
+      "broadcasting": "Mengirim ke jaringan…"
+    },
+    "result": {
+      "sentTitle": "Terkirim",
+      "sentBody": "Transaksimu sedang diproses. Statusnya tertunda sampai ditambang, lalu terkonfirmasi, lalu final setelah 12 blok.",
+      "uncertainTitle": "Terkirim, menunggu jaringan",
+      "uncertainBody": "Jaringan tidak menjawab tepat waktu, jadi transaksi ini mungkin sudah atau belum diterima. Muvo terus memeriksanya. Jangan kirim ulang sampai statusnya berubah.",
+      "failedTitle": "Tidak terkirim",
+      "hash": "Hash transaksi",
+      "explorer": "Lihat di explorer",
+      "tryAgain": "Ubah dan coba lagi"
+    },
+    "errors": {
+      "insufficientFunds": "Saldo tidak cukup untuk jumlah ini ditambah biaya jaringan.",
+      "insufficientGas": "CMU tidak cukup untuk biaya jaringan. Transfer token membayar biayanya dengan CMU.",
+      "balanceUnknown": "Saldomu belum termuat. Tunggu sebentar lalu coba lagi.",
+      "nonceTooLow": "Transaksi lain dari akun ini diproses lebih dulu. Kembali lalu coba lagi.",
+      "underpriced": "Biaya jaringan terlalu rendah saat ini. Coba lagi untuk mendapat biaya baru.",
+      "replacement": "Masih ada transaksi tertunda dari akun ini. Tunggu sampai terkonfirmasi, lalu coba lagi.",
+      "network": "Jaringan CointMU tidak bisa dihubungi sekarang. Periksa koneksimu lalu coba lagi.",
+      "wrongChain": "Node yang dipilih bukan jaringan CointMU. Pilih node lain di Pengaturan > Jaringan.",
+      "reverted": "Jaringan akan menolak transfer ini (untuk token, kontraknya menolak). Tidak ada yang terkirim.",
+      "unknown": "Terjadi kesalahan dan tidak ada yang terkirim. Coba lagi."
+    }
+  },
+  "receive": {
+    "title": "Terima",
+    "qrLabel": "Kode QR alamatmu",
+    "copy": "Salin alamat",
+    "copied": "Alamat disalin",
+    "share": "Bagikan alamat",
+    "note": "Kirim hanya CMU atau token CointMU ke alamat ini. Koin dari jaringan lain yang dikirim ke sini bisa hilang."
+  },
+  "scan": {
+    "title": "Pindai",
+    "hint": "Arahkan kamera ke kode QR alamat atau pembayaran CointMU. Tidak ada yang terkirim sebelum kamu meninjau dan mengonfirmasi.",
+    "cameraLabel": "Jendela kamera untuk kode QR",
+    "again": "Pindai lagi",
+    "permission": {
+      "checking": "Memeriksa akses kamera…",
+      "title": "Akses kamera",
+      "body": "Muvo memakai kamera hanya untuk membaca kode QR. Tidak ada yang direkam atau disimpan.",
+      "denied": "Akses kamera untuk Muvo mati. Nyalakan di pengaturan ponsel untuk memindai kode QR.",
+      "allow": "Izinkan kamera",
+      "openSettings": "Buka pengaturan"
+    },
+    "errors": {
+      "secret": {
+        "title": "Jangan pernah bagikan kode ini",
+        "body": "Kode QR ini berisi frasa pemulihan atau kunci privat. Siapa pun yang melihatnya bisa mengambil dana kamu. Muvo tidak menyimpannya. Jangan tunjukkan ke siapa pun atau pindai ke aplikasi lain."
+      },
+      "wrongChain": {
+        "title": "Jaringan berbeda",
+        "body": "Permintaan ini untuk blockchain lain. Muvo hanya mengirim di CointMU (chain {{chainId}})."
+      },
+      "badChecksum": {
+        "title": "Alamat salah ketik",
+        "body": "Alamat di kode ini tidak cocok dengan checksum-nya. Minta kode baru."
+      },
+      "invalidAddress": {
+        "title": "Alamat tidak valid",
+        "body": "Kode ini tidak berisi alamat CointMU yang valid."
+      },
+      "invalidAmount": {
+        "title": "Jumlah tidak valid",
+        "body": "Jumlah di kode ini tidak bisa dibaca. Minta kode baru."
+      },
+      "unsupported": {
+        "title": "Bukan kode pembayaran",
+        "body": "Kode QR ini bukan alamat atau permintaan pembayaran CointMU."
+      },
+      "unknownToken": {
+        "title": "Token tidak dikenal",
+        "body": "Permintaan ini untuk token yang belum ada di daftarmu. Tambahkan tokennya dulu di Beranda > Kelola, lalu pindai lagi."
+      }
+    }
+  },
   "pinPrompt": {
     "checking": "Memeriksa PIN Anda",
     "error": "PIN tidak dapat diperiksa. Silakan coba lagi.",
     "mismatch": "PIN tidak cocok. Ulangi dari awal.",
     "saving": "Mengamankan PIN Anda…"
   },
-  "accounts": { "defaultName": "Akun {{number}}" }
+  "accounts": {
+    "defaultName": "Akun {{number}}"
+  },
+  "tokens": {
+    "title": "Token",
+    "manage": "Kelola",
+    "subtitle": "Tambahkan token CointMU lewat alamat kontraknya, atau sembunyikan token yang tidak kamu pakai.",
+    "addTitle": "Tambah token",
+    "listTitle": "Token kamu",
+    "addressField": "Alamat kontrak token",
+    "lookUp": "Cari",
+    "add": "Tambah token",
+    "decimals_one": "{{count}} desimal",
+    "decimals_other": "{{count}} desimal",
+    "unverified": "Belum terverifikasi",
+    "unverifiedTitle": "Token belum terverifikasi",
+    "unverifiedBody": "Siapa pun bisa membuat token dengan nama atau simbol apa saja. Tambahkan hanya token yang kamu percaya, dan cocokkan alamat kontraknya dengan pihak yang menerbitkannya.",
+    "builtin": "Bawaan",
+    "showOnHome": "Tampilkan {{symbol}} di Beranda",
+    "remove": "Hapus {{symbol}}",
+    "empty": "Belum ada token. Tambahkan lewat alamat kontraknya.",
+    "errors": {
+      "invalidAddress": "Itu bukan alamat kontrak yang valid.",
+      "badChecksum": "Alamat ini salah ketik (huruf besarnya tidak cocok). Periksa lalu coba lagi.",
+      "alreadyAdded": "Token ini sudah ada di daftarmu.",
+      "notContract": "Tidak ada kontrak di alamat ini di CointMU.",
+      "notToken": "Kontrak ini tidak terlihat seperti token (tidak ada simbol atau desimal).",
+      "network": "Jaringan CointMU tidak bisa dihubungi sekarang. Coba lagi."
+    }
+  },
+  "tx": {
+    "unknownAsset": "Aset tidak dikenal",
+    "rowLabel": "{{amount}}, {{address}}. Buka detail",
+    "direction": {
+      "in": "Diterima",
+      "out": "Dikirim",
+      "self": "Ke diri sendiri"
+    },
+    "status": {
+      "pending": "Tertunda",
+      "confirmed": "Terkonfirmasi",
+      "confirmedCount": "Terkonfirmasi {{count}}/{{total}}",
+      "final": "Final",
+      "failed": "Gagal",
+      "dropped": "Dibatalkan jaringan",
+      "replaced": "Digantikan"
+    },
+    "statusHelp": {
+      "pending": "Menunggu dimasukkan ke dalam blok.",
+      "confirmed": "Sudah masuk blok. Menjadi final setelah {{total}} blok, karena blok terbaru masih bisa dibatalkan.",
+      "final": "Sudah cukup dalam di rantai untuk dianggap selesai.",
+      "failed": "Masuk blok tetapi ditolak oleh kontrak. Hanya biaya jaringan yang terpakai.",
+      "dropped": "Jaringan tidak lagi mengenal transaksi ini dan tidak pernah ditambang. Tidak ada yang terkirim; kamu bisa mengirim lagi.",
+      "replaced": "Transaksi lain dengan nonce yang sama yang ditambang. Transaksi ini tidak akan pernah ditambang."
+    }
+  }
 }

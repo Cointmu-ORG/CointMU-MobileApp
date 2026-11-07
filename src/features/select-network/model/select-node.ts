@@ -1,5 +1,12 @@
 import { useBalanceStore } from '@/entities/account';
-import { network, probeNode, useNetworkStore, type NodeProbe } from '@/entities/network';
+import { getVisibleTokens, useTokenBalanceStore } from '@/entities/asset';
+import {
+  getProvider,
+  network,
+  probeNode,
+  useNetworkStore,
+  type NodeProbe,
+} from '@/entities/network';
 import { useWalletStore } from '@/entities/wallet';
 import { isHttpUrl } from '@/shared/config';
 
@@ -10,12 +17,16 @@ export type SelectNodeResult =
 export type AddNodeError = 'invalidUrl' | 'alreadyListed';
 export type AddNodeResult = SelectNodeResult | { readonly ok: false; readonly error: AddNodeError };
 
-/** The balance came from the old node; fetch it again from the new one. */
+/** Balances came from the old node; fetch them again from the new one. */
 function refreshBalance(): void {
   const { address } = useWalletStore.getState();
   const balance = useBalanceStore.getState();
+  const tokenBalances = useTokenBalanceStore.getState();
   balance.clear();
-  if (address !== null) void balance.refresh(address);
+  tokenBalances.clear();
+  if (address === null) return;
+  void balance.refresh(address);
+  void tokenBalances.refresh(getProvider(), address, getVisibleTokens());
 }
 
 /**
