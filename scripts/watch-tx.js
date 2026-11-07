@@ -34,7 +34,7 @@ async function rpc(url, method, params) {
 /** Same reads, same order as observeTx in src/entities/transaction/api (nonce before receipt). */
 async function observe(url, tx, headOverride) {
   const latestNonce = toNum(await rpc(url, 'eth_getTransactionCount', [tx.from, 'latest']));
-  const [receipt, known] = await Promise.all([
+  const [receipt, nodeTx] = await Promise.all([
     rpc(url, 'eth_getTransactionReceipt', [tx.hash]),
     rpc(url, 'eth_getTransactionByHash', [tx.hash]),
   ]);
@@ -45,7 +45,7 @@ async function observe(url, tx, headOverride) {
       status: receipt.status == null ? null : toNum(receipt.status),
       blockNumber: toNum(receipt.blockNumber),
     },
-    isKnownToNode: known !== null,
+    nodeTx: nodeTx === null ? 'unknown' : nodeTx.blockNumber === null ? 'pending' : 'mined',
     headBlock,
     now: Date.now(),
   };
@@ -72,7 +72,7 @@ async function main() {
   const { hash, url, isReplay } = parseArgs(process.argv.slice(2));
   const found = await rpc(url, 'eth_getTransactionByHash', [hash]);
   if (!found) throw new Error(`Node ${url} does not know tx ${hash}.`);
-  const tx = { hash, from: found.from, nonce: toNum(found.nonce), createdAt: Date.now() };
+  let tx = { hash, from: found.from, nonce: toNum(found.nonce), unknownSince: null };
   console.log(
     `Watching ${hash} on ${url}, nonce ${tx.nonce}, final at ${TX_POLICY.finalConfirmations} conf${isReplay ? ' (replay)' : ''}`,
   );
@@ -82,6 +82,7 @@ async function main() {
   for (;;) {
     const obs = await observe(url, tx, head);
     const progress = resolveTxStatus(tx, obs, TX_POLICY);
+    tx = { ...tx, unknownSince: progress.unknownSince };
     const key = `${progress.status}/${progress.confirmations}`;
     if (key !== last) report(progress, obs, head === undefined ? '' : ' (replayed)');
     last = key;
