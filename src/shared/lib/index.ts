@@ -1,6 +1,11 @@
 export { checkAddress, isSameAddress, shortenAddress, type AddressCheck } from './address';
-export { formatAmount, type FormatAmountOptions } from './amount';
-export { parseAmountInput, type AmountInputError, type AmountInputResult } from './amount-input';
+export {
+  formatAmount,
+  parseAmountInput,
+  type AmountInputError,
+  type AmountInputResult,
+  type FormatAmountOptions,
+} from './amount';
 export { logger, redact } from './logger';
 export { secureRandomInt, type RandomInt } from './random';
 export { secureStorage } from './secure-storage';
