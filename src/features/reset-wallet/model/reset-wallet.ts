@@ -1,4 +1,5 @@
 import { useBalanceStore } from '@/entities/account';
+import { useTokenBalanceStore, useTokenStore } from '@/entities/asset';
 import { useAuthPrefsStore, useSessionStore, wipeAuthRecords } from '@/entities/auth';
 import { useTxStore } from '@/entities/transaction';
 import { deleteWalletSecret, useWalletStore } from '@/entities/wallet';
@@ -11,6 +12,8 @@ export async function resetWallet(): Promise<void> {
   await Promise.all([deleteWalletSecret(), wipeAuthRecords()]);
   useTxStore.getState().clear();
   useBalanceStore.getState().clear();
+  useTokenBalanceStore.getState().clear();
+  useTokenStore.getState().clear();
   useAuthPrefsStore.getState().setBiometricsEnabled(false);
   useSessionStore.getState().lock();
   useWalletStore.getState().reset();

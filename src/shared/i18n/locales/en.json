@@ -3,7 +3,8 @@
     "continue": "Continue",
     "cancel": "Cancel",
     "comingSoon": "Coming soon. This part of Muvo arrives in a later version.",
-    "done": "Done"
+    "done": "Done",
+    "paste": "Paste"
   },
   "onboarding": {
     "welcome": {
@@ -121,7 +122,9 @@
       }
     }
   },
-  "history": { "title": "History" },
+  "history": {
+    "title": "History"
+  },
   "settings": {
     "title": "Settings",
     "network": {
@@ -242,14 +245,49 @@
       "licenseDesc": "Open source under the MIT License"
     }
   },
-  "send": { "title": "Send" },
-  "receive": { "title": "Receive" },
-  "scan": { "title": "Scan" },
+  "send": {
+    "title": "Send"
+  },
+  "receive": {
+    "title": "Receive"
+  },
+  "scan": {
+    "title": "Scan"
+  },
   "pinPrompt": {
     "checking": "Checking your PIN",
     "error": "Couldn't check the PIN. Please try again.",
     "mismatch": "The PINs don't match. Start again.",
     "saving": "Securing your PIN…"
   },
-  "accounts": { "defaultName": "Account {{number}}" }
+  "accounts": {
+    "defaultName": "Account {{number}}"
+  },
+  "tokens": {
+    "title": "Tokens",
+    "manage": "Manage",
+    "subtitle": "Add a CointMU token by its contract address, or hide tokens you don't use.",
+    "addTitle": "Add a token",
+    "listTitle": "Your tokens",
+    "addressField": "Token contract address",
+    "lookUp": "Look up",
+    "add": "Add token",
+    "decimals_one": "{{count}} decimal",
+    "decimals_other": "{{count}} decimals",
+    "unverified": "Unverified",
+    "unverifiedTitle": "Unverified token",
+    "unverifiedBody": "Anyone can create a token with any name or symbol. Only add tokens you trust, and check the contract address with the project that issued it.",
+    "builtin": "Built in",
+    "showOnHome": "Show {{symbol}} on Home",
+    "remove": "Remove {{symbol}}",
+    "empty": "No tokens yet. Add one with its contract address.",
+    "errors": {
+      "invalidAddress": "That isn't a valid contract address.",
+      "badChecksum": "This address has a typo (its capital letters don't match). Check it and try again.",
+      "alreadyAdded": "This token is already in your list.",
+      "notContract": "There is no contract at this address on CointMU.",
+      "notToken": "This contract doesn't look like a token (no symbol or decimals).",
+      "network": "Can't reach the CointMU network right now. Try again."
+    }
+  }
 }

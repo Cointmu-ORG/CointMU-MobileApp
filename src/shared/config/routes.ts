@@ -17,6 +17,7 @@ export const ROUTES = {
   changePin: '/change-pin',
   recoveryPhrase: '/recovery-phrase',
   removeWallet: '/remove-wallet',
+  tokens: '/tokens',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

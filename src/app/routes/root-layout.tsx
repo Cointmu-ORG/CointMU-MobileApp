@@ -24,13 +24,14 @@ const SUB_SCREEN_HEADER = {
   headerStyle: { backgroundColor: colors.surface.DEFAULT },
 } as const;
 
-/** Screens opened from Settings, each below a native header with a back button. */
+/** Sub-screens (Settings, token management), each below a native header with a back button. */
 const SETTINGS_SCREENS = [
   { name: 'network', titleKey: 'settings.network.title' },
   { name: 'accounts', titleKey: 'settings.accounts.title' },
   { name: 'change-pin', titleKey: 'settings.changePin.title' },
   { name: 'recovery-phrase', titleKey: 'settings.recoveryPhrase.title' },
   { name: 'remove-wallet', titleKey: 'settings.removeWallet.title' },
+  { name: 'tokens', titleKey: 'tokens.title' },
 ] as const;
 
 /**

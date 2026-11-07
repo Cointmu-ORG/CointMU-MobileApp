@@ -21,6 +21,7 @@ const TONE_CLASS = {
   inverse: 'text-content-inverse',
   danger: 'text-danger-strong',
   success: 'text-success-strong',
+  warning: 'text-warning-strong',
 } as const;
 
 export type TextVariant = keyof typeof VARIANT_CLASS;

@@ -3,7 +3,8 @@
     "continue": "Lanjut",
     "cancel": "Batal",
     "comingSoon": "Segera hadir. Bagian Muvo ini hadir di versi berikutnya.",
-    "done": "Selesai"
+    "done": "Selesai",
+    "paste": "Tempel"
   },
   "onboarding": {
     "welcome": {
@@ -121,7 +122,9 @@
       }
     }
   },
-  "history": { "title": "Riwayat" },
+  "history": {
+    "title": "Riwayat"
+  },
   "settings": {
     "title": "Pengaturan",
     "network": {
@@ -242,14 +245,49 @@
       "licenseDesc": "Sumber terbuka dengan Lisensi MIT"
     }
   },
-  "send": { "title": "Kirim" },
-  "receive": { "title": "Terima" },
-  "scan": { "title": "Pindai" },
+  "send": {
+    "title": "Kirim"
+  },
+  "receive": {
+    "title": "Terima"
+  },
+  "scan": {
+    "title": "Pindai"
+  },
   "pinPrompt": {
     "checking": "Memeriksa PIN Anda",
     "error": "PIN tidak dapat diperiksa. Silakan coba lagi.",
     "mismatch": "PIN tidak cocok. Ulangi dari awal.",
     "saving": "Mengamankan PIN Anda…"
   },
-  "accounts": { "defaultName": "Akun {{number}}" }
+  "accounts": {
+    "defaultName": "Akun {{number}}"
+  },
+  "tokens": {
+    "title": "Token",
+    "manage": "Kelola",
+    "subtitle": "Tambahkan token CointMU lewat alamat kontraknya, atau sembunyikan token yang tidak kamu pakai.",
+    "addTitle": "Tambah token",
+    "listTitle": "Token kamu",
+    "addressField": "Alamat kontrak token",
+    "lookUp": "Cari",
+    "add": "Tambah token",
+    "decimals_one": "{{count}} desimal",
+    "decimals_other": "{{count}} desimal",
+    "unverified": "Belum terverifikasi",
+    "unverifiedTitle": "Token belum terverifikasi",
+    "unverifiedBody": "Siapa pun bisa membuat token dengan nama atau simbol apa saja. Tambahkan hanya token yang kamu percaya, dan cocokkan alamat kontraknya dengan pihak yang menerbitkannya.",
+    "builtin": "Bawaan",
+    "showOnHome": "Tampilkan {{symbol}} di Beranda",
+    "remove": "Hapus {{symbol}}",
+    "empty": "Belum ada token. Tambahkan lewat alamat kontraknya.",
+    "errors": {
+      "invalidAddress": "Itu bukan alamat kontrak yang valid.",
+      "badChecksum": "Alamat ini salah ketik (huruf besarnya tidak cocok). Periksa lalu coba lagi.",
+      "alreadyAdded": "Token ini sudah ada di daftarmu.",
+      "notContract": "Tidak ada kontrak di alamat ini di CointMU.",
+      "notToken": "Kontrak ini tidak terlihat seperti token (tidak ada simbol atau desimal).",
+      "network": "Jaringan CointMU tidak bisa dihubungi sekarang. Coba lagi."
+    }
+  }
 }
