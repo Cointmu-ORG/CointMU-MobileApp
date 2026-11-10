@@ -16,7 +16,7 @@ export function AccountChip() {
     <PressableSurface
       palette={SURFACE_PALETTE.ghost}
       className="-ml-2 min-h-11 flex-row items-center gap-1 self-start rounded-full px-2"
-      onPress={() => router.push(ROUTES.accounts)}
+      onPress={() => router.push(ROUTES.accountSwitcher)}
       accessibilityRole="button"
       accessibilityLabel={label(account)}
       accessibilityHint={t('home.balance.switchAccount')}

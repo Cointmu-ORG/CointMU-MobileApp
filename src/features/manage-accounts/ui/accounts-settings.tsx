@@ -1,13 +1,13 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useAccountLabel, useActiveAccount, useWalletStore } from '@/entities/wallet';
-import { logger, shortenAddress } from '@/shared/lib';
+import { shortenAddress } from '@/shared/lib';
 import { Button, ListRow, ListSection, RadioMark, Text } from '@/shared/ui';
 
-import { addNextAccount, switchToAccount } from '../model/accounts';
+import { switchToAccount } from '../model/accounts';
 import { RenameAccount } from './rename-account';
+import { useAddAccount } from './use-add-account';
 
 /** Settings > Accounts: switch, add (recovery-phrase wallets only) and rename (D-44). */
 export function AccountsSettings() {
@@ -16,23 +16,8 @@ export function AccountsSettings() {
   const accounts = useWalletStore((state) => state.accounts);
   const source = useWalletStore((state) => state.source);
   const active = useActiveAccount();
-  const [isAdding, setIsAdding] = useState(false);
-  const [hasFailed, setHasFailed] = useState(false);
+  const { add, isAdding, hasFailed } = useAddAccount();
   const canAdd = source === 'mnemonic';
-
-  const add = async () => {
-    setIsAdding(true);
-    setHasFailed(false);
-    try {
-      const result = await addNextAccount();
-      if (!result.ok) setHasFailed(true);
-    } catch (error) {
-      logger.error('Adding an account failed', { error });
-      setHasFailed(true);
-    } finally {
-      setIsAdding(false);
-    }
-  };
 
   return (
     <View className="gap-6">

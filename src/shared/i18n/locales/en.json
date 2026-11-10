@@ -385,7 +385,12 @@
     "saving": "Securing your PIN…"
   },
   "accounts": {
-    "defaultName": "Account {{number}}"
+    "defaultName": "Account {{number}}",
+    "switcher": {
+      "title": "Switch account",
+      "manage": "Manage accounts",
+      "manageHint": "Rename accounts in Settings"
+    }
   },
   "tokens": {
     "title": "Tokens",

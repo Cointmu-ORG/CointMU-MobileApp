@@ -16,6 +16,7 @@ export const ROUTES = {
   scan: '/scan',
   network: '/network',
   accounts: '/accounts',
+  accountSwitcher: '/account-switcher',
   changePin: '/change-pin',
   recoveryPhrase: '/recovery-phrase',
   removeWallet: '/remove-wallet',

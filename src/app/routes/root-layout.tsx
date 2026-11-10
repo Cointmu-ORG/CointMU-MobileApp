@@ -33,6 +33,10 @@ const SUB_SCREENS = [
   { name: 'tx/[hash]', titleKey: 'history.detail.title' },
 ] as const;
 
+// Half height first; drag up to full height for a long account list.
+const ACCOUNT_SHEET_DETENTS = [0.5, 1];
+const ACCOUNT_SHEET_CORNER_RADIUS = 24;
+
 /**
  * Auth guard (architecture §4). Protected groups follow wallet status and session state, and
  * Expo Router redirects automatically when a guard flips, so protected screens never render.
@@ -77,6 +81,18 @@ export function RootLayout() {
               options={{ ...SUB_SCREEN_HEADER, headerTitle: t(titleKey) }}
             />
           ))}
+          {/* Bottom sheet; Android renders no native header inside a form sheet. */}
+          <Stack.Screen
+            name="account-switcher"
+            options={{
+              presentation: 'formSheet',
+              animation: 'slide_from_bottom',
+              sheetAllowedDetents: ACCOUNT_SHEET_DETENTS,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: ACCOUNT_SHEET_CORNER_RADIUS,
+              contentStyle: { backgroundColor: colors.surface.card },
+            }}
+          />
           {/* Already broadcast: no back button or swipe-back into the signing step (D-53). */}
           <Stack.Screen
             name="send/result"
