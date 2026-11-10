@@ -18,8 +18,12 @@ import { holdNativeSplash, SplashHandoff } from './splash-handoff';
 
 holdNativeSplash();
 
-/** Sub-screens (Settings, token management), each below a native header with a back button. */
-const SETTINGS_SCREENS = [
+/** Sub-screens, each below a native header with a back button and a translated title. */
+const SUB_SCREENS = [
+  { name: 'send/index', titleKey: 'send.title' },
+  { name: 'send/review', titleKey: 'send.review.title' },
+  { name: 'receive', titleKey: 'receive.title' },
+  { name: 'scan', titleKey: 'scan.title' },
   { name: 'network', titleKey: 'settings.network.title' },
   { name: 'accounts', titleKey: 'settings.accounts.title' },
   { name: 'change-pin', titleKey: 'settings.changePin.title' },
@@ -64,23 +68,20 @@ export function RootLayout() {
           <Stack.Screen name="lock" />
         </Stack.Protected>
         <Stack.Protected guard={isActive && isUnlocked} redirectTo={entryRoute}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="send" />
-          <Stack.Screen
-            name="receive"
-            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('receive.title') }}
-          />
-          <Stack.Screen
-            name="scan"
-            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('scan.title') }}
-          />
-          {SETTINGS_SCREENS.map(({ name, titleKey }) => (
+          {/* The title is the fallback back label; a group name must never reach the UI. */}
+          <Stack.Screen name="(tabs)" options={{ title: t('tabs.home') }} />
+          {SUB_SCREENS.map(({ name, titleKey }) => (
             <Stack.Screen
               key={name}
               name={name}
               options={{ ...SUB_SCREEN_HEADER, headerTitle: t(titleKey) }}
             />
           ))}
+          {/* Already broadcast: no back button or swipe-back into the signing step (D-53). */}
+          <Stack.Screen
+            name="send/result"
+            options={{ ...SUB_SCREEN_HEADER, headerBackVisible: false, gestureEnabled: false }}
+          />
         </Stack.Protected>
       </Stack>
       <SplashHandoff />

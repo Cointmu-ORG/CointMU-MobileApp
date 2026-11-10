@@ -1,7 +1,7 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, Stack } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { BackHandler, View } from 'react-native';
 
 import { useBalanceStore } from '@/entities/account';
 import { PinPrompt } from '@/entities/auth';
@@ -37,6 +37,15 @@ function Warnings({ draft }: { draft: SendDraft }) {
   );
 }
 
+/** While a transfer is being signed and broadcast, the hardware back button does nothing. */
+function useBlockHardwareBack(isBlocked: boolean) {
+  useEffect(() => {
+    if (!isBlocked) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
+    return () => subscription.remove();
+  }, [isBlocked]);
+}
+
 /** Step 2 of Send. Authentication comes right before signing, every time (D-15). */
 export function SendReview() {
   const { t } = useTranslation();
@@ -44,6 +53,7 @@ export function SendReview() {
   const { draft, isRefreshing, error, ensureFresh } = useFreshQuote(account?.address ?? '');
   const funds = useFundsCheck(draft);
   const [step, setStep] = useState<Step>({ name: 'review' });
+  useBlockHardwareBack(step.name === 'sending');
 
   if (draft === null || account === null) {
     return <Notice tone="danger">{t('send.review.missing')}</Notice>;
@@ -55,6 +65,7 @@ export function SendReview() {
 
   const send = async () => {
     const current = useSendFlowStore.getState().draft ?? draft;
+    setStep({ name: 'sending', stage: 'checkingNetwork' });
     const outcome = await sendTransaction({
       draft: current,
       account,
@@ -77,6 +88,8 @@ export function SendReview() {
   if (step.name === 'sending') {
     return (
       <View className="flex-1 items-center justify-center gap-6">
+        {/* No way back while the transfer is signed and broadcast. */}
+        <Stack.Screen options={{ headerBackVisible: false, gestureEnabled: false }} />
         <Spinner label={t(`send.stage.${step.stage}`)} />
         <Text tone="secondary" accessibilityLiveRegion="polite">
           {t(`send.stage.${step.stage}`)}

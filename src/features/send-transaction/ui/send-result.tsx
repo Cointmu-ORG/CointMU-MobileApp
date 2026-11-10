@@ -2,8 +2,9 @@ import { router } from 'expo-router';
 import CircleCheck from 'lucide-react-native/icons/circle-check';
 import CircleX from 'lucide-react-native/icons/circle-x';
 import Clock from 'lucide-react-native/icons/clock';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Linking, View } from 'react-native';
+import { BackHandler, Linking, View } from 'react-native';
 
 import { explorerTxUrl, ROUTES } from '@/shared/config';
 import { Button, colors, ICON_SIZE, Text } from '@/shared/ui';
@@ -21,6 +22,14 @@ function finish() {
 export function SendResult() {
   const { t } = useTranslation();
   const outcome = useSendFlowStore((state) => state.outcome);
+  // Android back means "Done": it never returns to the review of a transfer already broadcast.
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      finish();
+      return true;
+    });
+    return () => subscription.remove();
+  }, []);
   if (outcome === null) return null;
 
   if (!outcome.ok) {
@@ -35,7 +44,7 @@ export function SendResult() {
             {t(`send.errors.${outcome.error}`)}
           </Text>
         </View>
-        <Button label={t('send.result.tryAgain')} onPress={() => router.replace(ROUTES.send)} />
+        <Button label={t('send.result.tryAgain')} onPress={() => router.dismissTo(ROUTES.send)} />
         <Button variant="ghost" label={t('common.done')} onPress={finish} />
       </View>
     );

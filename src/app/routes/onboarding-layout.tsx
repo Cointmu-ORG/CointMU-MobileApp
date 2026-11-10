@@ -5,6 +5,7 @@ import { useWalletStore } from '@/entities/wallet';
 import { colors } from '@/shared/ui';
 
 import { resolveEntryRoute } from '../model/resolve-entry-route';
+import { SUB_SCREEN_HEADER } from './header-options';
 
 /**
  * Each onboarding step is reachable only in its wallet status (D-32); the recovery screen only
@@ -30,11 +31,11 @@ export function OnboardingLayout() {
       <Stack.Protected guard={status === 'none' && !isRecoveryRequired} redirectTo={entryRoute}>
         <Stack.Screen name="welcome" />
         <Stack.Screen name="create" />
-        <Stack.Screen name="import" />
+        <Stack.Screen name="import" options={SUB_SCREEN_HEADER} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'pendingBackup'} redirectTo={entryRoute}>
         <Stack.Screen name="backup" />
-        <Stack.Screen name="verify" />
+        <Stack.Screen name="verify" options={SUB_SCREEN_HEADER} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'pendingPin'} redirectTo={entryRoute}>
         <Stack.Screen name="set-pin" />
