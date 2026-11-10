@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { PinPrompt, shouldOfferReset, useSessionStore } from '@/entities/auth';
-import { Button, Text } from '@/shared/ui';
+import { BrandMark, Button, Text } from '@/shared/ui';
 
 import { useUnlockSuccess } from './use-unlock-success';
 
@@ -12,6 +12,8 @@ type UnlockFormProps = {
   /** Shown after too many failures (D-16); the page owns the reset confirmation. */
   onResetRequested: () => void;
 };
+
+const LOGO_SIZE = 48;
 
 function completeUnlock(): void {
   useSessionStore.getState().unlock();
@@ -26,6 +28,7 @@ export function UnlockForm({ onResetRequested }: UnlockFormProps) {
     <Animated.View style={[styles.fill, successStyle]}>
       <PinPrompt
         title={t('lock.title')}
+        logo={<BrandMark size={LOGO_SIZE} />}
         onVerified={handleVerified}
         biometrics={{ prompt: t('lock.biometricsPrompt'), shouldPromptOnMount: true }}
         renderFooter={(lockout) =>

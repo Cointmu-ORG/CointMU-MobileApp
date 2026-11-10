@@ -27,6 +27,16 @@ describe('ReceiveCard', () => {
     expect(screen.getByText(/Only send CMU or CointMU tokens/)).toBeOnTheScreen();
   });
 
+  // Device feedback: the note looked clipped at the right edge. The whole sentence must be one
+  // wrapping text (no line limit) in both languages.
+  it.each(['en', 'id'])('shows the whole note without a line limit (%s)', async (language) => {
+    await i18n.changeLanguage(language);
+    await render(<ReceiveCard />);
+    const note = screen.getByText(i18n.t('receive.note'));
+    expect(note.props.numberOfLines).toBeUndefined();
+    expect(note.props.ellipsizeMode).toBeUndefined();
+  });
+
   it('copies and shares only the address', async () => {
     const share = jest
       .spyOn(Share, 'share')

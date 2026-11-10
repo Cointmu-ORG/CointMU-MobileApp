@@ -385,7 +385,12 @@
     "saving": "Mengamankan PIN Anda…"
   },
   "accounts": {
-    "defaultName": "Akun {{number}}"
+    "defaultName": "Akun {{number}}",
+    "switcher": {
+      "title": "Ganti akun",
+      "manage": "Kelola akun",
+      "manageHint": "Ubah nama akun di Pengaturan"
+    }
   },
   "tokens": {
     "title": "Token",

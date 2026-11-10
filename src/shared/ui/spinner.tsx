@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -26,6 +26,9 @@ type SpinnerProps = {
 /**
  * Indeterminate progress. Runs on the UI thread, so it keeps turning while key derivation or PIN
  * hashing blocks the JS thread. Static under reduce motion.
+ *
+ * The rotating view is exactly the ring: in a stretching parent (a list footer) a full-width
+ * wrapper would swing the ring around the middle of the row instead of turning it in place.
  */
 export function Spinner({ size = 'large', label }: SpinnerProps) {
   const rotation = useSharedValue(0);
@@ -41,10 +44,16 @@ export function Spinner({ size = 'large', label }: SpinnerProps) {
   }, [rotation]);
 
   return (
-    <Animated.View style={style} accessibilityRole="progressbar" accessibilityLabel={label}>
+    <Animated.View
+      style={[styles.ring, style]}
+      accessibilityRole="progressbar"
+      accessibilityLabel={label}
+    >
       <View
         className={`rounded-full border-primary-100 border-t-primary-600 ${SIZE_CLASS[size]}`}
       />
     </Animated.View>
   );
 }
+
+const styles = StyleSheet.create({ ring: { alignSelf: 'center' } });

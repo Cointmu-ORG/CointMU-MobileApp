@@ -18,8 +18,12 @@ import { holdNativeSplash, SplashHandoff } from './splash-handoff';
 
 holdNativeSplash();
 
-/** Sub-screens (Settings, token management), each below a native header with a back button. */
-const SETTINGS_SCREENS = [
+/** Sub-screens, each below a native header with a back button and a translated title. */
+const SUB_SCREENS = [
+  { name: 'send/index', titleKey: 'send.title' },
+  { name: 'send/review', titleKey: 'send.review.title' },
+  { name: 'receive', titleKey: 'receive.title' },
+  { name: 'scan', titleKey: 'scan.title' },
   { name: 'network', titleKey: 'settings.network.title' },
   { name: 'accounts', titleKey: 'settings.accounts.title' },
   { name: 'change-pin', titleKey: 'settings.changePin.title' },
@@ -28,6 +32,10 @@ const SETTINGS_SCREENS = [
   { name: 'tokens', titleKey: 'tokens.title' },
   { name: 'tx/[hash]', titleKey: 'history.detail.title' },
 ] as const;
+
+// Half height first; drag up to full height for a long account list.
+const ACCOUNT_SHEET_DETENTS = [0.5, 1];
+const ACCOUNT_SHEET_CORNER_RADIUS = 24;
 
 /**
  * Auth guard (architecture §4). Protected groups follow wallet status and session state, and
@@ -64,23 +72,32 @@ export function RootLayout() {
           <Stack.Screen name="lock" />
         </Stack.Protected>
         <Stack.Protected guard={isActive && isUnlocked} redirectTo={entryRoute}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="send" />
-          <Stack.Screen
-            name="receive"
-            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('receive.title') }}
-          />
-          <Stack.Screen
-            name="scan"
-            options={{ ...SUB_SCREEN_HEADER, headerTitle: t('scan.title') }}
-          />
-          {SETTINGS_SCREENS.map(({ name, titleKey }) => (
+          {/* The title is the fallback back label; a group name must never reach the UI. */}
+          <Stack.Screen name="(tabs)" options={{ title: t('tabs.home') }} />
+          {SUB_SCREENS.map(({ name, titleKey }) => (
             <Stack.Screen
               key={name}
               name={name}
               options={{ ...SUB_SCREEN_HEADER, headerTitle: t(titleKey) }}
             />
           ))}
+          {/* Bottom sheet; Android renders no native header inside a form sheet. */}
+          <Stack.Screen
+            name="account-switcher"
+            options={{
+              presentation: 'formSheet',
+              animation: 'slide_from_bottom',
+              sheetAllowedDetents: ACCOUNT_SHEET_DETENTS,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: ACCOUNT_SHEET_CORNER_RADIUS,
+              contentStyle: { backgroundColor: colors.surface.card },
+            }}
+          />
+          {/* Already broadcast: no back button or swipe-back into the signing step (D-53). */}
+          <Stack.Screen
+            name="send/result"
+            options={{ ...SUB_SCREEN_HEADER, headerBackVisible: false, gestureEnabled: false }}
+          />
         </Stack.Protected>
       </Stack>
       <SplashHandoff />

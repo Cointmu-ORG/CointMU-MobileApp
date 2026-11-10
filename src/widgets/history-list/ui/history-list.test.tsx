@@ -77,6 +77,7 @@ describe('HistoryList', () => {
     await render(<HistoryList />);
 
     expect(await screen.findByText('+1 CMU')).toBeOnTheScreen();
+    expect(screen.queryByLabelText('Loading history…')).toBeNull();
     expect(screen.getByText('-2 CMU')).toBeOnTheScreen();
     expect(screen.getByText('Today')).toBeOnTheScreen();
     expect(screen.getByLabelText('Pending')).toBeOnTheScreen();
@@ -84,6 +85,17 @@ describe('HistoryList', () => {
     expect(useHistoryStore.getState().entries[`1912:${OWNER.toLowerCase()}`]?.context.head).toBe(
       HEAD,
     );
+  });
+
+  it('shows skeleton rows in the list area while the first page loads', async () => {
+    jest.useFakeTimers();
+    mockChain.isDown = true;
+    await render(<HistoryList />);
+    expect(screen.getByLabelText('Loading history…')).toBeOnTheScreen();
+    expect(screen.queryByText('No transactions in the last 7 days.')).toBeNull();
+    await act(() => jest.advanceTimersByTimeAsync(RETRY_BACKOFF_TOTAL_MS));
+    await screen.findByRole('button', { name: 'Try again' });
+    expect(screen.queryByLabelText('Loading history…')).toBeNull();
   });
 
   it('shows an error with a retry when the node cannot be reached', async () => {

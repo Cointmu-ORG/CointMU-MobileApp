@@ -8,8 +8,7 @@ export { ListRow } from './list-row';
 export { ListSection } from './list-section';
 export { MOTION } from './motion';
 export { Notice, type NoticeTone } from './notice';
-export { PinDots } from './pin-dots';
-export { PinPad } from './pin-pad';
+export { PinEntry } from './pin-entry';
 export { PlaceholderScreen } from './placeholder-screen';
 export {
   PressableSurface,

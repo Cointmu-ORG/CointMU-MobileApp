@@ -59,10 +59,11 @@ app/                         # Expo Router routes ONLY. No logic.
   _layout.tsx                # re-exports src/app root layout (auth guard)
   (onboarding)/...           # welcome, create, import, backup, verify, set-pin, recover (D-39)
   (tabs)/                    # home (index, owns `/`), history, settings
-  send/                      # nested stack: index (form), review, result (D-53)
+  send/                      # index (form), review, result: screens of the root stack (D-60)
   receive.tsx
   scan.tsx                   # ?from=send returns to the form; otherwise opens Send
   tokens.tsx                 # add, hide and remove ERC-20 tokens
+  account-switcher.tsx       # form sheet opened from the home account chip (D-62)
   tx/[hash].tsx              # tx detail (local or scanned)
   lock.tsx
 src/
@@ -81,6 +82,8 @@ src/
 
 Auth guard (D-36): the root and onboarding layouts wrap screens in `Stack.Protected`, driven by wallet status and session state. Every group's `redirectTo` comes from one function, `resolveEntryRoute({ status, isUnlocked, isRecoveryRequired })`: `none` → welcome (or recover when recovery is required, D-39), `pendingBackup` → backup, `pendingPin` → set-pin, `active` → lock or home. Protected screens never render, and a status change redirects automatically, so features change state instead of navigating.
 The FSD `app` layer has no `ui` segment (Steiger `fsd/no-ui-in-app`); navigator layouts live in `src/app/routes`.
+
+Headers (D-60): every sub-screen of the root stack uses `SUB_SCREEN_HEADER` (`src/app/routes/header-options.ts`): a translated centered title and an icon-only back button, so a route group name never shows. Screens without back are deliberate: the tabs, lock, the send result (Done only) and the auto-advancing onboarding steps.
 
 Route file example:
 ```ts
@@ -113,6 +116,7 @@ A page slice may hold the screens of one flow: `pages/send` (form, review, resul
 - Startup integrity check (D-39): after the fresh-install check and store hydration, the persisted status must match what SecureStore can still read. `pendingBackup` and `pendingPin` need a readable secret; `active` needs a readable secret and a readable PIN record; `none` needs nothing. On a mismatch the app does not open the lock screen: it wipes local wallet data through the reset-wallet flow and routes to `/recover`, which explains the data couldn't be read and offers import by mnemonic or private key (reusing import-wallet) or starting a new wallet. The recovery state is persisted, so a killed app returns to `/recover`. The check reads the secret only to validate its shape; the value never leaves the wallet entity (`hasReadableWalletSecret`).
 - Signing: read the secret from SecureStore **after successful auth**, build the `Wallet`, sign, and drop the reference immediately. Do not keep a long-lived `Wallet` object in global state.
 - Backup flow (create wallet): show the 12 words once, block screenshots (`expo-screen-capture`), then force a verification quiz (re-enter 3 random words) before the wallet is activated.
+- PIN screens (D-59): every PIN entry (lock, set-pin, change PIN, `PinPrompt` before send, reveal and remove wallet) renders `PinEntry` from `shared/ui`: header at the top, keypad anchored to the bottom, keys scaled to the screen.
 - Auth: user sets a 6-digit PIN at onboarding. PIN is stored as a salted hash, never plain. Biometrics are optional on top of the PIN, and PIN is always the fallback.
 - PIN hashing goes through one `PinHasher` interface in `entities/auth` with the algorithm and parameters in `entities/auth/config`. SecureStore holds a versioned record `{ v, algo, iterations, salt, hash }`; verification uses the record's own params, and an outdated record is rehashed after a successful unlock (D-34). The KDF is a placeholder until Q-32 is decided.
 - Auth is required: on app open, after returning from background past the auto-lock timeout, and **before every transaction signature** and before revealing the mnemonic.
