@@ -16,16 +16,23 @@ type SegmentedControlProps<T extends string> = {
   accessibilityLabel: string;
 };
 
-const SELECTED: SurfacePalette = {
-  idle: 'bg-surface-card shadow-sm',
-  hovered: 'bg-surface-card shadow-sm',
-  pressed: 'bg-primary-50 shadow-sm',
-};
-const UNSELECTED: SurfacePalette = {
-  idle: 'bg-transparent',
-  hovered: 'bg-primary-50',
-  pressed: 'bg-primary-100',
-};
+/**
+ * Both palettes carry a shadow utility. NativeWind shadows set CSS variables, and a view that
+ * first gains a variable after its first render is remounted by css-interop, so the unselected
+ * segments use `shadow-none` instead of no shadow class.
+ */
+export const SEGMENT_PALETTE = {
+  selected: {
+    idle: 'bg-surface-card shadow-sm',
+    hovered: 'bg-surface-card shadow-sm',
+    pressed: 'bg-primary-50 shadow-sm',
+  },
+  unselected: {
+    idle: 'bg-transparent shadow-none',
+    hovered: 'bg-primary-50 shadow-none',
+    pressed: 'bg-primary-100 shadow-none',
+  },
+} as const satisfies Record<string, SurfacePalette>;
 
 /** One-of-n choice shown inline (import mode, language, auto-lock timeout). */
 export function SegmentedControl<T extends string>({
@@ -47,7 +54,7 @@ export function SegmentedControl<T extends string>({
             key={option.value}
             containerClassName="flex-1"
             className="min-h-11 items-center justify-center rounded-lg px-2"
-            palette={isSelected ? SELECTED : UNSELECTED}
+            palette={isSelected ? SEGMENT_PALETTE.selected : SEGMENT_PALETTE.unselected}
             onPress={() => onChange(option.value)}
             accessibilityRole="radio"
             accessibilityLabel={option.label}
