@@ -1,6 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type PressableProps } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { colors } from './theme/colors';
@@ -37,6 +44,8 @@ export type PressableSurfaceProps = Omit<PressableProps, 'children' | 'style' | 
   palette: SurfacePalette;
   /** Shape and layout of the visible surface (size, radius, padding). No colors. */
   className?: string;
+  /** Runtime-computed size of the surface (e.g. keys scaled to the screen). No colors. */
+  surfaceStyle?: StyleProp<ViewStyle>;
   /** Layout of the touch area itself, e.g. `flex-1`. */
   containerClassName?: string;
   isDisabled?: boolean;
@@ -54,6 +63,7 @@ export function PressableSurface({
   children,
   palette,
   className = '',
+  surfaceStyle,
   containerClassName = '',
   isDisabled = false,
   isBusy = false,
@@ -109,7 +119,7 @@ export function PressableSurface({
               pressed ? palette.pressed : isHovered ? palette.hovered : palette.idle
             } ${isDisabled ? 'opacity-50' : ''}`}
             // Outline does not take part in layout, so focus never shifts content.
-            style={isFocused ? styles.focusRing : undefined}
+            style={isFocused ? StyleSheet.flatten([surfaceStyle, styles.focusRing]) : surfaceStyle}
           >
             {children}
           </View>

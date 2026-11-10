@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
 
 import { logger } from '@/shared/lib';
-import { PinDots, PinPad, Spinner, Text, usePinInput } from '@/shared/ui';
+import { PinEntry, usePinInput } from '@/shared/ui';
 
 import { PIN_LENGTH } from '../config/auth-config';
 
@@ -67,33 +66,17 @@ export function NewPinForm(props: NewPinFormProps) {
   // Empty the dots whenever the step changes (create → confirm, or back after an error).
   useEffect(clear, [step, clear]);
 
-  const isSaving = step === 'saving';
   return (
-    <View className="flex-1 justify-between gap-8">
-      <View className="gap-6 pt-8">
-        <View className="gap-2">
-          <Text variant="title" accessibilityRole="header">
-            {step === 'create' ? createTitle : confirmTitle}
-          </Text>
-          <Text tone="secondary">{subtitle}</Text>
-        </View>
-        <PinDots
-          length={PIN_LENGTH}
-          filledCount={isSaving ? PIN_LENGTH : filledCount}
-          errorSignal={errorSignal}
-        />
-        <View className="min-h-12 items-center gap-3">
-          {isSaving ? <Spinner size="small" /> : null}
-          <Text
-            tone={isSaving ? 'secondary' : 'danger'}
-            className="text-center"
-            accessibilityLiveRegion="polite"
-          >
-            {isSaving ? t('pinPrompt.saving') : (message ?? '')}
-          </Text>
-        </View>
-      </View>
-      <PinPad onDigit={addDigit} onDelete={removeDigit} isDisabled={isSaving} />
-    </View>
+    <PinEntry
+      title={step === 'create' ? createTitle : confirmTitle}
+      subtitle={subtitle}
+      length={PIN_LENGTH}
+      filledCount={filledCount}
+      errorSignal={errorSignal}
+      error={message}
+      busyLabel={step === 'saving' ? t('pinPrompt.saving') : null}
+      onDigit={addDigit}
+      onDelete={removeDigit}
+    />
   );
 }

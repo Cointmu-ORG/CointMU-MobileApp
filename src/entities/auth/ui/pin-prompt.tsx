@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
 
 import { logger } from '@/shared/lib';
-import { PinDots, PinPad, Spinner, Text, usePinInput } from '@/shared/ui';
+import { PinEntry, usePinInput } from '@/shared/ui';
 
 import { PIN_LENGTH } from '../config/auth-config';
 import { formatCountdown } from '../lib/format-countdown';
@@ -22,6 +21,8 @@ export type PinPromptBiometrics = {
 type PinPromptProps = {
   title: string;
   subtitle?: string;
+  /** Shown above the title (the lock screen's logo). */
+  logo?: ReactNode;
   onVerified: () => void;
   /** Offer biometrics as well. Omit for PIN-only checks (change PIN, remove wallet). */
   biometrics?: PinPromptBiometrics;
@@ -62,6 +63,7 @@ function useLockoutAndBiometrics(
 export function PinPrompt({
   title,
   subtitle,
+  logo,
   onVerified,
   biometrics,
   renderFooter,
@@ -115,40 +117,20 @@ export function PinPrompt({
     ? t('lock.lockedOut', { time: formatCountdown(remainingMs) })
     : message;
   return (
-    <View className="flex-1 justify-between gap-8">
-      <View className="gap-6 pt-8">
-        <View className="gap-2">
-          <Text variant="title" className="text-center" accessibilityRole="header">
-            {title}
-          </Text>
-          {subtitle ? (
-            <Text tone="secondary" className="text-center">
-              {subtitle}
-            </Text>
-          ) : null}
-        </View>
-        <PinDots
-          length={PIN_LENGTH}
-          filledCount={isBusy ? PIN_LENGTH : filledCount}
-          errorSignal={errorSignal}
-        />
-        <View className="min-h-12 items-center gap-3">
-          {isBusy ? (
-            <Spinner size="small" label={t('pinPrompt.checking')} />
-          ) : (
-            <Text tone="danger" className="text-center" accessibilityLiveRegion="polite">
-              {statusText ?? ''}
-            </Text>
-          )}
-          {renderFooter?.(lockout)}
-        </View>
-      </View>
-      <PinPad
-        onDigit={addDigit}
-        onDelete={removeDigit}
-        onBiometrics={canUseBiometrics && !isLocked ? () => void tryBiometrics() : undefined}
-        isDisabled={isBusy || isLocked}
-      />
-    </View>
+    <PinEntry
+      title={title}
+      subtitle={subtitle}
+      logo={logo}
+      length={PIN_LENGTH}
+      filledCount={filledCount}
+      errorSignal={errorSignal}
+      error={statusText}
+      busyLabel={isBusy ? t('pinPrompt.checking') : null}
+      footer={renderFooter?.(lockout)}
+      onDigit={addDigit}
+      onDelete={removeDigit}
+      onBiometrics={canUseBiometrics && !isLocked ? () => void tryBiometrics() : undefined}
+      isDisabled={isLocked}
+    />
   );
 }
