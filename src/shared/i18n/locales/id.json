@@ -70,7 +70,8 @@
     "lockedOut": "Terlalu banyak percobaan salah. Coba lagi dalam {{time}}.",
     "biometricsPrompt": "Buka Muvo",
     "resetHint": "Lupa PIN? Kamu bisa mereset dompet ini dan memulihkannya dengan frasa pemulihan.",
-    "resetButton": "Reset dompet"
+    "resetButton": "Reset dompet",
+    "biometricsTurnedOff": "Buka kunci biometrik dimatikan karena tidak ada lagi yang terdaftar di ponsel ini. Gunakan PIN Anda."
   },
   "reset": {
     "confirmTitle": "Reset dompet ini?",
@@ -96,7 +97,10 @@
       "retry": "Coba lagi",
       "copyAddress": "Salin alamat",
       "copied": "Alamat disalin",
-      "switchAccount": "Ganti akun"
+      "switchAccount": "Ganti akun",
+      "show": "Tampilkan saldo",
+      "hide": "Sembunyikan saldo",
+      "showHint": "Menampilkan jumlah selama 30 detik"
     },
     "actions": {
       "send": "Kirim",
@@ -148,16 +152,20 @@
       "title": "Jaringan",
       "subtitle": "Node CointMU yang dipakai Muvo. Kunci Anda tidak pernah keluar dari ponsel ini; node hanya melihat alamat publik Anda dan permintaan yang dikirim Muvo.",
       "nodesTitle": "Node CointMU",
-      "nodesFooter": "Muvo hanya beralih ke node yang melaporkan chain ID {{chainId}}.",
+      "nodesFooter": "Muvo hanya beralih ke node yang melaporkan chain ID {{chainId}}. Tarik ke bawah atau ketuk Ping semua untuk memeriksa lagi.",
       "nodeName": "Node {{number}}",
-      "customName": "Node Anda",
-      "checkAll": "Cek semua",
+      "customName": "Node Anda {{number}}",
       "status": {
         "unchecked": "Belum dicek",
         "checking": "Mengecek…",
         "reachable": "Terjangkau · {{ms}} ms",
         "unreachable": "Tidak terjangkau",
-        "wrongChain": "Jaringan salah (chain {{chainId}})"
+        "wrongChain": "Jaringan salah (chain {{chainId}})",
+        "chainOk": "Chain {{chainId}}",
+        "block": "Blok {{height}}",
+        "blockUnknown": "Blok tidak diketahui",
+        "outOfSync_one": "Tidak sinkron · tertinggal {{count}} blok",
+        "outOfSync_other": "Tidak sinkron · tertinggal {{count}} blok"
       },
       "refusedUnreachable": "Node tersebut tidak dapat dihubungi. Muvo tetap memakai node saat ini.",
       "refusedWrongChain": "Node tersebut ada di chain {{chainId}}, bukan CointMU ({{expected}}). Muvo tetap memakai node saat ini.",
@@ -168,8 +176,12 @@
       "add": "Tambah dan pakai",
       "invalidUrl": "Masukkan URL http:// atau https://.",
       "alreadyListed": "Node tersebut sudah ada di daftar.",
-      "remove": "Hapus node Anda",
-      "row": "Node yang dipakai"
+      "pingAll": "Ping semua",
+      "pinging": "Sedang ping…",
+      "inUse": "Dipakai",
+      "removeNode": "Hapus {{name}}",
+      "addWarning": "Hanya tambahkan node yang Anda percaya. Node melihat alamat Anda dan transaksi yang Anda kirim, dan node yang tidak jujur bisa menampilkan saldo palsu. Node tidak pernah bisa memindahkan dana Anda.",
+      "limitReached": "Daftar ini memuat paling banyak {{max}} node. Hapus salah satu node Anda untuk menambah yang lain."
     },
     "accounts": {
       "title": "Akun",
@@ -181,28 +193,31 @@
       "nameField": "Nama untuk {{account}}",
       "nameHint": "Hanya tampil di ponsel ini.",
       "save": "Simpan nama",
-      "saved": "Nama tersimpan",
-      "row": "Akun aktif"
-    },
-    "general": {
-      "title": "Umum",
-      "language": "Bahasa",
-      "languageDesc": "Bahasa aplikasi"
+      "saved": "Nama tersimpan"
     },
     "security": {
       "title": "Keamanan",
       "changePin": "Ubah PIN",
-      "biometricsTitle": "Buka dengan biometrik",
-      "biometricsDesc": "Sidik jari atau wajah. PIN tetap bisa dipakai.",
-      "biometricsUnavailable": "Belum ada sidik jari atau wajah yang diatur di ponsel ini.",
-      "biometricsPrompt": "Aktifkan buka dengan biometrik",
       "autoLockTitle": "Kunci otomatis dompet",
       "autoLockDesc": "Kunci Muvo setelah berada di latar belakang selama ini; setelahnya Anda perlu memasukkan PIN lagi.",
       "immediately": "Langsung",
       "minutes_one": "{{count}} mnt",
       "minutes_other": "{{count}} mnt",
       "recoveryPhraseTitle": "Frasa pemulihan",
-      "recoveryPhraseDesc": "Kata-kata untuk memulihkan dompet Anda"
+      "recoveryPhraseDesc": "Kata-kata untuk memulihkan dompet Anda",
+      "access": "Akses",
+      "backup": "Cadangan",
+      "backupFooter": "Keduanya meminta PIN atau biometrik lebih dulu dan memblokir tangkapan layar.",
+      "recoveryPhraseNone": "Dompet ini tidak punya frasa pemulihan",
+      "privateKeyTitle": "Tampilkan kunci privat",
+      "privateKeyDesc": "Kunci akun yang aktif",
+      "privateKeyOnlyBackup": "Satu-satunya cadangan dompet ini",
+      "lockout": "Percobaan PIN",
+      "attemptsTitle": "Percobaan PIN yang salah",
+      "attemptsDesc": "Setelah {{free}} PIN salah berturut-turut, Muvo meminta Anda menunggu, makin lama setiap kalinya. Setelah {{limit}}, Muvo menawarkan untuk mereset dompet. PIN yang benar mengosongkan hitungan.",
+      "attemptsValue": "{{failed}} dari {{limit}}",
+      "danger": "Hapus",
+      "autoLockValue": "Kunci otomatis: {{time}}"
     },
     "changePin": {
       "title": "Ubah PIN",
@@ -259,7 +274,125 @@
       "reportIssueTitle": "Laporkan masalah",
       "reportIssueDesc": "Kirim laporan bug atau permintaan fitur",
       "licenseTitle": "Lisensi",
-      "licenseDesc": "Sumber terbuka dengan Lisensi MIT"
+      "licenseDesc": "Sumber terbuka dengan Lisensi MIT",
+      "appName": "Muvo",
+      "tagline": "Dompet untuk CointMU",
+      "versionShort": "v{{version}}",
+      "app": "Aplikasi",
+      "version": "Versi",
+      "codename": "Nama kode",
+      "build": "Build",
+      "networkTitle": "Jaringan",
+      "network": "Jaringan",
+      "releaseNotesTitle": "Catatan rilis",
+      "releaseNotesDesc": "Perubahan di setiap versi",
+      "copyright": "© 2026 CointMU Foundation • Lisensi MIT",
+      "disclaimer": "Muvo adalah dompet non-kustodian. Kunci Anda tetap berada di ponsel ini, dan tidak ada yang bisa memulihkannya untuk Anda, termasuk kami."
+    },
+    "groups": {
+      "general": "Umum",
+      "wallet": "Dompet"
+    },
+    "appearance": {
+      "title": "Tampilan",
+      "theme": "Tema",
+      "themes": {
+        "system": "Sistem",
+        "light": "Terang",
+        "dark": "Gelap"
+      },
+      "accent": "Warna aksen",
+      "accentDesc": "Dipakai untuk tombol, tautan, dan sorotan.",
+      "accentCurrent": "Dipilih: {{name}}",
+      "accents": {
+        "blue": "Biru",
+        "emerald": "Zamrud",
+        "indigo": "Nila",
+        "purple": "Ungu",
+        "amber": "Kuning sawo",
+        "red": "Merah"
+      },
+      "layout": "Tata letak",
+      "density": "Kerapatan",
+      "densityDesc": "Jarak vertikal dalam daftar.",
+      "densities": {
+        "comfortable": "Nyaman",
+        "compact": "Rapat"
+      },
+      "textSize": "Ikuti ukuran teks ponsel",
+      "textSizeDesc": "Teks membesar sesuai ukuran yang diatur di pengaturan ponsel. Jika mati, Muvo memakai ukuran standarnya.",
+      "motion": "Animasi",
+      "motionDesc": "Otomatis mematikannya saat ponsel meminta gerakan dikurangi.",
+      "motions": {
+        "auto": "Otomatis",
+        "reduced": "Dikurangi"
+      },
+      "display": "Tampilan data",
+      "timeFormat": "Format waktu",
+      "timeFormatDesc": "Cara waktu ditampilkan di riwayat.",
+      "timeFormats": {
+        "auto": "Otomatis",
+        "12h": "12 jam",
+        "24h": "24 jam"
+      },
+      "decimals": "Desimal saldo",
+      "decimalsDesc": "Jumlah angka desimal saldo. Penuh menampilkan jumlah persisnya. Jumlah yang Anda kirim selalu ditampilkan penuh.",
+      "decimalsFull": "Penuh",
+      "hideZero": "Sembunyikan token kosong",
+      "hideZeroDesc": "Token bersaldo nol tidak ditampilkan di beranda. CMU selalu tampil.",
+      "privacy": "Privasi",
+      "privacyFooter": "Layar frasa pemulihan dan kunci privat selalu memblokir tangkapan layar, apa pun pengaturan di sini.",
+      "hideBalances": "Sembunyikan saldo",
+      "hideBalancesDesc": "Tampilkan •••• sebagai ganti jumlah. Ketuk ikon mata di beranda untuk melihatnya selama 30 detik. Jumlah yang akan Anda kirim selalu ditampilkan.",
+      "hideInSwitcher": "Sembunyikan Muvo di pengalih aplikasi",
+      "hideInSwitcherDesc": "Tutupi layar setiap kali Muvo bukan aplikasi yang sedang dibuka.",
+      "hideInSwitcherDescAndroid": "Tutupi layar setiap kali Muvo bukan aplikasi yang sedang dibuka. Di Android ini juga memblokir tangkapan layar Muvo."
+    },
+    "language": {
+      "title": "Bahasa",
+      "footer": "Langsung diterapkan. Muvo akan dibuka dalam bahasa ini berikutnya."
+    },
+    "biometrics": {
+      "title": "Buka kunci biometrik",
+      "rowTitle": "Buka kunci dengan {{name}}",
+      "kind": {
+        "face-id": "Face ID",
+        "touch-id": "Touch ID",
+        "fingerprint": "sidik jari",
+        "face": "pengenalan wajah",
+        "iris": "pemindai iris",
+        "generic": "biometrik"
+      },
+      "checking": "Memeriksa ponsel ini…",
+      "noHardware": "Ponsel ini tidak punya sensor sidik jari atau wajah.",
+      "notEnrolled": "Belum ada yang terdaftar. Tambahkan sidik jari atau wajah di pengaturan ponsel, lalu kembali ke sini.",
+      "description": "Buka Muvo, setujui pengiriman, dan tampilkan cadangan tanpa mengetik PIN. PIN Anda tetap selalu berfungsi.",
+      "prompt": "Aktifkan {{name}} untuk Muvo",
+      "pinTitle": "Masukkan PIN Anda",
+      "pinSubtitle": "untuk mengaktifkan {{name}}",
+      "confirmTitle": "Konfirmasi dengan {{name}}",
+      "confirmBody": "Satu pemeriksaan yang berhasil akan mengaktifkannya. PIN Anda tetap berfungsi.",
+      "unavailable": "{{name}} sedang tidak tersedia di ponsel ini. Periksa pengaturan ponsel Anda.",
+      "notConfirmed": "Pemeriksaan tidak berhasil, jadi fitur ini tetap mati. Coba lagi atau tetap gunakan PIN.",
+      "tryAgain": "Coba lagi",
+      "turnedOffTitle": "Buka kunci biometrik dimatikan",
+      "turnedOffBody": "Tidak ada lagi sidik jari atau wajah yang terdaftar di ponsel ini, jadi Muvo kembali hanya memakai PIN. Daftarkan lagi di pengaturan ponsel, lalu aktifkan kembali di sini.",
+      "dismiss": "Mengerti"
+    },
+    "privateKey": {
+      "title": "Kunci privat",
+      "scopeImported": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan. Kunci ini satu-satunya cara memulihkannya. Tulis dan simpan di tempat yang aman dan offline.",
+      "scopePhrase": "Ini hanya kunci untuk {{account}}. Frasa pemulihan Anda memulihkan semua akun, jadi cadangkan itu lebih dulu.",
+      "warningTitle": "Jangan pernah membagikan kunci privat Anda",
+      "warning": "Siapa pun yang memilikinya menguasai akun ini sepenuhnya dan bisa mencuri semua dananya. Dukungan CointMU tidak akan pernah memintanya. Jangan pernah mengetiknya di situs web.",
+      "failed": "Gagal menampilkan kunci privat.",
+      "reveal": "Tampilkan kunci privat",
+      "authTitle": "Masukkan PIN Anda",
+      "authSubtitle": "untuk menampilkan kunci privat",
+      "authPrompt": "Tampilkan kunci privat Anda",
+      "keyLabel": "Kunci privat",
+      "hide": "Sembunyikan",
+      "autoHide": "Kunci juga disembunyikan saat Anda meninggalkan layar ini atau Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar."
     }
   },
   "send": {

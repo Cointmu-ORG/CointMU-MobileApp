@@ -70,7 +70,8 @@
     "lockedOut": "Too many wrong attempts. Try again in {{time}}.",
     "biometricsPrompt": "Unlock Muvo",
     "resetHint": "Forgot your PIN? You can reset this wallet and restore it with your recovery phrase.",
-    "resetButton": "Reset wallet"
+    "resetButton": "Reset wallet",
+    "biometricsTurnedOff": "Biometric unlock was turned off because none is set up on this phone anymore. Use your PIN."
   },
   "reset": {
     "confirmTitle": "Reset this wallet?",
@@ -96,7 +97,10 @@
       "retry": "Try again",
       "copyAddress": "Copy address",
       "copied": "Address copied",
-      "switchAccount": "Switch account"
+      "switchAccount": "Switch account",
+      "show": "Show balances",
+      "hide": "Hide balances",
+      "showHint": "Shows the amounts for 30 seconds"
     },
     "actions": {
       "send": "Send",
@@ -148,16 +152,20 @@
       "title": "Network",
       "subtitle": "Which CointMU node Muvo talks to. Your keys never leave this phone; a node only sees your public address and the requests Muvo sends.",
       "nodesTitle": "CointMU nodes",
-      "nodesFooter": "Muvo only switches to a node that reports chain ID {{chainId}}.",
+      "nodesFooter": "Muvo only switches to a node that reports chain ID {{chainId}}. Pull down or tap Ping all to check again.",
       "nodeName": "Node {{number}}",
-      "customName": "Your node",
-      "checkAll": "Check all",
+      "customName": "Your node {{number}}",
       "status": {
         "unchecked": "Not checked",
         "checking": "Checking…",
         "reachable": "Reachable · {{ms}} ms",
         "unreachable": "Unreachable",
-        "wrongChain": "Wrong network (chain {{chainId}})"
+        "wrongChain": "Wrong network (chain {{chainId}})",
+        "chainOk": "Chain {{chainId}}",
+        "block": "Block {{height}}",
+        "blockUnknown": "Block unknown",
+        "outOfSync_one": "Out of sync · {{count}} block behind",
+        "outOfSync_other": "Out of sync · {{count}} blocks behind"
       },
       "refusedUnreachable": "Couldn't reach that node. Muvo keeps using the current one.",
       "refusedWrongChain": "That node is on chain {{chainId}}, not CointMU ({{expected}}). Muvo keeps using the current one.",
@@ -168,8 +176,12 @@
       "add": "Add and use",
       "invalidUrl": "Enter an http:// or https:// URL.",
       "alreadyListed": "That node is already in the list.",
-      "remove": "Remove your node",
-      "row": "Node in use"
+      "pingAll": "Ping all",
+      "pinging": "Pinging…",
+      "inUse": "In use",
+      "removeNode": "Remove {{name}}",
+      "addWarning": "Only add nodes you trust. A node sees your address and the transactions you send, and a dishonest one can show false balances. It can never move your funds.",
+      "limitReached": "The list holds at most {{max}} nodes. Remove one of yours to add another."
     },
     "accounts": {
       "title": "Accounts",
@@ -181,28 +193,31 @@
       "nameField": "Name for {{account}}",
       "nameHint": "Only shown on this phone.",
       "save": "Save name",
-      "saved": "Name saved",
-      "row": "Active account"
-    },
-    "general": {
-      "title": "General",
-      "language": "Language",
-      "languageDesc": "Application language"
+      "saved": "Name saved"
     },
     "security": {
       "title": "Security",
       "changePin": "Change PIN",
-      "biometricsTitle": "Unlock with biometrics",
-      "biometricsDesc": "Fingerprint or face. Your PIN always works too.",
-      "biometricsUnavailable": "No fingerprint or face is set up on this phone.",
-      "biometricsPrompt": "Turn on biometric unlock",
       "autoLockTitle": "Auto-lock wallet",
       "autoLockDesc": "Lock Muvo after it has been in the background this long; you then need your PIN again.",
       "immediately": "Immediately",
       "minutes_one": "{{count}} min",
       "minutes_other": "{{count}} min",
       "recoveryPhraseTitle": "Recovery phrase",
-      "recoveryPhraseDesc": "The words that restore your wallet"
+      "recoveryPhraseDesc": "The words that restore your wallet",
+      "access": "Access",
+      "backup": "Backup",
+      "backupFooter": "Both ask for your PIN or biometrics first and block screenshots.",
+      "recoveryPhraseNone": "This wallet has no recovery phrase",
+      "privateKeyTitle": "Show private key",
+      "privateKeyDesc": "The key of the active account",
+      "privateKeyOnlyBackup": "The only backup of this wallet",
+      "lockout": "PIN attempts",
+      "attemptsTitle": "Wrong PIN attempts",
+      "attemptsDesc": "After {{free}} wrong PINs in a row Muvo makes you wait, longer each time. After {{limit}} it offers to reset the wallet. The right PIN clears the count.",
+      "attemptsValue": "{{failed}} of {{limit}}",
+      "danger": "Remove",
+      "autoLockValue": "Auto-lock: {{time}}"
     },
     "changePin": {
       "title": "Change PIN",
@@ -259,7 +274,125 @@
       "reportIssueTitle": "Report an issue",
       "reportIssueDesc": "Send a bug report or feature request",
       "licenseTitle": "License",
-      "licenseDesc": "Open source under the MIT License"
+      "licenseDesc": "Open source under the MIT License",
+      "appName": "Muvo",
+      "tagline": "The wallet for CointMU",
+      "versionShort": "v{{version}}",
+      "app": "App",
+      "version": "Version",
+      "codename": "Codename",
+      "build": "Build",
+      "networkTitle": "Network",
+      "network": "Network",
+      "releaseNotesTitle": "Release notes",
+      "releaseNotesDesc": "What changed in each version",
+      "copyright": "© 2026 CointMU Foundation • MIT License",
+      "disclaimer": "Muvo is a non-custodial wallet. Your keys stay on this phone, and nobody, including us, can recover them for you."
+    },
+    "groups": {
+      "general": "General",
+      "wallet": "Wallet"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "themes": {
+        "system": "System",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "accent": "Accent color",
+      "accentDesc": "Used for buttons, links and highlights.",
+      "accentCurrent": "Selected: {{name}}",
+      "accents": {
+        "blue": "Blue",
+        "emerald": "Emerald",
+        "indigo": "Indigo",
+        "purple": "Purple",
+        "amber": "Amber",
+        "red": "Red"
+      },
+      "layout": "Layout",
+      "density": "Density",
+      "densityDesc": "Vertical spacing in lists.",
+      "densities": {
+        "comfortable": "Comfortable",
+        "compact": "Compact"
+      },
+      "textSize": "Follow the phone's text size",
+      "textSizeDesc": "Text grows with the size set in your phone's settings. Off keeps Muvo's standard size.",
+      "motion": "Animations",
+      "motionDesc": "Automatic turns them off when your phone asks for reduced motion.",
+      "motions": {
+        "auto": "Automatic",
+        "reduced": "Reduced"
+      },
+      "display": "Display",
+      "timeFormat": "Time format",
+      "timeFormatDesc": "How times are shown in history.",
+      "timeFormats": {
+        "auto": "Automatic",
+        "12h": "12-hour",
+        "24h": "24-hour"
+      },
+      "decimals": "Balance decimals",
+      "decimalsDesc": "Decimal places of balances. Full shows the exact amount. What you send is always shown in full.",
+      "decimalsFull": "Full",
+      "hideZero": "Hide empty tokens",
+      "hideZeroDesc": "Tokens with a zero balance stay off the home screen. CMU always shows.",
+      "privacy": "Privacy",
+      "privacyFooter": "The recovery phrase and private key screens always block screenshots, whatever is set here.",
+      "hideBalances": "Hide balances",
+      "hideBalancesDesc": "Show •••• instead of amounts. Tap the eye on the home screen to see them for 30 seconds. The amount you are about to send is always shown.",
+      "hideInSwitcher": "Hide Muvo in the app switcher",
+      "hideInSwitcherDesc": "Cover the screen whenever Muvo is not the app in front.",
+      "hideInSwitcherDescAndroid": "Cover the screen whenever Muvo is not the app in front. On Android this also blocks screenshots of Muvo."
+    },
+    "language": {
+      "title": "Language",
+      "footer": "Applies right away. Muvo starts in this language next time."
+    },
+    "biometrics": {
+      "title": "Biometric unlock",
+      "rowTitle": "Unlock with {{name}}",
+      "kind": {
+        "face-id": "Face ID",
+        "touch-id": "Touch ID",
+        "fingerprint": "fingerprint",
+        "face": "face unlock",
+        "iris": "iris scan",
+        "generic": "biometrics"
+      },
+      "checking": "Checking this phone…",
+      "noHardware": "This phone has no fingerprint or face sensor.",
+      "notEnrolled": "Nothing is set up yet. Add a fingerprint or face in your phone's settings, then come back.",
+      "description": "Unlock Muvo, approve sends and reveal backups without typing your PIN. Your PIN always works too.",
+      "prompt": "Turn on {{name}} for Muvo",
+      "pinTitle": "Enter your PIN",
+      "pinSubtitle": "to turn on {{name}}",
+      "confirmTitle": "Confirm with {{name}}",
+      "confirmBody": "One successful check turns it on. Your PIN keeps working.",
+      "unavailable": "{{name}} isn't available on this phone right now. Check your phone's settings.",
+      "notConfirmed": "That didn't go through, so it stays off. Try again or use your PIN as before.",
+      "tryAgain": "Try again",
+      "turnedOffTitle": "Biometric unlock was turned off",
+      "turnedOffBody": "No fingerprint or face is set up on this phone anymore, so Muvo went back to PIN only. Set one up in your phone's settings, then turn it on again here.",
+      "dismiss": "Got it"
+    },
+    "privateKey": {
+      "title": "Private key",
+      "scopeImported": "This wallet was imported from a private key, so it has no recovery phrase. This key is the only way to restore it. Write it down and keep it somewhere safe and offline.",
+      "scopePhrase": "This is the key of {{account}} only. Your recovery phrase restores every account, so back that up first.",
+      "warningTitle": "Never share your private key",
+      "warning": "Anyone who has it gains full control of this account and can steal all of its funds. CointMU support will never ask for it. Never type it into a website.",
+      "failed": "Failed to reveal private key.",
+      "reveal": "Show private key",
+      "authTitle": "Enter your PIN",
+      "authSubtitle": "to show your private key",
+      "authPrompt": "Show your private key",
+      "keyLabel": "Private key",
+      "hide": "Hide",
+      "autoHide": "It is also hidden when you leave this screen or Muvo goes to the background. It can't be copied or captured in a screenshot."
     }
   },
   "send": {
