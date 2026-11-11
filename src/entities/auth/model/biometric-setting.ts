@@ -2,10 +2,11 @@ import {
   authenticateWithBiometrics,
   getBiometricAvailability,
   type BiometricAvailability,
+  type BiometricFailure,
 } from '../api/biometrics';
 import { useAuthPrefsStore } from './auth-prefs-store';
 
-export type EnableBiometricsResult = 'enabled' | 'unavailable' | 'not-confirmed';
+export type EnableBiometricsResult = 'enabled' | 'unavailable' | BiometricFailure;
 
 /**
  * Turns biometric unlock on. Call only after the PIN was verified (the enable screen does):
@@ -16,7 +17,8 @@ export type EnableBiometricsResult = 'enabled' | 'unavailable' | 'not-confirmed'
 export async function enableBiometrics(prompt: string): Promise<EnableBiometricsResult> {
   const availability = await getBiometricAvailability();
   if (availability.status !== 'available') return 'unavailable';
-  if (!(await authenticateWithBiometrics(prompt))) return 'not-confirmed';
+  const outcome = await authenticateWithBiometrics(prompt);
+  if (outcome !== 'success') return outcome;
   const prefs = useAuthPrefsStore.getState();
   prefs.setBiometricsEnabled(true);
   prefs.setBiometricsOffNotice(false);

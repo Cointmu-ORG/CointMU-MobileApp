@@ -6,7 +6,7 @@ import {
   writeLockoutState,
   writePinRecord,
 } from '../api/auth-storage';
-import { authenticateWithBiometrics } from '../api/biometrics';
+import { authenticateWithBiometrics, type BiometricOutcome } from '../api/biometrics';
 import {
   reconcileClock,
   registerFailure,
@@ -61,10 +61,14 @@ export async function attemptPin(pin: string, now = Date.now()): Promise<PinAtte
 }
 
 /** Biometrics are not offered while a PIN lockout runs. Success also clears the failure count. */
-export async function attemptBiometrics(prompt: string, now = Date.now()): Promise<boolean> {
+export async function attemptBiometrics(
+  prompt: string,
+  now = Date.now(),
+): Promise<BiometricOutcome> {
   const lockout = await loadLockout(now);
-  if (remainingLockoutMs(lockout, now) > 0) return false;
-  if (!(await authenticateWithBiometrics(prompt))) return false;
-  await writeLockoutState(registerSuccess(now));
-  return true;
+  // The prompt never opened; the PIN pad already shows the lockout countdown.
+  if (remainingLockoutMs(lockout, now) > 0) return 'cancelled';
+  const outcome = await authenticateWithBiometrics(prompt);
+  if (outcome === 'success') await writeLockoutState(registerSuccess(now));
+  return outcome;
 }

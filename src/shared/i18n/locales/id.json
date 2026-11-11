@@ -73,6 +73,15 @@
     "resetButton": "Reset dompet",
     "biometricsTurnedOff": "Buka kunci biometrik dimatikan karena tidak ada lagi yang terdaftar di ponsel ini. Gunakan PIN Anda."
   },
+  "biometrics": {
+    "error": {
+      "not-available": "Biometrik sedang tidak tersedia di ponsel ini. Gunakan PIN Anda.",
+      "not-enrolled": "Belum ada sidik jari atau wajah yang terdaftar di ponsel ini. Tambahkan di pengaturan ponsel, lalu coba lagi.",
+      "lockout": "Terlalu banyak percobaan gagal, jadi ponsel mengunci biometrik. Buka kunci ponsel dengan kode sandinya, lalu coba lagi, atau gunakan PIN Anda.",
+      "unsupported-build": "Face ID berfungsi di aplikasi yang terpasang, bukan di Expo Go.",
+      "failed": "Tidak berhasil. Coba lagi atau gunakan PIN Anda."
+    }
+  },
   "reset": {
     "confirmTitle": "Reset dompet ini?",
     "confirmBody": "Dompet akan dihapus dari HP ini. Tanpa frasa pemulihan atau kunci privat, dana akan hilang.",
@@ -373,7 +382,6 @@
       "confirmTitle": "Konfirmasi dengan {{name}}",
       "confirmBody": "Satu pemeriksaan yang berhasil akan mengaktifkannya. PIN Anda tetap berfungsi.",
       "unavailable": "{{name}} sedang tidak tersedia di ponsel ini. Periksa pengaturan ponsel Anda.",
-      "notConfirmed": "Pemeriksaan tidak berhasil, jadi fitur ini tetap mati. Coba lagi atau tetap gunakan PIN.",
       "tryAgain": "Coba lagi",
       "turnedOffTitle": "Buka kunci biometrik dimatikan",
       "turnedOffBody": "Tidak ada lagi sidik jari atau wajah yang terdaftar di ponsel ini, jadi Muvo kembali hanya memakai PIN. Daftarkan lagi di pengaturan ponsel, lalu aktifkan kembali di sini.",

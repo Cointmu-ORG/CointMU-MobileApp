@@ -92,11 +92,14 @@ export function PinPrompt({
   const tryBiometrics = useCallback(async () => {
     if (!biometrics) return;
     try {
-      if (await attemptBiometrics(biometrics.prompt)) onVerified();
+      const outcome = await attemptBiometrics(biometrics.prompt);
+      if (outcome === 'success') return onVerified();
+      // A cancelled prompt is a choice, not an error: the PIN pad is right there.
+      setMessage(outcome === 'cancelled' ? null : t(`biometrics.error.${outcome}`));
     } catch (error) {
       logger.warn('Biometric check failed', { error });
     }
-  }, [biometrics, onVerified]);
+  }, [biometrics, onVerified, t]);
   const { lockout, setLockout, canUseBiometrics, wasTurnedOff } = useLockoutAndBiometrics(
     biometrics,
     tryBiometrics,

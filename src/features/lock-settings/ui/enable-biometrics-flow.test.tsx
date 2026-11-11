@@ -49,7 +49,7 @@ describe('EnableBiometricsFlow', () => {
     expect(useAuthPrefsStore.getState().isBiometricsEnabled).toBe(true);
   });
 
-  it('stays off and offers another try when the biometric check is cancelled', async () => {
+  it('stays off, shows no error and offers another try when the prompt is cancelled', async () => {
     auth.authenticateAsync.mockResolvedValue({
       success: false,
       error: 'user_cancel',
@@ -58,9 +58,18 @@ describe('EnableBiometricsFlow', () => {
     await render(<EnableBiometricsFlow onDone={onDone} />);
 
     await typePin(PIN);
-    expect(await screen.findByText(/so it stays off/)).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: 'Try again' })).toBeEnabled();
+    expect(screen.queryByText(/didn't work|aren't available|locked biometrics/)).toBeNull();
     expect(useAuthPrefsStore.getState().isBiometricsEnabled).toBe(false);
     expect(onDone).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Try again' })).toBeOnTheScreen();
+  });
+
+  it('says why when the phone refuses the check', async () => {
+    auth.authenticateAsync.mockResolvedValue({ success: false, error: 'lockout' });
+    await render(<EnableBiometricsFlow onDone={jest.fn()} />);
+
+    await typePin(PIN);
+    expect(await screen.findByText(/your phone locked biometrics/)).toBeOnTheScreen();
+    expect(useAuthPrefsStore.getState().isBiometricsEnabled).toBe(false);
   });
 });

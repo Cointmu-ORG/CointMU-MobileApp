@@ -73,6 +73,15 @@
     "resetButton": "Reset wallet",
     "biometricsTurnedOff": "Biometric unlock was turned off because none is set up on this phone anymore. Use your PIN."
   },
+  "biometrics": {
+    "error": {
+      "not-available": "Biometrics aren't available on this phone right now. Use your PIN.",
+      "not-enrolled": "No fingerprint or face is set up on this phone. Add one in your phone's settings, then try again.",
+      "lockout": "Too many failed tries, so your phone locked biometrics. Unlock the phone with its passcode, then try again, or use your PIN.",
+      "unsupported-build": "Face ID works in the installed app, not in Expo Go.",
+      "failed": "That didn't work. Try again or use your PIN."
+    }
+  },
   "reset": {
     "confirmTitle": "Reset this wallet?",
     "confirmBody": "This deletes the wallet from this phone. Without your recovery phrase or private key, the funds are lost.",
@@ -373,7 +382,6 @@
       "confirmTitle": "Confirm with {{name}}",
       "confirmBody": "One successful check turns it on. Your PIN keeps working.",
       "unavailable": "{{name}} isn't available on this phone right now. Check your phone's settings.",
-      "notConfirmed": "That didn't go through, so it stays off. Try again or use your PIN as before.",
       "tryAgain": "Try again",
       "turnedOffTitle": "Biometric unlock was turned off",
       "turnedOffBody": "No fingerprint or face is set up on this phone anymore, so Muvo went back to PIN only. Set one up in your phone's settings, then turn it on again here.",
