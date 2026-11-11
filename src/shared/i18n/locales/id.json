@@ -246,9 +246,13 @@
       "authTitle": "Masukkan PIN Anda",
       "authSubtitle": "untuk menampilkan frasa pemulihan",
       "hide": "Sembunyikan",
-      "autoHide": "Frasa juga disembunyikan saat Anda meninggalkan layar ini atau Muvo masuk ke latar belakang.",
+      "autoHide": "Kata disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo masuk ke latar belakang.",
       "failed": "Gagal menampilkan frasa pemulihan.",
-      "privateKey": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan. Simpan cadangan kunci Anda sendiri: hanya itu cara memulihkan dompet ini."
+      "privateKey": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan. Simpan cadangan kunci Anda sendiri: hanya itu cara memulihkan dompet ini.",
+      "masked": "Tersembunyi. Ketuk ikon mata untuk menampilkan kata.",
+      "revealed": "Ditampilkan selama 30 detik.",
+      "showWords": "Tampilkan kata",
+      "hideWords": "Sembunyikan kata"
     },
     "logout": {
       "title": "Keluar",
@@ -400,7 +404,9 @@
       "authPrompt": "Tampilkan kunci privat Anda",
       "keyLabel": "Kunci privat",
       "hide": "Sembunyikan",
-      "autoHide": "Kunci juga disembunyikan saat Anda meninggalkan layar ini atau Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar."
+      "autoHide": "Kunci disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar.",
+      "showKey": "Tampilkan kunci",
+      "hideKey": "Sembunyikan kunci"
     }
   },
   "send": {

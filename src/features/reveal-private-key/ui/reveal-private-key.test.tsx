@@ -31,10 +31,16 @@ async function typePin(pin: string) {
   }
 }
 
-async function revealWithPin() {
+/** Passes the PIN; the key is then on the screen only as dots. */
+async function authenticate() {
   await fireEvent.press(screen.getByRole('button', { name: 'Show private key' }));
   await typePin(PIN);
-  return screen.findByText(PRIVATE_KEY);
+  return screen.findByRole('button', { name: 'Show key' });
+}
+
+async function revealWithPin() {
+  await fireEvent.press(await authenticate());
+  return screen.getByText(PRIVATE_KEY);
 }
 
 beforeEach(async () => {
@@ -45,7 +51,10 @@ beforeEach(async () => {
   jest.mocked(SecureStore.getItemAsync).mockClear();
 });
 
-afterEach(() => jest.restoreAllMocks());
+afterEach(() => {
+  jest.useRealTimers();
+  jest.restoreAllMocks();
+});
 
 describe('RevealPrivateKey', () => {
   it('blocks screenshots for the whole screen', async () => {
@@ -68,7 +77,37 @@ describe('RevealPrivateKey', () => {
     expect(secretReads()).toBe(0);
 
     await typePin(PIN);
-    expect(await screen.findByText(PRIVATE_KEY)).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: 'Show key' })).toBeOnTheScreen();
+  });
+
+  it('keeps the key out of the screen after the PIN until the eye is pressed', async () => {
+    await render(<RevealPrivateKey />);
+    const eye = await authenticate();
+    expect(screen.queryByText(PRIVATE_KEY)).toBeNull();
+    // The mask is a fixed run of dots, not one dot per character of the key.
+    const mask = screen.getByText(/^•+$/);
+    expect(String(mask.props.children)).not.toHaveLength(PRIVATE_KEY.length);
+    expect(mask.props.selectable).toBe(false);
+
+    await fireEvent.press(eye);
+    expect(screen.getByText(PRIVATE_KEY)).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Hide key' }));
+    expect(screen.queryByText(PRIVATE_KEY)).toBeNull();
+  });
+
+  it('masks the key again 30 seconds after the eye was pressed', async () => {
+    await render(<RevealPrivateKey />);
+    const eye = await authenticate();
+    jest.useFakeTimers();
+    await fireEvent.press(eye);
+    expect(screen.getByText(PRIVATE_KEY)).toBeOnTheScreen();
+
+    await act(() => jest.advanceTimersByTime(29_000));
+    expect(screen.getByText(PRIVATE_KEY)).toBeOnTheScreen();
+    await act(() => jest.advanceTimersByTime(1_000));
+    expect(screen.queryByText(PRIVATE_KEY)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Show key' })).toBeOnTheScreen();
   });
 
   it('offers no way to copy the key', async () => {
@@ -78,6 +117,7 @@ describe('RevealPrivateKey', () => {
     expect(key.props.selectable).toBe(false);
     expect(screen.queryByRole('button', { name: /copy/i })).toBeNull();
     expect(screen.getAllByRole('button').map((button) => button.props.accessibilityLabel)).toEqual([
+      'Hide key',
       'Hide',
     ]);
   });

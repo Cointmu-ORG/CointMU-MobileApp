@@ -31,7 +31,17 @@ beforeEach(async () => {
   jest.mocked(SecureStore.getItemAsync).mockClear();
 });
 
-afterEach(() => jest.restoreAllMocks());
+afterEach(() => {
+  jest.useRealTimers();
+  jest.restoreAllMocks();
+});
+
+/** Passes the PIN; the words are then on the screen only as dots. */
+async function authenticate() {
+  await fireEvent.press(screen.getByRole('button', { name: 'Reveal recovery phrase' }));
+  await typePin(PIN);
+  return screen.findByRole('button', { name: 'Show words' });
+}
 
 describe('RevealPhrase', () => {
   it('asks for the PIN before it reads or shows the phrase', async () => {
@@ -47,8 +57,34 @@ describe('RevealPhrase', () => {
     expect(secretReads()).toBe(0);
 
     await typePin(PIN);
-    expect(await screen.findByText('abandon')).toBeOnTheScreen();
+    expect(await screen.findByRole('button', { name: 'Show words' })).toBeOnTheScreen();
+  });
+
+  it('keeps the words out of the screen after the PIN until the eye is pressed', async () => {
+    await render(<RevealPhrase />);
+    const eye = await authenticate();
+    for (const word of PHRASE.split(' ')) expect(screen.queryByText(word)).toBeNull();
+
+    await fireEvent.press(eye);
+    expect(screen.getByText('abandon')).toBeOnTheScreen();
     expect(screen.getByText('accident')).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Hide words' }));
+    expect(screen.queryByText('abandon')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Show words' })).toBeOnTheScreen();
+  });
+
+  it('masks the words again 30 seconds after the eye was pressed', async () => {
+    await render(<RevealPhrase />);
+    const eye = await authenticate();
+    jest.useFakeTimers();
+    await fireEvent.press(eye);
+    expect(screen.getByText('abandon')).toBeOnTheScreen();
+
+    await act(() => jest.advanceTimersByTime(29_000));
+    expect(screen.getByText('abandon')).toBeOnTheScreen();
+    await act(() => jest.advanceTimersByTime(1_000));
+    expect(screen.queryByText('abandon')).toBeNull();
   });
 
   it('hides the words when Muvo goes to the background', async () => {
@@ -58,9 +94,8 @@ describe('RevealPhrase', () => {
       return { remove: jest.fn() };
     });
     await render(<RevealPhrase />);
-    await fireEvent.press(screen.getByRole('button', { name: 'Reveal recovery phrase' }));
-    await typePin(PIN);
-    expect(await screen.findByText('abandon')).toBeOnTheScreen();
+    await fireEvent.press(await authenticate());
+    expect(screen.getByText('abandon')).toBeOnTheScreen();
 
     await act(() => emit('background'));
     expect(screen.queryByText('abandon')).toBeNull();

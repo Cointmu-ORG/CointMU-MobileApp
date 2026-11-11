@@ -246,9 +246,13 @@
       "authTitle": "Enter your PIN",
       "authSubtitle": "to show your recovery phrase",
       "hide": "Hide",
-      "autoHide": "It is also hidden when you leave this screen or Muvo goes to the background.",
+      "autoHide": "The words hide again after 30 seconds, when you leave this screen and when Muvo goes to the background.",
       "failed": "Failed to reveal recovery phrase.",
-      "privateKey": "This wallet was imported from a private key, so it has no recovery phrase. Keep your own backup of the key: it is the only way to restore this wallet."
+      "privateKey": "This wallet was imported from a private key, so it has no recovery phrase. Keep your own backup of the key: it is the only way to restore this wallet.",
+      "masked": "Hidden. Tap the eye to show the words.",
+      "revealed": "Shown for 30 seconds.",
+      "showWords": "Show words",
+      "hideWords": "Hide words"
     },
     "logout": {
       "title": "Log out",
@@ -400,7 +404,9 @@
       "authPrompt": "Show your private key",
       "keyLabel": "Private key",
       "hide": "Hide",
-      "autoHide": "It is also hidden when you leave this screen or Muvo goes to the background. It can't be copied or captured in a screenshot."
+      "autoHide": "The key hides again after 30 seconds, when you leave this screen and when Muvo goes to the background. It can't be copied or captured in a screenshot.",
+      "showKey": "Show key",
+      "hideKey": "Hide key"
     }
   },
   "send": {
