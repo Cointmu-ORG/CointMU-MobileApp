@@ -6,6 +6,7 @@ export {
   type WalletSecret,
 } from './api/wallet-secret';
 export { deriveAccount, type DerivedAccount } from './lib/derive';
+export { exportPrivateKey } from './lib/export-key';
 export { SignerMismatchError, signWithSecret } from './lib/signer';
 export { generateMnemonic, isValidMnemonic, normalizePhrase, splitWords } from './lib/mnemonic';
 export { addressFromPrivateKey, normalizePrivateKey } from './lib/private-key';
