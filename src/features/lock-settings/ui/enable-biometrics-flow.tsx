@@ -14,6 +14,7 @@ import { Button, Notice, Text } from '@/shared/ui';
 
 import { useBiometricLabel } from './biometric-label';
 
+/** `cancelled` shows no notice: the user closed the prompt and can simply try again. */
 type Step = 'pin' | 'confirming' | Exclude<EnableBiometricsResult, 'enabled'>;
 
 function useBiometricKind(): BiometricKind | null {
@@ -46,7 +47,7 @@ export function EnableBiometricsFlow({ onDone }: { onDone: () => void }) {
       else setStep(result);
     } catch (error) {
       logger.warn('Turning on biometrics failed', { error });
-      setStep('not-confirmed');
+      setStep('failed');
     }
   };
 
@@ -70,15 +71,15 @@ export function EnableBiometricsFlow({ onDone }: { onDone: () => void }) {
       {step === 'unavailable' ? (
         <Notice tone="warning">{t('settings.biometrics.unavailable', { name })}</Notice>
       ) : null}
-      {step === 'not-confirmed' ? (
-        <Notice tone="warning">{t('settings.biometrics.notConfirmed', { name })}</Notice>
+      {step !== 'confirming' && step !== 'unavailable' && step !== 'cancelled' ? (
+        <Notice tone="warning">{t(`biometrics.error.${step}`)}</Notice>
       ) : null}
       <View className="gap-2">
         <Button
           label={t('settings.biometrics.tryAgain')}
           onPress={() => void confirm()}
           isLoading={step === 'confirming'}
-          isDisabled={step === 'unavailable'}
+          isDisabled={step === 'unavailable' || step === 'unsupported-build'}
         />
         <Button label={t('common.cancel')} variant="ghost" onPress={onDone} />
       </View>

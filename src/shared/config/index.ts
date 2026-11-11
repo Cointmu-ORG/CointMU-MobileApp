@@ -1,4 +1,12 @@
-export { getAppInfo, type AppInfo } from './app-info';
+export { getAppInfo, isRunningInExpoGo, type AppInfo } from './app-info';
+export {
+  BUILD_CHANNELS,
+  formatBuildReport,
+  getBuildInfo,
+  parseBuildInfo,
+  type BuildChannel,
+  type BuildInfo,
+} from './build-info';
 export { env, explorerTxUrl, isHttpUrl, readEnv, type Env } from './env';
 export { EXTERNAL_LINKS } from './links';
 export {

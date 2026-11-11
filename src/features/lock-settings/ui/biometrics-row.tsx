@@ -13,7 +13,7 @@ type BiometricsRowProps = {
 
 /**
  * Security > biometric unlock. Named after the device's sensor. Disabled, with the reason, when
- * the phone has no sensor or nothing is enrolled. Turning it off is immediate.
+ * the phone has no sensor, nothing is enrolled, or Face ID is asked for inside Expo Go. Turning it off is immediate.
  */
 export function BiometricsRow({ onEnableRequested }: BiometricsRowProps) {
   const { t } = useTranslation();
@@ -29,6 +29,9 @@ export function BiometricsRow({ onEnableRequested }: BiometricsRowProps) {
     if (availability.status === 'no-hardware') return t('settings.biometrics.noHardware');
     if (availability.status === 'not-enrolled') {
       return t('settings.biometrics.notEnrolled', { name });
+    }
+    if (availability.status === 'unsupported-build') {
+      return t('biometrics.error.unsupported-build');
     }
     return t('settings.biometrics.description');
   };

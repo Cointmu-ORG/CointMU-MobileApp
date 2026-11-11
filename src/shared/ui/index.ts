@@ -17,6 +17,7 @@ export {
   type SurfacePalette,
 } from './pressable-surface';
 export { Screen } from './screen';
+export { SecretEye } from './secret-eye';
 export { RadioMark } from './radio-mark';
 export { ScrollScreen } from './scroll-screen';
 export { SegmentedControl, type SegmentOption } from './segmented-control';
@@ -46,5 +47,6 @@ export {
 export { ICON_SIZE } from './theme/icon-size';
 export { useIsMotionReduced } from './use-is-motion-reduced';
 export { useShake } from './use-shake';
+export { useTimedReveal } from './use-timed-reveal';
 export { WordGrid } from './word-grid';
 export { usePinInput } from './use-pin-input';

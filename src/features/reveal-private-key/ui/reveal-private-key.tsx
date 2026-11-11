@@ -6,9 +6,12 @@ import { AppState, ScrollView, View } from 'react-native';
 import { PinPrompt } from '@/entities/auth';
 import { useAccountLabel, useActiveAccount, useWalletStore } from '@/entities/wallet';
 import { logger } from '@/shared/lib';
-import { Button, Card, Notice, Text } from '@/shared/ui';
+import { Button, Card, Notice, SecretEye, Text, useTimedReveal } from '@/shared/ui';
 
 import { loadActivePrivateKey } from '../model/load-private-key';
+
+/** Fixed, so the mask says nothing about the key (and is plainly not its real length). */
+const MASKED_KEY = '•'.repeat(24);
 
 type State = { step: 'intro' | 'auth' | 'error' } | { step: 'shown'; privateKey: string };
 
@@ -42,17 +45,62 @@ function Intro({ onReveal, isFailed }: { onReveal: () => void; isFailed: boolean
   );
 }
 
+/** The key stays masked until the eye is pressed, and masks itself again after 30 s. */
+function ShownKey({ privateKey, onHide }: { privateKey: string; onHide: () => void }) {
+  const { t } = useTranslation();
+  const account = useActiveAccount();
+  const label = useAccountLabel();
+  const { isRevealed, toggle } = useTimedReveal();
+  return (
+    <ScrollView contentContainerClassName="gap-6 pb-8">
+      <Notice tone="danger" title={t('settings.privateKey.warningTitle')}>
+        {t('settings.privateKey.warning')}
+      </Notice>
+      <Card className="gap-3">
+        {account ? (
+          <View className="gap-0.5">
+            <Text variant="label">{label(account)}</Text>
+            <Text variant="mono" tone="secondary">
+              {account.address}
+            </Text>
+          </View>
+        ) : null}
+        <View className="gap-1">
+          <View className="flex-row items-center justify-between">
+            <Text variant="caption" tone="secondary">
+              {t('settings.privateKey.keyLabel')}
+            </Text>
+            <SecretEye
+              isRevealed={isRevealed}
+              onToggle={toggle}
+              showLabel={t('settings.privateKey.showKey')}
+              hideLabel={t('settings.privateKey.hideKey')}
+            />
+          </View>
+          <Text variant="mono" selectable={false}>
+            {isRevealed ? privateKey : MASKED_KEY}
+          </Text>
+        </View>
+      </Card>
+      <View className="gap-2">
+        <Button label={t('settings.privateKey.hide')} onPress={onHide} />
+        <Text variant="caption" tone="secondary" className="text-center">
+          {t('settings.privateKey.autoHide')}
+        </Text>
+      </View>
+    </ScrollView>
+  );
+}
+
 /**
  * Settings > Security > Show private key (D-70). Same gates as the recovery phrase: screenshots
  * are blocked for the whole screen, the key is read only after a PIN or biometric check, kept in
- * component state, and dropped on "Hide", on leaving the screen and as soon as Muvo leaves the
+ * component state, shown masked until the eye is pressed, and dropped on "Hide", on leaving the screen and as soon as Muvo leaves the
  * foreground. There is no copy action and the text cannot be selected.
  */
 export function RevealPrivateKey() {
   usePreventScreenCapture();
   const { t } = useTranslation();
-  const account = useActiveAccount();
-  const label = useAccountLabel();
   const [state, setState] = useState<State>({ step: 'intro' });
 
   useEffect(() => {
@@ -83,40 +131,7 @@ export function RevealPrivateKey() {
   }
 
   if (state.step === 'shown') {
-    return (
-      <ScrollView contentContainerClassName="gap-6 pb-8">
-        <Notice tone="danger" title={t('settings.privateKey.warningTitle')}>
-          {t('settings.privateKey.warning')}
-        </Notice>
-        <Card className="gap-3">
-          {account ? (
-            <View className="gap-0.5">
-              <Text variant="label">{label(account)}</Text>
-              <Text variant="mono" tone="secondary">
-                {account.address}
-              </Text>
-            </View>
-          ) : null}
-          <View className="gap-1">
-            <Text variant="caption" tone="secondary">
-              {t('settings.privateKey.keyLabel')}
-            </Text>
-            <Text variant="mono" selectable={false}>
-              {state.privateKey}
-            </Text>
-          </View>
-        </Card>
-        <View className="gap-2">
-          <Button
-            label={t('settings.privateKey.hide')}
-            onPress={() => setState({ step: 'intro' })}
-          />
-          <Text variant="caption" tone="secondary" className="text-center">
-            {t('settings.privateKey.autoHide')}
-          </Text>
-        </View>
-      </ScrollView>
-    );
+    return <ShownKey privateKey={state.privateKey} onHide={() => setState({ step: 'intro' })} />;
   }
 
   return <Intro onReveal={() => setState({ step: 'auth' })} isFailed={state.step === 'error'} />;

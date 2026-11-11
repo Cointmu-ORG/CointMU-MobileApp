@@ -1,4 +1,5 @@
 graphify-out
 package-lock.json
+build-info.json
 .agent
 .claude

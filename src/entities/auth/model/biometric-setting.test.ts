@@ -1,6 +1,11 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 
-import { getBiometricAvailability, toBiometricKind } from '../api/biometrics';
+import {
+  authenticateWithBiometrics,
+  getBiometricAvailability,
+  toBiometricFailure,
+  toBiometricKind,
+} from '../api/biometrics';
 import { useAuthPrefsStore } from './auth-prefs-store';
 import { disableBiometrics, enableBiometrics, reconcileBiometrics } from './biometric-setting';
 
@@ -59,6 +64,72 @@ describe('getBiometricAvailability', () => {
   });
 });
 
+describe('Face ID in Expo Go (Q-31)', () => {
+  const mockSensor = (type: LocalAuthentication.AuthenticationType) => {
+    auth.hasHardwareAsync.mockResolvedValue(true);
+    auth.isEnrolledAsync.mockResolvedValue(true);
+    auth.supportedAuthenticationTypesAsync.mockResolvedValue([type]);
+  };
+
+  it('reports Face ID inside Expo Go as unsupported instead of available', async () => {
+    mockSensor(FACIAL_RECOGNITION);
+    await expect(getBiometricAvailability('ios', true)).resolves.toEqual({
+      status: 'unsupported-build',
+      kind: 'face-id',
+    });
+  });
+
+  it('leaves Face ID in an installed build, Touch ID and Android alone', async () => {
+    mockSensor(FACIAL_RECOGNITION);
+    await expect(getBiometricAvailability('ios', false)).resolves.toMatchObject({
+      status: 'available',
+    });
+    await expect(getBiometricAvailability('android', true)).resolves.toMatchObject({
+      status: 'available',
+      kind: 'face',
+    });
+    mockSensor(FINGERPRINT);
+    await expect(getBiometricAvailability('ios', true)).resolves.toMatchObject({
+      status: 'available',
+      kind: 'touch-id',
+    });
+  });
+
+  it('never prompts and never turns the setting on', async () => {
+    mockSensor(FACIAL_RECOGNITION);
+    const availability = await getBiometricAvailability('ios', true);
+    expect(availability.status).not.toBe('available');
+    expect(auth.authenticateAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('toBiometricFailure', () => {
+  it.each([
+    ['user_cancel', 'cancelled'],
+    ['system_cancel', 'cancelled'],
+    ['app_cancel', 'cancelled'],
+    ['user_fallback', 'cancelled'],
+    ['not_available', 'not-available'],
+    ['not_enrolled', 'not-enrolled'],
+    ['passcode_not_set', 'not-enrolled'],
+    ['lockout', 'lockout'],
+    ['missing_usage_description', 'unsupported-build'],
+    ['authentication_failed', 'failed'],
+    ['unknown: -1000, something new', 'failed'],
+    // An object key that is not an error code must not leak through the lookup.
+    ['toString', 'failed'],
+  ])('maps %s to %s', (code, failure) => {
+    expect(toBiometricFailure(code)).toBe(failure);
+  });
+
+  it('passes the mapped reason out of the prompt', async () => {
+    auth.authenticateAsync.mockResolvedValue({ success: false, error: 'lockout' });
+    await expect(authenticateWithBiometrics('Unlock')).resolves.toBe('lockout');
+    auth.authenticateAsync.mockResolvedValue({ success: true });
+    await expect(authenticateWithBiometrics('Unlock')).resolves.toBe('success');
+  });
+});
+
 describe('enableBiometrics', () => {
   it('turns the setting on only after a successful biometric check', async () => {
     mockDevice({ hasHardware: true, isEnrolled: true, succeeds: true });
@@ -71,7 +142,7 @@ describe('enableBiometrics', () => {
 
   it('stays off when the prompt is cancelled or fails', async () => {
     mockDevice({ hasHardware: true, isEnrolled: true, succeeds: false });
-    await expect(enableBiometrics('Turn on')).resolves.toBe('not-confirmed');
+    await expect(enableBiometrics('Turn on')).resolves.toBe('cancelled');
     expect(prefs().isBiometricsEnabled).toBe(false);
   });
 

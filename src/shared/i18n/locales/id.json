@@ -73,6 +73,15 @@
     "resetButton": "Reset dompet",
     "biometricsTurnedOff": "Buka kunci biometrik dimatikan karena tidak ada lagi yang terdaftar di ponsel ini. Gunakan PIN Anda."
   },
+  "biometrics": {
+    "error": {
+      "not-available": "Biometrik sedang tidak tersedia di ponsel ini. Gunakan PIN Anda.",
+      "not-enrolled": "Belum ada sidik jari atau wajah yang terdaftar di ponsel ini. Tambahkan di pengaturan ponsel, lalu coba lagi.",
+      "lockout": "Terlalu banyak percobaan gagal, jadi ponsel mengunci biometrik. Buka kunci ponsel dengan kode sandinya, lalu coba lagi, atau gunakan PIN Anda.",
+      "unsupported-build": "Face ID berfungsi di aplikasi yang terpasang, bukan di Expo Go.",
+      "failed": "Tidak berhasil. Coba lagi atau gunakan PIN Anda."
+    }
+  },
   "reset": {
     "confirmTitle": "Reset dompet ini?",
     "confirmBody": "Dompet akan dihapus dari HP ini. Tanpa frasa pemulihan atau kunci privat, dana akan hilang.",
@@ -237,9 +246,13 @@
       "authTitle": "Masukkan PIN Anda",
       "authSubtitle": "untuk menampilkan frasa pemulihan",
       "hide": "Sembunyikan",
-      "autoHide": "Frasa juga disembunyikan saat Anda meninggalkan layar ini atau Muvo masuk ke latar belakang.",
+      "autoHide": "Kata disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo masuk ke latar belakang.",
       "failed": "Gagal menampilkan frasa pemulihan.",
-      "privateKey": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan. Simpan cadangan kunci Anda sendiri: hanya itu cara memulihkan dompet ini."
+      "privateKey": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan. Simpan cadangan kunci Anda sendiri: hanya itu cara memulihkan dompet ini.",
+      "masked": "Tersembunyi. Ketuk ikon mata untuk menampilkan kata.",
+      "revealed": "Ditampilkan selama 30 detik.",
+      "showWords": "Tampilkan kata",
+      "hideWords": "Sembunyikan kata"
     },
     "logout": {
       "title": "Keluar",
@@ -287,7 +300,21 @@
       "releaseNotesTitle": "Catatan rilis",
       "releaseNotesDesc": "Perubahan di setiap versi",
       "copyright": "© 2026 CointMU Foundation • Lisensi MIT",
-      "disclaimer": "Muvo adalah dompet non-kustodian. Kunci Anda tetap berada di ponsel ini, dan tidak ada yang bisa memulihkannya untuk Anda, termasuk kami."
+      "disclaimer": "Muvo adalah dompet non-kustodian. Kunci Anda tetap berada di ponsel ini, dan tidak ada yang bisa memulihkannya untuk Anda, termasuk kami.",
+      "buildInfo": "Info build",
+      "commit": "Commit",
+      "commitModified": "{{commit}} (diubah)",
+      "builtAt": "Dibuat",
+      "channel": "Kanal",
+      "channels": {
+        "dev": "Pengembangan",
+        "ci": "CI",
+        "release": "Rilis"
+      },
+      "unknown": "tidak diketahui",
+      "copyBuildInfo": "Salin info build",
+      "copyBuildInfoDesc": "Tempelkan ke laporan bug. Tidak berisi data dompet.",
+      "copied": "Disalin"
     },
     "groups": {
       "general": "Umum",
@@ -373,7 +400,6 @@
       "confirmTitle": "Konfirmasi dengan {{name}}",
       "confirmBody": "Satu pemeriksaan yang berhasil akan mengaktifkannya. PIN Anda tetap berfungsi.",
       "unavailable": "{{name}} sedang tidak tersedia di ponsel ini. Periksa pengaturan ponsel Anda.",
-      "notConfirmed": "Pemeriksaan tidak berhasil, jadi fitur ini tetap mati. Coba lagi atau tetap gunakan PIN.",
       "tryAgain": "Coba lagi",
       "turnedOffTitle": "Buka kunci biometrik dimatikan",
       "turnedOffBody": "Tidak ada lagi sidik jari atau wajah yang terdaftar di ponsel ini, jadi Muvo kembali hanya memakai PIN. Daftarkan lagi di pengaturan ponsel, lalu aktifkan kembali di sini.",
@@ -392,7 +418,9 @@
       "authPrompt": "Tampilkan kunci privat Anda",
       "keyLabel": "Kunci privat",
       "hide": "Sembunyikan",
-      "autoHide": "Kunci juga disembunyikan saat Anda meninggalkan layar ini atau Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar."
+      "autoHide": "Kunci disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar.",
+      "showKey": "Tampilkan kunci",
+      "hideKey": "Sembunyikan kunci"
     }
   },
   "send": {

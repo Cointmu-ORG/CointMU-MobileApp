@@ -6,7 +6,7 @@ import { AppState, ScrollView, View } from 'react-native';
 import { PinPrompt } from '@/entities/auth';
 import { useWalletStore } from '@/entities/wallet';
 import { logger } from '@/shared/lib';
-import { Button, Text, WordGrid } from '@/shared/ui';
+import { Button, SecretEye, Text, useTimedReveal, WordGrid } from '@/shared/ui';
 
 import { loadRecoveryWords } from '../model/load-words';
 import { PhraseWarning } from './phrase-warning';
@@ -29,10 +29,42 @@ function Intro({ onReveal, isFailed }: { onReveal: () => void; isFailed: boolean
   );
 }
 
+/** The words stay masked until the eye is pressed, and mask themselves again after 30 s. */
+function ShownPhrase({ words, onHide }: { words: readonly string[]; onHide: () => void }) {
+  const { t } = useTranslation();
+  const { isRevealed, toggle } = useTimedReveal();
+  return (
+    <ScrollView contentContainerClassName="gap-6 pb-8">
+      <PhraseWarning />
+      <View className="gap-1">
+        <View className="flex-row items-center justify-between">
+          <Text variant="caption" tone="secondary">
+            {t(isRevealed ? 'settings.recoveryPhrase.revealed' : 'settings.recoveryPhrase.masked')}
+          </Text>
+          <SecretEye
+            isRevealed={isRevealed}
+            onToggle={toggle}
+            showLabel={t('settings.recoveryPhrase.showWords')}
+            hideLabel={t('settings.recoveryPhrase.hideWords')}
+          />
+        </View>
+        <WordGrid words={words} isMasked={!isRevealed} />
+      </View>
+      <View className="gap-2">
+        <Button label={t('settings.recoveryPhrase.hide')} onPress={onHide} />
+        <Text variant="caption" tone="secondary" className="text-center">
+          {t('settings.recoveryPhrase.autoHide')}
+        </Text>
+      </View>
+    </ScrollView>
+  );
+}
+
 /**
  * Settings > Recovery phrase. Screenshots are blocked for the whole screen. The words are read
- * from SecureStore only after a PIN or biometric check, kept in component state, and dropped on
- * "Hide", on leaving the screen, and as soon as Muvo leaves the foreground.
+ * from SecureStore only after a PIN or biometric check, kept in component state, shown masked
+ * until the eye is pressed, and dropped on "Hide", on leaving the screen, and as soon as Muvo
+ * leaves the foreground.
  */
 export function RevealPhrase() {
   usePreventScreenCapture();
@@ -70,21 +102,7 @@ export function RevealPhrase() {
     );
   }
   if (state.step === 'shown') {
-    return (
-      <ScrollView contentContainerClassName="gap-6 pb-8">
-        <PhraseWarning />
-        <WordGrid words={state.words} />
-        <View className="gap-2">
-          <Button
-            label={t('settings.recoveryPhrase.hide')}
-            onPress={() => setState({ step: 'intro' })}
-          />
-          <Text variant="caption" tone="secondary" className="text-center">
-            {t('settings.recoveryPhrase.autoHide')}
-          </Text>
-        </View>
-      </ScrollView>
-    );
+    return <ShownPhrase words={state.words} onHide={() => setState({ step: 'intro' })} />;
   }
   return <Intro onReveal={() => setState({ step: 'auth' })} isFailed={state.step === 'error'} />;
 }

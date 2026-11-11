@@ -55,9 +55,15 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
+    "build-info": "node scripts/generate-build-info.js",
+    "prepare": "node scripts/generate-build-info.js",
+    "prestart": "node scripts/generate-build-info.js",
     "start": "expo start",
+    "preandroid": "node scripts/generate-build-info.js",
     "android": "expo start --android",
+    "preios": "node scripts/generate-build-info.js",
     "ios": "expo start --ios",
+    "preweb": "node scripts/generate-build-info.js",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

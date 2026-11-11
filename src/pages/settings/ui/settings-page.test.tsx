@@ -1,10 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { Linking } from 'react-native';
 
 import { storeNewPin, useAuthPrefsStore, useSessionStore } from '@/entities/auth';
 import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
-import { EXTERNAL_LINKS, getAppInfo } from '@/shared/config';
+import { EXTERNAL_LINKS, getAppInfo, getBuildInfo } from '@/shared/config';
 import { i18n } from '@/shared/i18n';
 import { DEFAULT_APPEARANCE, useAppearanceStore } from '@/shared/model';
 
@@ -15,6 +16,7 @@ preloadRoutes();
 const PHRASE = 'test test test test test test test test test test test junk';
 const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
+jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(async () => true) }));
 jest.mock('@/shared/api', () => ({
   ...jest.requireActual('@/shared/api'),
   createRpcProvider: () => ({
@@ -168,6 +170,24 @@ describe('Settings > About', () => {
     expect(screen.getByText('1912')).toBeOnTheScreen();
     expect(screen.getByText('rpc.test.invalid')).toBeOnTheScreen();
     expect(screen.getByText('© 2026 CointMU Foundation • MIT License')).toBeOnTheScreen();
+  });
+
+  it('shows the build info and copies a plain-text block without wallet data', async () => {
+    const { commitShort, isDirty, channel } = getBuildInfo();
+    await open('/about', 'Build info');
+    const commit = commitShort ?? 'unknown';
+    expect(screen.getByText(isDirty ? `${commit} (modified)` : commit)).toBeOnTheScreen();
+    expect(
+      screen.getByText({ dev: 'Development', ci: 'CI', release: 'Release' }[channel]),
+    ).toBeOnTheScreen();
+
+    await fireEvent.press(screen.getByRole('button', { name: /^Copy build info/ }));
+    expect(await screen.findByText('Copied')).toBeOnTheScreen();
+    const [[report]] = jest.mocked(Clipboard.setStringAsync).mock.calls;
+    expect(report).toMatch(/^Muvo \S+ \(build .+\)\nCommit: .+\nBranch: .+\nBuilt: .+\nChannel: /);
+    expect(report).not.toContain(ADDRESS);
+    expect(report).not.toContain('rpc.test.invalid');
+    for (const word of new Set(PHRASE.split(' '))) expect(report).not.toMatch(`\\b${word}\\b`);
   });
 
   it('opens links in the system browser', async () => {

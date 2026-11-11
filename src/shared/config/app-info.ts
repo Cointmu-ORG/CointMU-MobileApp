@@ -12,8 +12,13 @@ export type AppInfo = {
   readonly build: string | null;
 };
 
+/** True in Expo Go, which runs our JS inside its own native app (its Info.plist, not ours). */
+export function isRunningInExpoGo(): boolean {
+  return Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+}
+
 export function getAppInfo(): AppInfo {
-  const isClientApp = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+  const isClientApp = isRunningInExpoGo();
   return {
     // package.json carries the same release version as app.json (D-40).
     version:

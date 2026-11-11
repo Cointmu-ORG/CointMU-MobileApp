@@ -9,8 +9,10 @@ export {
 export {
   authenticateWithBiometrics,
   getBiometricAvailability,
+  toBiometricFailure,
   toBiometricKind,
   type BiometricAvailability,
+  type BiometricFailure,
   type BiometricKind,
 } from './api/biometrics';
 export {
