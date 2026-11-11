@@ -19,11 +19,11 @@ Keys live on the device only. There is no "forgot password" and no server-side r
 | Symbol | CMU |
 | Decimals | 18 (wei is protocol-level in geth; Q-01 closed, D-49) |
 | Consensus | Proof of Work (geth-based) |
-| RPC | preset node list from `EXPO_PUBLIC_RPC_URLS` (comma-separated, first is the default) plus one user-added node; see below and D-43 |
+| RPC | preset node list from `EXPO_PUBLIC_RPC_URLS` (comma-separated, first is the default) plus user-added nodes; see below, D-43 and D-67 |
 
 Chain config lives in one place (`src/entities/network`). Never hardcode chain ID or RPC elsewhere.
 
-Node selection (D-43): Settings > Network lists the preset nodes and at most one node the user added. Before a node is used (selected or added) the app calls `eth_chainId` and refuses anything that is not 1912, so balances and signatures can never go to another chain. Each node shows its status and latency. The choice (`muvo.network`: selected URL and custom URL) is persisted; it is not a secret. A stored choice that no longer exists falls back to the first preset. `getProvider()` follows the selection.
+Node selection (D-43, D-67): Settings > Network lists the preset nodes and the nodes the user added (10 in all). Before a node is used (selected or added) the app calls `eth_chainId` and refuses anything that is not 1912, so balances and signatures can never go to another chain. Each node shows its status and latency, the chain check, its block height and an "out of sync" flag when it lags the best node by more than `NODE_SYNC_LAG_BLOCKS`. Pings run on open, on "Ping all" or pull-to-refresh, three at a time with a timeout, and stop when the screen closes or the app leaves the foreground. The choice (`muvo.network`, version 1: selected URL and custom URLs) is persisted; it is not a secret. A stored choice that no longer exists falls back to the first preset. `getProvider()` follows the selection.
 
 ## 3. Stack
 
@@ -33,7 +33,7 @@ Node selection (D-43): Settings > Network lists the preset nodes and at most one
 | Navigation | Expo Router |
 | Blockchain | ethers v6 (`JsonRpcProvider`, HTTP polling, no WebSocket) |
 | State | Zustand (persist only non-sensitive data) |
-| Styling | NativeWind v4 (Tailwind) |
+| Styling | NativeWind v4 (Tailwind); colors are CSS variables set on the root view (D-66) |
 | i18n | i18next + react-i18next, JSON per language |
 | Secrets | `expo-secure-store` |
 | Auth | PIN + `expo-local-authentication` |
@@ -63,6 +63,8 @@ app/                         # Expo Router routes ONLY. No logic.
   receive.tsx
   scan.tsx                   # ?from=send returns to the form; otherwise opens Send
   tokens.tsx                 # add, hide and remove ERC-20 tokens
+  appearance.tsx, language.tsx, security.tsx, about.tsx   # settings groups (D-71)
+  enable-biometrics.tsx, private-key.tsx                  # opened from Security (D-69, D-70)
   account-switcher.tsx       # form sheet opened from the home account chip (D-62)
   tx/[hash].tsx              # tx detail (local or scanned)
   lock.tsx
@@ -76,14 +78,15 @@ src/
     api/      rpc provider factory
     config/   env, constants
     lib/      pure helpers (amount, address, logger, crypto-safe utils)
-    ui/       design-system components (Button, Input, Screen, ...)
+    ui/       design-system components (Button, Input, Screen, SettingsRow, ...), theme/ (tokens, ThemeRoot)
+    model/    display preferences: appearance store, hide-balances reveal, amount display hook
     i18n/     locales/en.json, locales/id.json, setup
 ```
 
 Auth guard (D-36): the root and onboarding layouts wrap screens in `Stack.Protected`, driven by wallet status and session state. Every group's `redirectTo` comes from one function, `resolveEntryRoute({ status, isUnlocked, isRecoveryRequired })`: `none` → welcome (or recover when recovery is required, D-39), `pendingBackup` → backup, `pendingPin` → set-pin, `active` → lock or home. Protected screens never render, and a status change redirects automatically, so features change state instead of navigating.
 The FSD `app` layer has no `ui` segment (Steiger `fsd/no-ui-in-app`); navigator layouts live in `src/app/routes`.
 
-Headers (D-60): every sub-screen of the root stack uses `SUB_SCREEN_HEADER` (`src/app/routes/header-options.ts`): a translated centered title and an icon-only back button, so a route group name never shows. Screens without back are deliberate: the tabs, lock, the send result (Done only) and the auto-advancing onboarding steps.
+Headers (D-60): every sub-screen of the root stack uses `useSubScreenHeader()` (`src/app/routes/header-options.ts`; a hook, because its colors follow the theme): a translated centered title and an icon-only back button, so a route group name never shows. Screens without back are deliberate: the tabs, lock, the send result (Done only) and the auto-advancing onboarding steps.
 
 Route file example:
 ```ts
@@ -92,9 +95,9 @@ export { HomePage as default } from '@/pages/home';
 ```
 
 ### Features
-`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `manage-tokens`, `change-language`, `change-pin`, `lock-settings`, `reveal-mnemonic`, `reset-wallet`, `select-network`, `manage-accounts`.
+`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `manage-tokens`, `change-language`, `change-appearance`, `change-pin`, `lock-settings`, `reveal-mnemonic`, `reveal-private-key`, `reset-wallet`, `select-network`, `manage-accounts`.
 
-A page slice may hold the screens of one flow: `pages/send` (form, review, result) and `pages/history` (list, tx detail). This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
+A page slice may hold the screens of one flow: `pages/send` (form, review, result), `pages/history` (list, tx detail) and `pages/settings` (the tab, Appearance, Language, Security, enable biometrics, private key, About). This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
 
 ### Slice segments
 `ui/`, `model/` (Zustand store, selectors, types), `api/` (RPC calls), `lib/` (pure helpers), `config/`. Each slice exposes only `index.ts`.
@@ -110,20 +113,20 @@ A page slice may hold the screens of one flow: `pages/send` (form, review, resul
 - Derivation: BIP-39 mnemonic (12 words), BIP-44 path `m/44'/60'/0'/0/{index}`. A wallet starts with index 0; the user can add more accounts (index 1, 2, …) from the same mnemonic, switch between them and name them (D-44). The wallet store keeps `accounts` (index, address, name) and the active `accountIndex`/`address`; names are local and public. Private-key wallets have exactly one account. Multiple separate wallets (several secrets) are out of scope (Q-34).
 - Derivation wrapper: all mnemonic → account derivation goes through `deriveAccount()` in `entities/wallet/lib/derive.ts`. ethers v6 `fromPhrase` runs PBKDF2 in pure JS and blocks the Hermes JS thread, so the wrapper waits for a painted frame first and the UI shows a Reanimated (UI-thread) progress animation. Swapping the PBKDF2 backend later only touches this function (Q-30).
 - Import: mnemonic (12 or 24 words) or raw private key. A private-key import has no mnemonic and cannot derive more accounts. The import screen shows a mandatory "back up this key yourself" warning that the user must acknowledge (D-28).
-- Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params. The clipboard is used only for the user's own address; there is no copy action for the mnemonic or a private key.
+- Storage: mnemonic or private key goes in `expo-secure-store` with `keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY`. It is never put in Zustand, AsyncStorage, logs, Sentry, or navigation params. The clipboard is used only for the user's own address; there is no copy action for the mnemonic or a private key. "Show private key" (D-70) reveals the active account's key behind the same gates as the phrase.
 - Onboarding state (D-32): a new mnemonic goes to SecureStore immediately, and the wallet status (persisted, non-secret) moves `none` → `pendingBackup` → `pendingPin` → `active`; imports go `none` → `pendingPin` → `active`. A killed app resumes at the step for its status.
 - Fresh install (D-33): the iOS Keychain survives uninstall but AsyncStorage does not. If the `muvo.installed` marker is missing at startup, all of the app's SecureStore items are wiped before anything reads them.
 - Startup integrity check (D-39): after the fresh-install check and store hydration, the persisted status must match what SecureStore can still read. `pendingBackup` and `pendingPin` need a readable secret; `active` needs a readable secret and a readable PIN record; `none` needs nothing. On a mismatch the app does not open the lock screen: it wipes local wallet data through the reset-wallet flow and routes to `/recover`, which explains the data couldn't be read and offers import by mnemonic or private key (reusing import-wallet) or starting a new wallet. The recovery state is persisted, so a killed app returns to `/recover`. The check reads the secret only to validate its shape; the value never leaves the wallet entity (`hasReadableWalletSecret`).
 - Signing: read the secret from SecureStore **after successful auth**, build the `Wallet`, sign, and drop the reference immediately. Do not keep a long-lived `Wallet` object in global state.
 - Backup flow (create wallet): show the 12 words once, block screenshots (`expo-screen-capture`), then force a verification quiz (re-enter 3 random words) before the wallet is activated.
 - PIN screens (D-59): every PIN entry (lock, set-pin, change PIN, `PinPrompt` before send, reveal and remove wallet) renders `PinEntry` from `shared/ui`: header at the top, keypad anchored to the bottom, keys scaled to the screen.
-- Auth: user sets a 6-digit PIN at onboarding. PIN is stored as a salted hash, never plain. Biometrics are optional on top of the PIN, and PIN is always the fallback.
+- Auth: user sets a 6-digit PIN at onboarding. PIN is stored as a salted hash, never plain. Biometrics are optional on top of the PIN, and PIN is always the fallback. Turning biometrics on needs the PIN and then a successful biometric check; if the device later loses its enrolment the setting switches itself off with a notice (D-69).
 - PIN hashing goes through one `PinHasher` interface in `entities/auth` with the algorithm and parameters in `entities/auth/config`. SecureStore holds a versioned record `{ v, algo, iterations, salt, hash }`; verification uses the record's own params, and an outdated record is rehashed after a successful unlock (D-34). The KDF is a placeholder until Q-32 is decided.
 - Auth is required: on app open, after returning from background past the auto-lock timeout, and **before every transaction signature** and before revealing the mnemonic.
 - Auto-lock: 1 minute default, user-adjustable (immediately, 1, 5, 15 min).
 - PIN brute force: escalating lockout after failed attempts. After 10 failures, offer wallet reset (this wipes local keys; recovery requires the mnemonic). The failed count, lockout-until and lastSeenAt live in SecureStore, not in a persisted store (D-27). If the clock goes backwards during a lockout, the lockout restarts from now. Biometrics are not offered while a lockout runs.
 - Reset wallet: confirm twice, wipe SecureStore and persisted stores, return to onboarding. From the lock screen (after 10 failures) it is two confirmations. From Settings it is "Remove wallet from this device" (D-45): a strong warning with a "I have my recovery phrase" acknowledgement, the PIN, then a final confirmation. "Lock now" only locks the session.
-- Settings (D-46): Security holds change PIN (current PIN, then the new one twice), the biometrics switch (turning it on needs one successful biometric check), the auto-lock timeout (persisted in `muvo.auth.prefs`), and the recovery phrase. The phrase is read only after a PIN or biometric check, screenshots are blocked on that screen, and the words are dropped on Hide, on leaving the screen and when the app leaves the foreground. Private-key wallets show no phrase and no key (Q-35). Every PIN check, including these, shares the lockout.
+- Settings (D-46, D-71): the tab lists the groups, each on its own screen. Security holds change PIN (current PIN, then the new one twice), the biometrics switch (D-69), the auto-lock timeout (persisted in `muvo.auth.prefs`), lock now, the recovery phrase, the private key (D-70), the wrong-PIN counter and remove wallet. The phrase is read only after a PIN or biometric check, screenshots are blocked on that screen, and the words are dropped on Hide, on leaving the screen and when the app leaves the foreground. Private-key wallets show no phrase; their key is shown by "Show private key" (D-70). Every PIN check, including these, shares the lockout.
 
 ## 6. Transaction flow
 
@@ -157,7 +160,8 @@ No indexer is assumed (Q-11). Three `TransactionSource`s (`entities/transaction/
 
 ## 9. UI and i18n
 
-- White and blue theme, matching the desktop app. Light mode only for MVP. Design tokens in Tailwind config.
+- White and blue theme, matching the desktop app, in light and dark (System, Light, Dark; D-66) with six accent colors (D-68). Tokens live in `src/shared/ui/theme`; Tailwind classes read them as CSS variables that `ThemeRoot` sets on the root view, and code reads them with `useThemeColors()`. Never import a color value statically and never write a hex code in a component.
+- Appearance preferences (D-71, `muvo.appearance`): density, text size, animations, time format, balance decimals, hide empty tokens, hide balances, hide the app in the app switcher. Balances and history amounts go through `useAmountDisplay()` (decimals and masking); the send form and review always show exact amounts.
 - Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`; a language picked in Settings is stored (`muvo.language`, AsyncStorage) and restored during bootstrap, before the splash hides. No hardcoded user-facing strings.
 - Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting; amount input accepts the locale's decimal separator (D-51). Dates via date-fns with the `id`/`en` locale. No fiat.
 - Status and warnings never rely on color alone: badges and notices carry an icon and text.

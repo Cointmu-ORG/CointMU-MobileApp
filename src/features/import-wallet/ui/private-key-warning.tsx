@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { Checkbox, colors, MOTION, Text } from '@/shared/ui';
+import { Checkbox, MOTION, Text, useThemeColors } from '@/shared/ui';
 
 const ICON_SIZE = 20;
 
@@ -14,6 +14,7 @@ type PrivateKeyWarningProps = {
 
 /** D-28: mandatory "back up your key" warning for private-key imports. */
 export function PrivateKeyWarning({ isAcknowledged, onToggle }: PrivateKeyWarningProps) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   return (
     <Animated.View entering={FadeIn.duration(MOTION.baseMs)}>

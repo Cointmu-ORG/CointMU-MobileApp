@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
 import { ROUTES } from '@/shared/config';
-import { colors, ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
+import { ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 /** Active account name; opens the account switcher. */
 export function AccountChip() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const label = useAccountLabel();
   const account = useActiveAccount();

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, View } from 'react-native';
 
 import { useMnemonicWords } from '@/entities/wallet';
-import { Button, colors, Text, WordGrid } from '@/shared/ui';
+import { Button, Text, useThemeColors, WordGrid } from '@/shared/ui';
 
 type MnemonicBackupProps = {
   onConfirmed: () => void;
@@ -14,11 +14,12 @@ type MnemonicBackupProps = {
  * Deliberately no copy button: the clipboard is forbidden for secrets (forbidden rule 2).
  */
 export function MnemonicBackup({ onConfirmed }: MnemonicBackupProps) {
+  const colors = useThemeColors();
   usePreventScreenCapture();
   const { t } = useTranslation();
   const state = useMnemonicWords();
 
-  if (state.status === 'loading') return <ActivityIndicator color={colors.primary[600]} />;
+  if (state.status === 'loading') return <ActivityIndicator color={colors.accent.DEFAULT} />;
   if (state.status === 'error') {
     return (
       <Text tone="danger" accessibilityLiveRegion="polite">

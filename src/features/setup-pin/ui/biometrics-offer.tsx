@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { authenticateWithBiometrics, useAuthPrefsStore } from '@/entities/auth';
+import { enableBiometrics } from '@/entities/auth';
 import { logger } from '@/shared/lib';
 import { Button, Text } from '@/shared/ui';
 
@@ -14,8 +14,8 @@ export function BiometricsOffer({ onDone }: { onDone: () => void }) {
   const enable = async () => {
     setIsBusy(true);
     try {
-      const isConfirmed = await authenticateWithBiometrics(t('lock.biometricsPrompt'));
-      useAuthPrefsStore.getState().setBiometricsEnabled(isConfirmed);
+      // The PIN was set a moment ago on this screen, so the user is already verified.
+      await enableBiometrics(t('lock.biometricsPrompt'));
     } catch (error) {
       logger.warn('Biometric enrolment prompt failed', { error });
     } finally {

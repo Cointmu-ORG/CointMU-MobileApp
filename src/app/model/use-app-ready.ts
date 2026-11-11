@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useWalletStore } from '@/entities/wallet';
 import { restoreLanguage } from '@/shared/i18n';
 import { logger } from '@/shared/lib';
+import { useAppearanceStore } from '@/shared/model';
 
 import { ensureFreshInstallState } from './fresh-install';
 import { recoverIfWalletDataMissing } from './wallet-integrity';
@@ -16,6 +17,8 @@ export function useAppReady(): boolean {
   const [isInstallChecked, setIsInstallChecked] = useState(false);
   const [isIntegrityChecked, setIsIntegrityChecked] = useState(false);
   const hasHydrated = useWalletStore((state) => state.hasHydrated);
+  // The first frame must already be in the stored theme and accent.
+  const hasAppearance = useAppearanceStore((state) => state.hasHydrated);
 
   useEffect(() => {
     const install = ensureFreshInstallState()
@@ -36,5 +39,5 @@ export function useAppReady(): boolean {
       .finally(() => setIsIntegrityChecked(true));
   }, [isInstallChecked, hasHydrated]);
 
-  return isIntegrityChecked;
+  return isIntegrityChecked && hasAppearance;
 }

@@ -1,5 +1,7 @@
 import { Text as NativeText, type TextProps as NativeTextProps } from 'react-native';
 
+import { useAppearanceStore } from '../model/appearance-store';
+
 const VARIANT_CLASS = {
   title: 'text-3xl font-bold',
   heading: 'text-xl font-semibold',
@@ -12,12 +14,13 @@ const VARIANT_CLASS = {
 } as const;
 
 // Color is separate from size so classes never conflict (NativeWind resolves by CSS order).
-// Every tone meets WCAG AA (4.5:1) on white and on the surface color. `content.muted` is too
+// Every tone meets WCAG AA (4.5:1) on the card and the surface color, in both themes and for
+// every accent (theme/build-theme.test.ts). `content.muted` is too
 // light for text (2.6:1), so it is not a tone; status colors use their darker "strong" shade.
 const TONE_CLASS = {
   default: 'text-content',
   secondary: 'text-content-secondary',
-  primary: 'text-primary-600',
+  primary: 'text-accent',
   inverse: 'text-content-inverse',
   danger: 'text-danger-strong',
   success: 'text-success-strong',
@@ -33,9 +36,15 @@ export type TextProps = NativeTextProps & {
   className?: string;
 };
 
+/**
+ * All app text. Grows with the device's text size unless the user turned that off in
+ * Settings > Appearance.
+ */
 export function Text({ variant = 'body', tone = 'default', className = '', ...props }: TextProps) {
+  const followsSystemTextSize = useAppearanceStore((state) => state.followsSystemTextSize);
   return (
     <NativeText
+      allowFontScaling={followsSystemTextSize}
       className={`${VARIANT_CLASS[variant]} ${TONE_CLASS[tone]} ${className}`}
       {...props}
     />

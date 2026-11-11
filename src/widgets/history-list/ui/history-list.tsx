@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, SectionList, View } from 'react-native';
 
-import { Button, colors, ICON_SIZE, Notice, Skeleton, Spinner, Text } from '@/shared/ui';
+import { Button, ICON_SIZE, Notice, Skeleton, Spinner, Text, useThemeColors } from '@/shared/ui';
 
 import { groupByDay } from '../lib/group-by-day';
 import { useHistory } from '../model/use-history';
@@ -27,6 +27,7 @@ function Header() {
 }
 
 function Empty({ isError, onRetry }: { isError: boolean; onRetry: () => void }) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   if (isError) {
     return (
@@ -94,6 +95,7 @@ function Footer(props: {
 
 /** History tab: grouped by day, pull to refresh, older pages on scroll or on request. */
 export function HistoryList() {
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
   const { items, status, hasMore, isFirstLoad, loadMore, refresh } = useHistory();
   const sections = useMemo(
@@ -152,8 +154,8 @@ export function HistoryList() {
             setIsPullRefresh(true);
             refresh();
           }}
-          tintColor={colors.primary[600]}
-          colors={[colors.primary[600]]}
+          tintColor={colors.accent.DEFAULT}
+          colors={[colors.accent.DEFAULT]}
         />
       }
       contentContainerClassName="px-6 pb-8 pt-4"

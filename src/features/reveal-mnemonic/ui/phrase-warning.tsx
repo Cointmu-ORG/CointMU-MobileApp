@@ -2,9 +2,10 @@ import ShieldAlert from 'lucide-react-native/icons/shield-alert';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { colors, ICON_SIZE, Text } from '@/shared/ui';
+import { ICON_SIZE, Text, useThemeColors } from '@/shared/ui';
 
 export function PhraseWarning() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   return (
     <View className="flex-row gap-3 rounded-card border border-warning bg-warning-soft p-4">

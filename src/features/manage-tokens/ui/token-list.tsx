@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Switch, View } from 'react-native';
+import { View } from 'react-native';
 
 import {
   getAssetKey,
@@ -9,7 +9,7 @@ import {
   type Erc20Asset,
 } from '@/entities/asset';
 import { shortenAddress } from '@/shared/lib';
-import { Button, colors, Text } from '@/shared/ui';
+import { Button, Text, ThemedSwitch } from '@/shared/ui';
 
 function TokenRow({ token }: { token: Erc20Asset }) {
   const { t } = useTranslation();
@@ -30,11 +30,10 @@ function TokenRow({ token }: { token: Erc20Asset }) {
             {isCustom ? t('tokens.unverified') : t('tokens.builtin')}
           </Text>
         </View>
-        <Switch
+        <ThemedSwitch
           value={isShown}
           onValueChange={(next) => useTokenStore.getState().setHidden(key, !next)}
           accessibilityLabel={t('tokens.showOnHome', { symbol: token.symbol })}
-          trackColor={{ true: colors.primary[600], false: colors.border.strong }}
         />
       </View>
       {isCustom ? (

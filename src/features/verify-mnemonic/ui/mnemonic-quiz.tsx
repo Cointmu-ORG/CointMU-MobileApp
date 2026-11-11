@@ -4,7 +4,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { useMnemonicWords, useWalletStore } from '@/entities/wallet';
 import { secureRandomInt, type RandomInt } from '@/shared/lib';
-import { Button, colors, type InputStatus, MOTION, Text } from '@/shared/ui';
+import { Button, type InputStatus, MOTION, Text, useThemeColors } from '@/shared/ui';
 
 import { pickQuizIndices } from '../lib/pick-quiz-indices';
 import { QuizField } from './quiz-field';
@@ -62,9 +62,10 @@ type MnemonicQuizProps = { randomInt?: RandomInt };
 
 /** Re-enter 3 random words; only a full pass moves the wallet past pendingBackup (D-14). */
 export function MnemonicQuiz({ randomInt = secureRandomInt }: MnemonicQuizProps) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const state = useMnemonicWords();
-  if (state.status === 'loading') return <ActivityIndicator color={colors.primary[600]} />;
+  if (state.status === 'loading') return <ActivityIndicator color={colors.accent.DEFAULT} />;
   if (state.status === 'error') {
     return <Text tone="danger">{t('onboarding.backup.loadError')}</Text>;
   }

@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 import { MOTION } from './motion';
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 import { useShake } from './use-shake';
 
 type PinDotsProps = {
@@ -16,12 +16,13 @@ type PinDotsProps = {
 };
 
 function PinDot({ isFilled }: { isFilled: boolean }) {
+  const colors = useThemeColors();
   const fillStyle = useAnimatedStyle(() => ({
     transform: [{ scale: withTiming(isFilled ? 1 : 0, { duration: MOTION.fastMs }) }],
   }));
   return (
     <View className="h-4 w-4 items-center justify-center rounded-full border-2 border-primary-600">
-      <Animated.View style={[styles.fill, fillStyle]} />
+      <Animated.View style={[styles.fill, { backgroundColor: colors.primary[600] }, fillStyle]} />
     </View>
   );
 }
@@ -60,6 +61,5 @@ const styles = StyleSheet.create({
     width: DOT_FILL_SIZE,
     height: DOT_FILL_SIZE,
     borderRadius: DOT_FILL_SIZE / 2,
-    backgroundColor: colors.primary[600],
   },
 });

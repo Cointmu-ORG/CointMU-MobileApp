@@ -6,11 +6,12 @@ import { useWalletStore } from '@/entities/wallet';
 import { AssetList } from '@/widgets/asset-list';
 import { BalanceCard } from '@/widgets/balance-card';
 import { TxList } from '@/widgets/tx-list';
-import { colors, ScrollScreen } from '@/shared/ui';
+import { ScrollScreen, useThemeColors } from '@/shared/ui';
 
 import { QuickActions } from './quick-actions';
 
 export function HomePage() {
+  const colors = useThemeColors();
   const address = useWalletStore((state) => state.address);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -27,8 +28,8 @@ export function HomePage() {
         <RefreshControl
           refreshing={isRefreshing}
           onRefresh={() => void refresh()}
-          tintColor={colors.primary[600]}
-          colors={[colors.primary[600]]}
+          tintColor={colors.accent.DEFAULT}
+          colors={[colors.accent.DEFAULT]}
         />
       }
     >

@@ -9,7 +9,7 @@ import QRCode from 'react-native-qrcode-svg';
 
 import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
 import { logger } from '@/shared/lib';
-import { Button, Card, colors, ICON_SIZE, Notice, Text } from '@/shared/ui';
+import { Button, Card, ICON_SIZE, Notice, Text, useTheme } from '@/shared/ui';
 
 const QR_SIZE = 220;
 const QR_QUIET_ZONE = 12;
@@ -39,6 +39,7 @@ function useCopy(address: string) {
  * with copy and share. A note says which assets belong on this address.
  */
 export function ReceiveCard() {
+  const { colors, scheme } = useTheme();
   const { t } = useTranslation();
   const account = useActiveAccount();
   const labelOf = useAccountLabel();
@@ -63,8 +64,9 @@ export function ReceiveCard() {
             value={address}
             size={QR_SIZE}
             quietZone={QR_QUIET_ZONE}
-            color={colors.content.DEFAULT}
-            backgroundColor={colors.surface.card}
+            // Always dark modules on white: many scanners cannot read an inverted code.
+            color={scheme === 'dark' ? colors.surface.DEFAULT : colors.content.DEFAULT}
+            backgroundColor={colors.content.inverse}
             ecl="M"
           />
         </View>
@@ -82,7 +84,7 @@ export function ReceiveCard() {
           variant="secondary"
           label={t('receive.share')}
           onPress={() => void share()}
-          icon={<Share2 size={ICON_SIZE.md} color={colors.primary[600]} />}
+          icon={<Share2 size={ICON_SIZE.md} color={colors.accent.DEFAULT} />}
         />
       </View>
       <Notice tone="info">{t('receive.note')}</Notice>

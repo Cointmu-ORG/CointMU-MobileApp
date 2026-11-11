@@ -8,6 +8,7 @@ import { PIN_LENGTH } from '../config/auth-config';
 import { formatCountdown } from '../lib/format-countdown';
 import { remainingLockoutMs, type LockoutState } from '../lib/lockout';
 import { useAuthPrefsStore } from '../model/auth-prefs-store';
+import { reconcileBiometrics } from '../model/biometric-setting';
 import { useLockoutCountdown } from '../model/use-lockout-countdown';
 import { attemptBiometrics, attemptPin, loadLockout } from '../model/verify-pin';
 
@@ -30,15 +31,22 @@ type PinPromptProps = {
   renderFooter?: (lockout: LockoutState | null) => ReactNode;
 };
 
-/** Loads the lockout once, and offers biometrics on mount when the caller asks for it. */
+/**
+ * Loads the lockout once and checks that biometrics still work on this device. If the setting
+ * was on but the enrolment is gone, it is switched off (the PIN pad is already on screen) and
+ * `wasTurnedOff` lets the prompt say why. Then offers biometrics on mount when the caller asks.
+ */
 function useLockoutAndBiometrics(
   biometrics: PinPromptBiometrics | undefined,
   tryBiometrics: () => Promise<void>,
 ) {
   const isBiometricsEnabled = useAuthPrefsStore((state) => state.isBiometricsEnabled);
   const [lockout, setLockout] = useState<LockoutState | null>(null);
+  const [isDeviceChecked, setIsDeviceChecked] = useState(false);
+  const [wasTurnedOff, setWasTurnedOff] = useState(false);
   const hasPrompted = useRef(false);
-  const canUseBiometrics = biometrics !== undefined && isBiometricsEnabled;
+  const offersBiometrics = biometrics !== undefined;
+  const canUseBiometrics = offersBiometrics && isBiometricsEnabled && isDeviceChecked;
 
   useEffect(() => {
     loadLockout()
@@ -47,13 +55,21 @@ function useLockoutAndBiometrics(
   }, []);
 
   useEffect(() => {
+    if (!offersBiometrics) return;
+    reconcileBiometrics()
+      .then((check) => setWasTurnedOff(check.wasTurnedOff))
+      .catch((error: unknown) => logger.warn('Checking biometrics failed', { error }))
+      .finally(() => setIsDeviceChecked(true));
+  }, [offersBiometrics]);
+
+  useEffect(() => {
     if (!lockout || !canUseBiometrics || !biometrics?.shouldPromptOnMount) return;
     if (hasPrompted.current || remainingLockoutMs(lockout, Date.now()) > 0) return;
     hasPrompted.current = true;
     void tryBiometrics();
   }, [lockout, canUseBiometrics, biometrics, tryBiometrics]);
 
-  return { lockout, setLockout, canUseBiometrics };
+  return { lockout, setLockout, canUseBiometrics, wasTurnedOff };
 }
 
 /**
@@ -81,7 +97,7 @@ export function PinPrompt({
       logger.warn('Biometric check failed', { error });
     }
   }, [biometrics, onVerified]);
-  const { lockout, setLockout, canUseBiometrics } = useLockoutAndBiometrics(
+  const { lockout, setLockout, canUseBiometrics, wasTurnedOff } = useLockoutAndBiometrics(
     biometrics,
     tryBiometrics,
   );
@@ -113,9 +129,10 @@ export function PinPrompt({
   useEffect(clear, [errorSignal, clear]);
 
   const isLocked = remainingMs > 0;
+  const idleText = wasTurnedOff ? t('lock.biometricsTurnedOff') : null;
   const statusText = isLocked
     ? t('lock.lockedOut', { time: formatCountdown(remainingMs) })
-    : message;
+    : (message ?? idleText);
   return (
     <PinEntry
       title={title}

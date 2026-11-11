@@ -1,3 +1,6 @@
 export { lockNow } from './model/lock-now';
 export { AutoLockPicker } from './ui/auto-lock-picker';
-export { BiometricsSwitch } from './ui/biometrics-switch';
+export { BiometricsOffNotice } from './ui/biometrics-off-notice';
+export { BiometricsRow } from './ui/biometrics-row';
+export { EnableBiometricsFlow } from './ui/enable-biometrics-flow';
+export { LockoutInfo } from './ui/lockout-info';

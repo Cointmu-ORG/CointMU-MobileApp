@@ -4,8 +4,8 @@ import { View } from 'react-native';
 
 import { useBalanceStore } from '@/entities/account';
 import { getAssetKey, useTokenBalanceStore, useVisibleAssets, type Asset } from '@/entities/asset';
-import { AMOUNT_DISPLAY_FRACTION_DIGITS, ROUTES } from '@/shared/config';
-import { formatAmount } from '@/shared/lib';
+import { ROUTES } from '@/shared/config';
+import { useAmountDisplay, useAppearanceStore } from '@/shared/model';
 import { Button, Card, Skeleton, Text } from '@/shared/ui';
 
 function useAssetBalance(asset: Asset): bigint | null {
@@ -15,10 +15,14 @@ function useAssetBalance(asset: Asset): bigint | null {
 }
 
 function AssetRow({ asset }: { asset: Asset }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { formatBalance } = useAmountDisplay();
+  const hidesZeroBalanceTokens = useAppearanceStore((state) => state.hidesZeroBalanceTokens);
   const balance = useAssetBalance(asset);
   const name = asset.kind === 'native' ? t('home.assets.nativeName') : (asset.name ?? asset.symbol);
   const isUnverified = asset.kind === 'erc20' && asset.source === 'custom';
+  // Settings > Appearance: a token with nothing in it stays off the home list. CMU always shows.
+  if (hidesZeroBalanceTokens && asset.kind === 'erc20' && balance === 0n) return null;
 
   return (
     <View className="flex-row items-center justify-between gap-3 py-2">
@@ -40,12 +44,7 @@ function AssetRow({ asset }: { asset: Asset }) {
       {balance === null ? (
         <Skeleton className="h-5 w-20 rounded-md" />
       ) : (
-        <Text variant="label">
-          {formatAmount(balance, asset.decimals, {
-            locale: i18n.language,
-            maxFractionDigits: AMOUNT_DISPLAY_FRACTION_DIGITS,
-          })}
-        </Text>
+        <Text variant="label">{formatBalance(balance, asset.decimals)}</Text>
       )}
     </View>
   );

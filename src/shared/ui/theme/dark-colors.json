@@ -1,0 +1,26 @@
+{
+  "surface": {
+    "DEFAULT": "#030712",
+    "card": "#111827",
+    "muted": "#1f2937"
+  },
+  "border": {
+    "DEFAULT": "#374151",
+    "strong": "#6b7280"
+  },
+  "content": {
+    "DEFAULT": "#f3f4f6",
+    "secondary": "#9ca3af",
+    "muted": "#6b7280",
+    "inverse": "#ffffff"
+  },
+  "success": { "DEFAULT": "#10b981", "soft": "#0d2e2f", "strong": "#6ee7b7" },
+  "warning": { "DEFAULT": "#f59e0b", "soft": "#3a241d", "strong": "#fcd34d" },
+  "danger": {
+    "DEFAULT": "#ef4444",
+    "soft": "#3d1a23",
+    "strong": "#fca5a5",
+    "solid": "#b91c1c",
+    "pressed": "#991b1b"
+  }
+}

@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { MAX_NODES } from '@/entities/network';
 import { logger } from '@/shared/lib';
 import { Button, Input } from '@/shared/ui';
 
 import { addCustomNode, type AddNodeResult } from '../model/select-node';
 import { useFailureMessage } from './use-failure-message';
 
-/** Adds the user's own RPC node; it is checked (chain ID) before it is saved or used. */
+/** Adds one of the user's own RPC nodes; it is checked (chain ID) before it is saved or used. */
 export function CustomNodeForm() {
   const { t } = useTranslation();
   const describeFailure = useFailureMessage();
@@ -17,7 +18,9 @@ export function CustomNodeForm() {
   const [isBusy, setIsBusy] = useState(false);
 
   const describe = (result: Exclude<AddNodeResult, { ok: true }>) =>
-    'error' in result ? t(`settings.network.${result.error}`) : describeFailure(result.probe);
+    'error' in result
+      ? t(`settings.network.${result.error}`, { max: MAX_NODES })
+      : describeFailure(result.probe);
 
   const submit = async () => {
     setIsBusy(true);

@@ -8,36 +8,53 @@ import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { colors, ICON_SIZE, Text, type TextTone } from '@/shared/ui';
+import { ICON_SIZE, Text, type TextTone, type ThemeColors, useThemeColors } from '@/shared/ui';
 
 import { TX_POLICY } from '../config/tx-config';
 import type { TxStatus } from '../model/types';
 
-const STYLE: Record<TxStatus, { Icon: LucideIcon; tone: TextTone; color: string; box: string }> = {
+type BadgeStyle = {
+  Icon: LucideIcon;
+  tone: TextTone;
+  color: (colors: ThemeColors) => string;
+  box: string;
+};
+
+const STYLE: Record<TxStatus, BadgeStyle> = {
   pending: {
     Icon: Hourglass,
     tone: 'warning',
-    color: colors.warning.strong,
+    color: (colors) => colors.warning.strong,
     box: 'bg-warning-soft',
   },
-  confirmed: { Icon: Check, tone: 'primary', color: colors.primary[600], box: 'bg-primary-50' },
+  confirmed: {
+    Icon: Check,
+    tone: 'primary',
+    color: (colors) => colors.accent.DEFAULT,
+    box: 'bg-primary-50',
+  },
   final: {
     Icon: CheckCheck,
     tone: 'success',
-    color: colors.success.strong,
+    color: (colors) => colors.success.strong,
     box: 'bg-success-soft',
   },
-  failed: { Icon: CircleX, tone: 'danger', color: colors.danger.strong, box: 'bg-danger-soft' },
+  failed: {
+    Icon: CircleX,
+    tone: 'danger',
+    color: (colors) => colors.danger.strong,
+    box: 'bg-danger-soft',
+  },
   dropped: {
     Icon: Ban,
     tone: 'secondary',
-    color: colors.content.secondary,
+    color: (colors) => colors.content.secondary,
     box: 'bg-surface-muted',
   },
   replaced: {
     Icon: Repeat,
     tone: 'secondary',
-    color: colors.content.secondary,
+    color: (colors) => colors.content.secondary,
     box: 'bg-surface-muted',
   },
 };
@@ -51,6 +68,7 @@ type TxStatusBadgeProps = {
 /** Status chip: icon and text, never color alone. */
 export function TxStatusBadge({ status, confirmations = 0 }: TxStatusBadgeProps) {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const { Icon, tone, color, box } = STYLE[status];
   const label =
     status === 'confirmed'
@@ -61,7 +79,7 @@ export function TxStatusBadge({ status, confirmations = 0 }: TxStatusBadgeProps)
       className={`flex-row items-center gap-1 self-start rounded-full px-2 py-1 ${box}`}
       accessibilityLabel={label}
     >
-      <Icon size={ICON_SIZE.sm} color={color} accessibilityElementsHidden />
+      <Icon size={ICON_SIZE.sm} color={color(colors)} accessibilityElementsHidden />
       <Text variant="caption" tone={tone}>
         {label}
       </Text>

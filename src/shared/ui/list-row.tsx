@@ -3,9 +3,11 @@ import type { LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { View, type AccessibilityRole, type AccessibilityState } from 'react-native';
 
+import type { Density } from '../model/appearance-prefs';
+import { useAppearanceStore } from '../model/appearance-store';
 import { PressableSurface, SURFACE_PALETTE } from './pressable-surface';
 import { Text } from './text';
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 import { ICON_SIZE } from './theme/icon-size';
 
 type ListRowProps = {
@@ -27,6 +29,7 @@ type ListRowProps = {
 };
 
 function IconTile({ Icon, isDestructive }: { Icon: LucideIcon; isDestructive: boolean }) {
+  const colors = useThemeColors();
   return (
     <View
       className={`h-9 w-9 items-center justify-center rounded-lg ${
@@ -35,7 +38,7 @@ function IconTile({ Icon, isDestructive }: { Icon: LucideIcon; isDestructive: bo
     >
       <Icon
         size={ICON_SIZE.md}
-        color={isDestructive ? colors.danger.strong : colors.primary[600]}
+        color={isDestructive ? colors.danger.strong : colors.accent.DEFAULT}
       />
     </View>
   );
@@ -51,6 +54,7 @@ function RowBody({
   onPress,
   isDestructive = false,
 }: ListRowProps) {
+  const colors = useThemeColors();
   const hasChevron = onPress !== undefined && trailing === undefined;
   return (
     <>
@@ -76,14 +80,19 @@ function RowBody({
   );
 }
 
-const ROW_CLASS = 'min-h-14 flex-row items-center gap-3 px-4 py-3';
+// Compact keeps the 44 dp touch target; only the padding around the content shrinks.
+const ROW_CLASS: Record<Density, string> = {
+  comfortable: 'min-h-14 flex-row items-center gap-3 px-4 py-3',
+  compact: 'min-h-11 flex-row items-center gap-3 px-4 py-1.5',
+};
 
 /** One settings-style row. Tappable when `onPress` is given, with the shared press feedback. */
 export function ListRow(props: ListRowProps) {
   const { title, value, onPress, isDisabled, accessibilityRole, accessibilityState } = props;
+  const rowClass = ROW_CLASS[useAppearanceStore((state) => state.density)];
   if (onPress === undefined) {
     return (
-      <View className={`${ROW_CLASS} bg-surface-card`}>
+      <View className={`${rowClass} bg-surface-card`}>
         <RowBody {...props} />
       </View>
     );
@@ -91,7 +100,7 @@ export function ListRow(props: ListRowProps) {
   return (
     <PressableSurface
       palette={SURFACE_PALETTE.row}
-      className={ROW_CLASS}
+      className={rowClass}
       onPress={onPress}
       isDisabled={isDisabled}
       accessibilityRole={accessibilityRole ?? 'button'}

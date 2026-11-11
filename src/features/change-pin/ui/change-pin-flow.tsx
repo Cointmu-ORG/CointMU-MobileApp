@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { NewPinForm, PinPrompt, storeNewPin } from '@/entities/auth';
-import { Button, colors, Text } from '@/shared/ui';
+import { Button, Text, useThemeColors } from '@/shared/ui';
 
 type Step = 'current' | 'new' | 'done';
 const DONE_ICON_SIZE = 48;
@@ -14,6 +14,7 @@ const DONE_ICON_SIZE = 48;
  * the new PIN twice. Only the new record's hash is stored.
  */
 export function ChangePinFlow({ onFinished }: { onFinished: () => void }) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>('current');
   const save = useCallback(async (pin: string) => {

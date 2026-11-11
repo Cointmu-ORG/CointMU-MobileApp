@@ -11,6 +11,7 @@
     "800": "#1e40af",
     "900": "#1e3a8a"
   },
+  "accent": { "DEFAULT": "#1d4ed8" },
   "surface": {
     "DEFAULT": "#f8fafc",
     "card": "#ffffff",
@@ -29,5 +30,11 @@
   },
   "success": { "DEFAULT": "#10b981", "soft": "#ecfdf5", "strong": "#047857" },
   "warning": { "DEFAULT": "#f59e0b", "soft": "#fffbeb", "strong": "#b45309" },
-  "danger": { "DEFAULT": "#ef4444", "soft": "#fef2f2", "strong": "#b91c1c", "pressed": "#991b1b" }
+  "danger": {
+    "DEFAULT": "#ef4444",
+    "soft": "#fef2f2",
+    "strong": "#b91c1c",
+    "solid": "#b91c1c",
+    "pressed": "#991b1b"
+  }
 }

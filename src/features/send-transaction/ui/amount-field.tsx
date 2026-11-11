@@ -2,8 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import type { Asset } from '@/entities/asset';
-import { AMOUNT_DISPLAY_FRACTION_DIGITS } from '@/shared/config';
-import { formatAmount } from '@/shared/lib';
+import { useAmountDisplay } from '@/shared/model';
 import { Button, Input, Text } from '@/shared/ui';
 
 type AmountFieldProps = {
@@ -19,15 +18,14 @@ type AmountFieldProps = {
 /** Locale-aware amount input with the available balance and "Max". */
 export function AmountField(props: AmountFieldProps) {
   const { asset, value, error, balance, isMaxLoading, onChange, onMax } = props;
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  // The available balance follows "Hide balances"; what the user types is always shown.
+  const { formatBalance } = useAmountDisplay();
   const available =
     balance === null
       ? t('send.form.balanceLoading')
       : t('send.form.available', {
-          amount: formatAmount(balance, asset.decimals, {
-            locale: i18n.language,
-            maxFractionDigits: AMOUNT_DISPLAY_FRACTION_DIGITS,
-          }),
+          amount: formatBalance(balance, asset.decimals),
           symbol: asset.symbol,
         });
 

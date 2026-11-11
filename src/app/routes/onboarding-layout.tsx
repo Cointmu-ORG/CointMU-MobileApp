@@ -2,10 +2,10 @@ import { Stack } from 'expo-router';
 
 import { useSessionStore } from '@/entities/auth';
 import { useWalletStore } from '@/entities/wallet';
-import { colors } from '@/shared/ui';
+import { useThemeColors } from '@/shared/ui';
 
 import { resolveEntryRoute } from '../model/resolve-entry-route';
-import { SUB_SCREEN_HEADER } from './header-options';
+import { useSubScreenHeader } from './header-options';
 
 /**
  * Each onboarding step is reachable only in its wallet status (D-32); the recovery screen only
@@ -13,6 +13,8 @@ import { SUB_SCREEN_HEADER } from './header-options';
  * the router moves to the first screen of the newly allowed group, and a killed app resumes there.
  */
 export function OnboardingLayout() {
+  const colors = useThemeColors();
+  const subScreenHeader = useSubScreenHeader();
   const status = useWalletStore((state) => state.status);
   const isRecoveryRequired = useWalletStore((state) => state.isRecoveryRequired);
   const isUnlocked = useSessionStore((state) => state.isUnlocked);
@@ -31,11 +33,11 @@ export function OnboardingLayout() {
       <Stack.Protected guard={status === 'none' && !isRecoveryRequired} redirectTo={entryRoute}>
         <Stack.Screen name="welcome" />
         <Stack.Screen name="create" />
-        <Stack.Screen name="import" options={SUB_SCREEN_HEADER} />
+        <Stack.Screen name="import" options={subScreenHeader} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'pendingBackup'} redirectTo={entryRoute}>
         <Stack.Screen name="backup" />
-        <Stack.Screen name="verify" options={SUB_SCREEN_HEADER} />
+        <Stack.Screen name="verify" options={subScreenHeader} />
       </Stack.Protected>
       <Stack.Protected guard={status === 'pendingPin'} redirectTo={entryRoute}>
         <Stack.Screen name="set-pin" />

@@ -5,7 +5,14 @@ import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { colors, ICON_SIZE, Input, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
+import {
+  ICON_SIZE,
+  Input,
+  PressableSurface,
+  SURFACE_PALETTE,
+  Text,
+  useThemeColors,
+} from '@/shared/ui';
 
 type RecipientFieldProps = {
   value: string;
@@ -23,6 +30,7 @@ function FieldAction({
   Icon: LucideIcon;
   onPress: () => void;
 }) {
+  const colors = useThemeColors();
   return (
     <PressableSurface
       palette={SURFACE_PALETTE.secondary}
@@ -32,7 +40,7 @@ function FieldAction({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Icon size={ICON_SIZE.md} color={colors.primary[600]} />
+      <Icon size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
       <Text variant="label" tone="primary">
         {label}
       </Text>

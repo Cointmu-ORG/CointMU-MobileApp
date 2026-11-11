@@ -2,8 +2,9 @@ import { useState, type ComponentProps } from 'react';
 import { TextInput, View, type TextInputProps } from 'react-native';
 import Animated from 'react-native-reanimated';
 
+import { useAppearanceStore } from '../model/appearance-store';
 import { Text } from './text';
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 
 export type InputStatus = 'default' | 'success' | 'error';
 
@@ -24,6 +25,8 @@ type InputProps = Omit<TextInputProps, 'className'> & {
 };
 
 export function Input({ label, status = 'default', message, animatedStyle, ...props }: InputProps) {
+  const colors = useThemeColors();
+  const followsSystemTextSize = useAppearanceStore((state) => state.followsSystemTextSize);
   const [isFocused, setIsFocused] = useState(false);
   const borderClass =
     status === 'default' && isFocused ? 'border-border-active' : BORDER_CLASS[status];
@@ -36,6 +39,7 @@ export function Input({ label, status = 'default', message, animatedStyle, ...pr
       <Animated.View style={animatedStyle}>
         <TextInput
           accessibilityLabel={label}
+          allowFontScaling={followsSystemTextSize}
           placeholderTextColor={colors.content.secondary}
           className={`min-h-14 rounded-control border bg-surface-card px-4 py-3 text-base text-content ${borderClass}`}
           {...props}

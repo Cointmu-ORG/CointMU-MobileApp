@@ -3,7 +3,7 @@ import { ActivityIndicator } from 'react-native';
 
 import { PressableSurface, SURFACE_PALETTE } from './pressable-surface';
 import { Text, type TextTone } from './text';
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -14,11 +14,12 @@ const LABEL_TONE: Record<ButtonVariant, TextTone> = {
   danger: 'inverse',
 };
 
-const SPINNER_COLOR: Record<ButtonVariant, string> = {
-  primary: colors.content.inverse,
-  secondary: colors.primary[600],
-  ghost: colors.primary[600],
-  danger: colors.content.inverse,
+/** Variants whose label sits on a filled surface; the others show the accent on a light one. */
+const IS_FILLED: Record<ButtonVariant, boolean> = {
+  primary: true,
+  secondary: false,
+  ghost: false,
+  danger: true,
 };
 
 type ButtonProps = {
@@ -41,6 +42,7 @@ export function Button({
   icon,
   accessibilityHint,
 }: ButtonProps) {
+  const colors = useThemeColors();
   return (
     <PressableSurface
       palette={SURFACE_PALETTE[variant]}
@@ -53,7 +55,9 @@ export function Button({
       accessibilityHint={accessibilityHint}
     >
       {isLoading ? (
-        <ActivityIndicator color={SPINNER_COLOR[variant]} />
+        <ActivityIndicator
+          color={IS_FILLED[variant] ? colors.content.inverse : colors.accent.DEFAULT}
+        />
       ) : (
         <>
           {icon}

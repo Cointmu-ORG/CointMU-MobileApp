@@ -1,24 +1,28 @@
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Appearance, StyleSheet } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 
 import { logger } from '@/shared/lib';
-import { BrandMark, colors, MOTION } from '@/shared/ui';
+import { BrandMark, MOTION, splashBackground, useIsMotionReduced } from '@/shared/ui';
 
 // Same image, size and background as the native splash (expo-splash-screen in app.json), so the
-// swap from native to JS is invisible; then this copy zooms out of the way.
+// swap from native to JS is invisible; then this copy zooms out of the way. The native splash
+// follows the device's scheme, not the theme picked in Settings, so the scheme is read before
+// the app applies its own override.
 const SPLASH_IMAGE_WIDTH = 120;
 const EXIT_SCALE = 1.15;
 
+let deviceScheme: string | null | undefined = null;
+
 /** Call once at module scope, before the first render, so the native splash stays up. */
 export function holdNativeSplash(): void {
+  deviceScheme = Appearance.getColorScheme();
   SplashScreen.preventAutoHideAsync().catch((error: unknown) =>
     logger.warn('Holding the splash screen failed', { error }),
   );
@@ -29,7 +33,7 @@ export function holdNativeSplash(): void {
  * laid out underneath) and fades this copy out. Under reduce motion it is removed at once.
  */
 export function SplashHandoff() {
-  const isReducedMotion = useReducedMotion();
+  const isReducedMotion = useIsMotionReduced();
   const [isDone, setIsDone] = useState(false);
   const progress = useSharedValue(0);
   const style = useAnimatedStyle(() => ({
@@ -48,7 +52,7 @@ export function SplashHandoff() {
   if (isDone || isReducedMotion) return null;
   return (
     <Animated.View
-      style={[styles.overlay, style]}
+      style={[styles.overlay, { backgroundColor: splashBackground(deviceScheme) }, style]}
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
@@ -63,6 +67,5 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface.DEFAULT,
   },
 });

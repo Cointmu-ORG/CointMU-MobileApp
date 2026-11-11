@@ -6,10 +6,11 @@ import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import type { ColorValue } from 'react-native';
 
-import { colors } from '@/shared/ui';
+import { useThemeColors } from '@/shared/ui';
 
 function tabIcon(Icon: LucideIcon) {
   function TabIcon({ color, size }: { color: ColorValue; size: number }) {
+    const colors = useThemeColors();
     // The tab bar passes our string tint colors; anything else falls back to the inactive tint.
     return (
       <Icon color={typeof color === 'string' ? color : colors.content.secondary} size={size} />
@@ -19,12 +20,13 @@ function tabIcon(Icon: LucideIcon) {
 }
 
 export function TabsLayout() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary[600],
+        tabBarActiveTintColor: colors.accent.DEFAULT,
         tabBarInactiveTintColor: colors.content.secondary,
         tabBarStyle: {
           backgroundColor: colors.surface.card,

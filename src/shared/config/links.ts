@@ -5,5 +5,6 @@ export const EXTERNAL_LINKS = {
   documentation: 'https://docs.cointmu.net',
   repository: REPO_URL,
   reportIssue: `${REPO_URL}/issues/new`,
+  releaseNotes: `${REPO_URL}/releases`,
   license: `${REPO_URL}/blob/main/LICENSE`,
 } as const;
