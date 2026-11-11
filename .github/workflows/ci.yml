@@ -62,8 +62,11 @@ jobs:
       # EXPO_PUBLIC_* values (jest.setup.ts); no .env or RPC is needed.
       - run: npm test
 
+      # Pinned: 1.21.7 (2026-11-11) crashes at startup with "Cannot find module
+      # '@expo/env'", a dependency missing from its own package. Go back to
+      # the latest once a fixed release is out.
       - name: expo-doctor
-        run: npx --yes expo-doctor
+        run: npx --yes expo-doctor@1.21.6
 
       # Bundles both platforms with Metro, like the desktop's build step.
       # EXPO_PUBLIC_* are inlined at bundle time, so harmless dummies are set;
