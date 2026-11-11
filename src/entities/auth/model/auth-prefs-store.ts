@@ -7,6 +7,9 @@ import { AUTO_LOCK_DEFAULT_MS, type AutoLockMs } from '../config/auth-config';
 type AuthPrefsState = {
   isBiometricsEnabled: boolean;
   setBiometricsEnabled: (isEnabled: boolean) => void;
+  /** Biometric unlock was switched off because the device lost its enrolment; shown once. */
+  hasBiometricsOffNotice: boolean;
+  setBiometricsOffNotice: (hasNotice: boolean) => void;
   autoLockMs: AutoLockMs;
   setAutoLockMs: (timeoutMs: AutoLockMs) => void;
 };
@@ -17,6 +20,8 @@ export const useAuthPrefsStore = create<AuthPrefsState>()(
     (set) => ({
       isBiometricsEnabled: false,
       setBiometricsEnabled: (isEnabled) => set({ isBiometricsEnabled: isEnabled }),
+      hasBiometricsOffNotice: false,
+      setBiometricsOffNotice: (hasNotice) => set({ hasBiometricsOffNotice: hasNotice }),
       autoLockMs: AUTO_LOCK_DEFAULT_MS,
       setAutoLockMs: (timeoutMs) => set({ autoLockMs: timeoutMs }),
     }),

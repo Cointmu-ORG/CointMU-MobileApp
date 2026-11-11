@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { canUseBiometrics, NewPinForm, storeNewPin } from '@/entities/auth';
+import { getBiometricAvailability, NewPinForm, storeNewPin } from '@/entities/auth';
 
 import { finishOnboarding } from '../model/finish-onboarding';
 import { BiometricsOffer } from './biometrics-offer';
@@ -13,7 +13,8 @@ export function SetupPinFlow() {
 
   const save = useCallback(async (pin: string) => {
     await storeNewPin(pin);
-    if (await canUseBiometrics()) return setIsOfferingBiometrics(true);
+    const { status } = await getBiometricAvailability();
+    if (status === 'available') return setIsOfferingBiometrics(true);
     finishOnboarding();
   }, []);
 

@@ -26,6 +26,8 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 
 jest.mock('expo-local-authentication', () => ({
+  AuthenticationType: { FINGERPRINT: 1, FACIAL_RECOGNITION: 2, IRIS: 3 },
+  supportedAuthenticationTypesAsync: jest.fn(async () => []),
   hasHardwareAsync: jest.fn(async () => false),
   isEnrolledAsync: jest.fn(async () => false),
   authenticateAsync: jest.fn(async () => ({ success: false, error: 'not_available' })),
