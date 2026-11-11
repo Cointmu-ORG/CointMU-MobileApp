@@ -1,26 +1,45 @@
+import RefreshCw from 'lucide-react-native/icons/refresh-cw';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { listNodes, network, useActiveRpcUrl, useNetworkStore } from '@/entities/network';
+import {
+  bestBlockHeight,
+  MAX_NODES,
+  network,
+  remainingCustomSlots,
+  useActiveRpcUrl,
+  useNetworkStore,
+  type NodeProbe,
+} from '@/entities/network';
 import { logger } from '@/shared/lib';
-import { Button, ListSection, Text } from '@/shared/ui';
+import { Button, ICON_SIZE, ListSection, Notice, Text, useThemeColors } from '@/shared/ui';
 
 import { removeCustomNode, selectNode } from '../model/select-node';
-import { useNodeProbes } from '../model/use-node-probes';
+import type { NodeChecks, NodeStatus } from '../model/use-node-checks';
 import { CustomNodeForm } from './custom-node-form';
 import { NodeRow } from './node-row';
 import { useFailureMessage } from './use-failure-message';
 
-/** Settings > Network: pick a preset node or the user's own; each is chain-checked first. */
-export function NetworkSettings() {
+function isProbe(status: NodeStatus | undefined): status is NodeProbe {
+  return status !== undefined && status.status !== 'checking';
+}
+
+/**
+ * Settings > Network: the preset nodes and the user's own, each with its ping (status, latency,
+ * block height, chain check, out of sync). A node is only switched to after a fresh chain check.
+ * The screen owns the scroll view and the pull-to-refresh; `checks` comes from `useNodeChecks`.
+ */
+export function NetworkSettings({ checks }: { checks: NodeChecks }) {
   const { t } = useTranslation();
+  const colors = useThemeColors();
   const describeFailure = useFailureMessage();
-  const customUrl = useNetworkStore((state) => state.customUrl);
+  const customUrls = useNetworkStore((state) => state.customUrls);
   const activeUrl = useActiveRpcUrl();
-  const nodes = listNodes(customUrl);
-  const { statuses, setStatus, checkAll } = useNodeProbes(nodes.map((node) => node.url));
+  const { nodes, statuses, isChecking, checkAll, setStatus } = checks;
   const [error, setError] = useState<string | null>(null);
+  const bestHeight = bestBlockHeight(Object.values(statuses).filter(isProbe));
+  const presetCount = network.presetUrls.length;
 
   const choose = async (url: string) => {
     if (url === activeUrl) return;
@@ -28,7 +47,7 @@ export function NetworkSettings() {
     setStatus(url, { status: 'checking' });
     try {
       const result = await selectNode(url);
-      if (result.ok) return;
+      if (result.ok) return void checkAll();
       setStatus(url, result.probe);
       setError(describeFailure(result.probe));
     } catch (caught) {
@@ -43,19 +62,21 @@ export function NetworkSettings() {
         title={t('settings.network.nodesTitle')}
         footer={t('settings.network.nodesFooter', { chainId: network.chainId })}
       >
-        {/* Presets come first in listNodes, so the index numbers them. */}
+        {/* Presets come first, so the index numbers each kind from 1. */}
         {nodes.map((node, index) => (
           <NodeRow
             key={node.url}
             name={
               node.isCustom
-                ? t('settings.network.customName')
+                ? t('settings.network.customName', { number: index - presetCount + 1 })
                 : t('settings.network.nodeName', { number: index + 1 })
             }
             url={node.url}
             status={statuses[node.url]}
+            bestHeight={bestHeight}
             isSelected={node.url === activeUrl}
             onSelect={() => void choose(node.url)}
+            onRemove={node.isCustom ? () => removeCustomNode(node.url) : undefined}
           />
         ))}
       </ListSection>
@@ -65,22 +86,21 @@ export function NetworkSettings() {
         </Text>
       ) : null}
       <Button
-        label={t('settings.network.checkAll')}
-        variant="ghost"
+        label={t(isChecking ? 'settings.network.pinging' : 'settings.network.pingAll')}
+        variant="secondary"
+        icon={<RefreshCw size={ICON_SIZE.md} color={colors.accent.DEFAULT} />}
         onPress={() => void checkAll()}
+        isDisabled={isChecking}
       />
       <View className="gap-3">
         <Text variant="heading" accessibilityRole="header">
           {t('settings.network.addTitle')}
         </Text>
-        {customUrl === null ? (
+        <Notice tone="warning">{t('settings.network.addWarning')}</Notice>
+        {remainingCustomSlots(customUrls) > 0 ? (
           <CustomNodeForm />
         ) : (
-          <Button
-            label={t('settings.network.remove')}
-            variant="secondary"
-            onPress={removeCustomNode}
-          />
+          <Text tone="secondary">{t('settings.network.limitReached', { max: MAX_NODES })}</Text>
         )}
       </View>
     </View>
