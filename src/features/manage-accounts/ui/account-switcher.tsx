@@ -7,9 +7,9 @@ import { View } from 'react-native';
 import { useBalanceStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
 import { useAccountLabel, useActiveAccount, useWalletStore } from '@/entities/wallet';
-import { AMOUNT_DISPLAY_FRACTION_DIGITS } from '@/shared/config';
-import { formatAmount, shortenAddress } from '@/shared/lib';
-import { colors, ICON_SIZE, ListRow, ListSection, Text } from '@/shared/ui';
+import { shortenAddress } from '@/shared/lib';
+import { useAmountDisplay } from '@/shared/model';
+import { ICON_SIZE, ListRow, ListSection, Text, useThemeColors } from '@/shared/ui';
 
 import { switchToAccount } from '../model/accounts';
 import { useAddAccount } from './use-add-account';
@@ -23,18 +23,15 @@ type AccountSwitcherProps = {
 
 /** Only the active account's balance is ever loaded; other rows show none. */
 function useActiveBalanceText(): string | undefined {
-  const { i18n } = useTranslation();
+  const { formatBalance } = useAmountDisplay();
   const wei = useBalanceStore((state) => state.wei);
   if (wei === null) return undefined;
-  const amount = formatAmount(wei, NATIVE_ASSET.decimals, {
-    locale: i18n.language,
-    maxFractionDigits: AMOUNT_DISPLAY_FRACTION_DIGITS,
-  });
-  return `${amount} ${NATIVE_ASSET.symbol}`;
+  return `${formatBalance(wei, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`;
 }
 
 /** Quick account switcher for the home sheet: pick an account, add one, or open Manage. */
 export function AccountSwitcher({ onDone, onManage }: AccountSwitcherProps) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const label = useAccountLabel();
   const accounts = useWalletStore((state) => state.accounts);
@@ -67,7 +64,7 @@ export function AccountSwitcher({ onDone, onManage }: AccountSwitcherProps) {
               value={isActive ? activeBalance : undefined}
               trailing={
                 isActive ? (
-                  <Check size={ICON_SIZE.md} color={colors.primary[600]} />
+                  <Check size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
                 ) : (
                   <View className="w-5" />
                 )

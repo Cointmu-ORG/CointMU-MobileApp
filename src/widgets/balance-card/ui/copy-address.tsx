@@ -6,12 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { logger, shortenAddress } from '@/shared/lib';
-import { colors, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
+import { PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 const ICON_SIZE = 16;
 const COPIED_FEEDBACK_MS = 2_000;
 
 export function CopyAddress({ address }: { address: string }) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const [isCopied, setIsCopied] = useState(false);
 

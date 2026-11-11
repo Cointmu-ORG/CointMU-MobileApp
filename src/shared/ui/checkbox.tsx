@@ -3,7 +3,7 @@ import { View } from 'react-native';
 
 import { PressableSurface, SURFACE_PALETTE } from './pressable-surface';
 import { Text } from './text';
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 
 const CHECK_SIZE = 16;
 
@@ -14,6 +14,7 @@ type CheckboxProps = {
 };
 
 export function Checkbox({ label, isChecked, onToggle }: CheckboxProps) {
+  const colors = useThemeColors();
   return (
     <PressableSurface
       palette={SURFACE_PALETTE.ghost}

@@ -1,5 +1,10 @@
-import type { ReactNode } from 'react';
-import { KeyboardAvoidingView, ScrollView, StyleSheet } from 'react-native';
+import type { ReactElement, ReactNode } from 'react';
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  StyleSheet,
+  type RefreshControlProps,
+} from 'react-native';
 
 import { Screen, useHeaderOffset } from './screen';
 
@@ -8,7 +13,13 @@ import { Screen, useHeaderOffset } from './screen';
  * (the PIN layout, a centered progress state) fills it like on a plain Screen. Android apps are edge-to-edge, so the window no longer resizes
  * for the keyboard: without a `behavior` the fields and the submit button stay under it.
  */
-export function FormScreen({ children }: { children: ReactNode }) {
+type FormScreenProps = {
+  children: ReactNode;
+  /** Pull-to-refresh for screens that show live data (the node list). */
+  refreshControl?: ReactElement<RefreshControlProps>;
+};
+
+export function FormScreen({ children, refreshControl }: FormScreenProps) {
   const headerOffset = useHeaderOffset();
   return (
     <Screen>
@@ -21,6 +32,7 @@ export function FormScreen({ children }: { children: ReactNode }) {
           contentContainerClassName="grow gap-6 pb-8"
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          refreshControl={refreshControl}
         >
           {children}
         </ScrollView>

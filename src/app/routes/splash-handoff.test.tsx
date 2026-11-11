@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 
 import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
-import { colors } from '@/shared/ui';
+import { splashBackground } from '@/shared/ui';
 
 import appJson from '../../../app.json';
 
@@ -19,12 +19,15 @@ jest.mock('expo-splash-screen', () => ({
 type PluginEntry = string | [string, Record<string, unknown>];
 
 describe('splash', () => {
-  it('uses the surface token as the native splash background', () => {
+  it('uses the surface token of each scheme as the native splash background', () => {
     const plugins = appJson.expo.plugins as PluginEntry[];
     const splash = plugins.find(
       (entry) => Array.isArray(entry) && entry[0] === 'expo-splash-screen',
     );
-    expect(splash?.[1]).toMatchObject({ backgroundColor: colors.surface.DEFAULT });
+    expect(splash?.[1]).toMatchObject({
+      backgroundColor: splashBackground('light'),
+      dark: { backgroundColor: splashBackground('dark') },
+    });
   });
 
   it('holds the native splash until bootstrap is done, then hides it', async () => {

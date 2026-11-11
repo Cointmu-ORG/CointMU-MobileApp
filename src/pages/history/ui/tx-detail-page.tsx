@@ -7,7 +7,8 @@ import { findAsset, NATIVE_ASSET } from '@/entities/asset';
 import { getProvider } from '@/entities/network';
 import { fetchTxFee, TX_POLICY, TxStatusBadge, type HistoryItem } from '@/entities/transaction';
 import { explorerTxUrl } from '@/shared/config';
-import { formatAmount, formatDateTime, logger } from '@/shared/lib';
+import { formatDateTime, logger } from '@/shared/lib';
+import { useAmountDisplay, useAppearanceStore } from '@/shared/model';
 import { Button, Card, FormScreen, Text } from '@/shared/ui';
 
 import { useHistoryItem } from './use-history-item';
@@ -41,8 +42,8 @@ function Details({ item }: { item: HistoryItem }) {
   const { t, i18n } = useTranslation();
   const fee = usePaidFee(item);
   const asset = findAsset(item.assetKey);
-  const exact = (value: bigint, decimals: number) =>
-    formatAmount(value, decimals, { locale: i18n.language, maxFractionDigits: decimals });
+  const { formatExact: exact } = useAmountDisplay();
+  const timeFormat = useAppearanceStore((state) => state.timeFormat);
   const amount = asset
     ? `${exact(BigInt(item.value), asset.decimals)} ${asset.symbol}`
     : t('tx.unknownAsset');
@@ -62,7 +63,7 @@ function Details({ item }: { item: HistoryItem }) {
         </Text>
       </Row>
       <Row label={t('history.detail.date')}>
-        <Text>{formatDateTime(item.timestamp, i18n.language)}</Text>
+        <Text>{formatDateTime(item.timestamp, i18n.language, timeFormat)}</Text>
       </Row>
       <Row label={t('history.detail.block')}>
         <Text>

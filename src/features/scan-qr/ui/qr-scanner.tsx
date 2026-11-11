@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, StyleSheet, View } from 'react-native';
 
-import { Button, colors, ICON_SIZE, Spinner, Text } from '@/shared/ui';
+import { Button, ICON_SIZE, Spinner, Text, useThemeColors } from '@/shared/ui';
 
 type QrScannerProps = {
   /** Called once per code. The parent pauses scanning while it shows the result. */
@@ -14,11 +14,12 @@ type QrScannerProps = {
 };
 
 function PermissionRequest({ canAskAgain, onAsk }: { canAskAgain: boolean; onAsk: () => void }) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   return (
     <View className="flex-1 items-center justify-center gap-4 px-2">
       <View className="h-16 w-16 items-center justify-center rounded-card bg-primary-50">
-        <Camera size={ICON_SIZE.lg} color={colors.primary[600]} />
+        <Camera size={ICON_SIZE.lg} color={colors.accent.DEFAULT} />
       </View>
       <Text variant="heading" accessibilityRole="header" className="text-center">
         {t('scan.permission.title')}
@@ -80,7 +81,7 @@ export function QrScanner({ onScanned, isPaused }: QrScannerProps) {
   }
   return (
     <View
-      className="flex-1 overflow-hidden rounded-card bg-content"
+      className="flex-1 overflow-hidden rounded-card bg-surface-muted"
       accessibilityLabel={t('scan.cameraLabel')}
     >
       {isFocused ? (

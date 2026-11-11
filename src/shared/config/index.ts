@@ -2,7 +2,6 @@ export { getAppInfo, type AppInfo } from './app-info';
 export { env, explorerTxUrl, isHttpUrl, readEnv, type Env } from './env';
 export { EXTERNAL_LINKS } from './links';
 export {
-  AMOUNT_DISPLAY_FRACTION_DIGITS,
   BALANCE_POLL_INTERVAL_MS,
   FALLBACK_LANGUAGE,
   RPC_MAX_RETRIES,

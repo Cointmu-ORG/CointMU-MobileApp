@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 import { usePressScale } from './use-press-scale';
 
 /**
@@ -31,7 +31,7 @@ export const SURFACE_PALETTE = {
     pressed: 'border border-primary-300 bg-primary-100',
   },
   ghost: { idle: 'bg-transparent', hovered: 'bg-primary-50', pressed: 'bg-primary-100' },
-  danger: { idle: 'bg-danger-strong', hovered: 'bg-danger-pressed', pressed: 'bg-danger-pressed' },
+  danger: { idle: 'bg-danger-solid', hovered: 'bg-danger-pressed', pressed: 'bg-danger-pressed' },
   /** List rows and other content on a card. */
   row: { idle: 'bg-surface-card', hovered: 'bg-surface', pressed: 'bg-surface-muted' },
   /** Keys and chips that sit on the screen background. */
@@ -77,6 +77,7 @@ export function PressableSurface({
   ...props
 }: PressableSurfaceProps) {
   const press = usePressScale();
+  const colors = useThemeColors();
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -119,7 +120,15 @@ export function PressableSurface({
               pressed ? palette.pressed : isHovered ? palette.hovered : palette.idle
             } ${isDisabled ? 'opacity-50' : ''}`}
             // Outline does not take part in layout, so focus never shifts content.
-            style={isFocused ? StyleSheet.flatten([surfaceStyle, styles.focusRing]) : surfaceStyle}
+            style={
+              isFocused
+                ? StyleSheet.flatten([
+                    surfaceStyle,
+                    styles.focusRing,
+                    { outlineColor: colors.primary[500] },
+                  ])
+                : surfaceStyle
+            }
           >
             {children}
           </View>
@@ -136,6 +145,5 @@ const styles = StyleSheet.create({
     outlineWidth: FOCUS_RING_WIDTH,
     outlineOffset: FOCUS_RING_WIDTH,
     outlineStyle: 'solid',
-    outlineColor: colors.primary[500],
   },
 });

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { BackHandler, Linking, View } from 'react-native';
 
 import { explorerTxUrl, ROUTES } from '@/shared/config';
-import { Button, colors, ICON_SIZE, Text } from '@/shared/ui';
+import { Button, ICON_SIZE, Text, useThemeColors } from '@/shared/ui';
 
 import { useSendFlowStore } from '../model/send-flow-store';
 
@@ -20,6 +20,7 @@ function finish() {
 
 /** Step 3 of Send. The pending record is already saved; the status poller takes over. */
 export function SendResult() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const outcome = useSendFlowStore((state) => state.outcome);
   // Android back means "Done": it never returns to the review of a transfer already broadcast.
@@ -56,7 +57,7 @@ export function SendResult() {
   return (
     <View className="gap-6">
       <View className="items-center gap-3">
-        <Icon size={RESULT_ICON_SIZE} color={colors.primary[600]} />
+        <Icon size={RESULT_ICON_SIZE} color={colors.accent.DEFAULT} />
         <Text variant="title" accessibilityRole="header" className="text-center">
           {t(`send.result.${kind}Title`)}
         </Text>

@@ -20,11 +20,31 @@ export { Screen } from './screen';
 export { RadioMark } from './radio-mark';
 export { ScrollScreen } from './scroll-screen';
 export { SegmentedControl, type SegmentOption } from './segmented-control';
+export { SettingsChoiceRow, SettingsRow, SettingsSection, SettingsSwitchRow } from './settings-row';
 export { Skeleton } from './skeleton';
 export { Spinner } from './spinner';
 export { Text, type TextTone, type TextVariant } from './text';
-export { colors } from './theme/colors';
+export { ThemedSwitch } from './themed-switch';
+export {
+  ACCENT_IDS,
+  accentSwatch,
+  buildThemeColors,
+  THEME_PREFERENCES,
+  type AccentId,
+  type ColorScheme,
+  type ThemeColors,
+  type ThemePreference,
+} from './theme/build-theme';
+export { defaultColors, splashBackground } from './theme/colors';
+export {
+  ThemeRoot,
+  useResolvedTheme,
+  useTheme,
+  useThemeColors,
+  type Theme,
+} from './theme/theme-root';
 export { ICON_SIZE } from './theme/icon-size';
+export { useIsMotionReduced } from './use-is-motion-reduced';
 export { useShake } from './use-shake';
 export { WordGrid } from './word-grid';
 export { usePinInput } from './use-pin-input';

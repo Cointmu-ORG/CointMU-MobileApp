@@ -5,11 +5,12 @@ import { Alert, ScrollView, View } from 'react-native';
 
 import { PinPrompt } from '@/entities/auth';
 import { logger } from '@/shared/lib';
-import { Button, Checkbox, colors, ICON_SIZE, Text } from '@/shared/ui';
+import { Button, Checkbox, ICON_SIZE, Text, useThemeColors } from '@/shared/ui';
 
 import { resetWallet } from '../model/reset-wallet';
 
 function Warning({ onContinue }: { onContinue: () => void }) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const [hasBackup, setHasBackup] = useState(false);
   return (

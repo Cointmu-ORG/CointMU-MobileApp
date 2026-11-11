@@ -5,20 +5,17 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { useBalanceStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
 import { useWalletStore } from '@/entities/wallet';
-import { AMOUNT_DISPLAY_FRACTION_DIGITS } from '@/shared/config';
-import { formatAmount } from '@/shared/lib';
+import { useAmountDisplay } from '@/shared/model';
 import { Button, Card, MOTION, Skeleton, Text } from '@/shared/ui';
 
 import { useBalancePolling } from '../model/use-balance-polling';
 import { AccountChip } from './account-chip';
+import { BalanceEye } from './balance-eye';
 import { CopyAddress } from './copy-address';
 
 function BalanceValue({ wei }: { wei: bigint }) {
-  const { i18n } = useTranslation();
-  const formatted = formatAmount(wei, NATIVE_ASSET.decimals, {
-    locale: i18n.language,
-    maxFractionDigits: AMOUNT_DISPLAY_FRACTION_DIGITS,
-  });
+  const { formatBalance } = useAmountDisplay();
+  const formatted = formatBalance(wei, NATIVE_ASSET.decimals);
   // Keyed by the formatted string: a new value fades in. Numbers are never tweened through floats.
   return (
     <Animated.View key={formatted} entering={FadeIn.duration(MOTION.slowMs)}>
@@ -46,9 +43,12 @@ export function BalanceCard({ enterIndex = 0 }: { enterIndex?: number }) {
     <Card enterIndex={enterIndex} className="gap-4">
       <View className="gap-1">
         <AccountChip />
-        <Text variant="label" tone="secondary">
-          {t('home.balance.label')}
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <Text variant="label" tone="secondary">
+            {t('home.balance.label')}
+          </Text>
+          <BalanceEye />
+        </View>
       </View>
       {wei !== null ? <BalanceValue wei={wei} /> : null}
       {wei === null && !isUnreachable ? <Skeleton className="h-10 w-48 rounded-lg" /> : null}

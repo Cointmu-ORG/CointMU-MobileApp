@@ -8,7 +8,7 @@ import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { ROUTES, type AppRoute } from '@/shared/config';
-import { colors, MOTION, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
+import { MOTION, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 const ICON_SIZE = 22;
 
@@ -19,6 +19,7 @@ const ACTIONS: readonly { key: string; route: AppRoute; Icon: LucideIcon }[] = [
 ];
 
 function QuickAction({ label, route, Icon }: { label: string; route: AppRoute; Icon: LucideIcon }) {
+  const colors = useThemeColors();
   return (
     <PressableSurface
       palette={SURFACE_PALETTE.ghost}

@@ -6,21 +6,20 @@ import { View } from 'react-native';
 import { findAsset } from '@/entities/asset';
 import { TxStatusBadge, useTxStore, type LocalTxRecord } from '@/entities/transaction';
 import { useWalletStore } from '@/entities/wallet';
-import { AMOUNT_DISPLAY_FRACTION_DIGITS, ROUTES } from '@/shared/config';
-import { formatAmount, isSameAddress, shortenAddress } from '@/shared/lib';
-import { Card, colors, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
+import { ROUTES } from '@/shared/config';
+import { isSameAddress, shortenAddress } from '@/shared/lib';
+import { useAmountDisplay } from '@/shared/model';
+import { Card, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 const RECENT_LIMIT = 5;
 const EMPTY_ICON_SIZE = 32;
 
 function TxRow({ record }: { record: LocalTxRecord }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { formatBalance } = useAmountDisplay();
   const asset = findAsset(record.assetKey);
   const amount = asset
-    ? `-${formatAmount(BigInt(record.value), asset.decimals, {
-        locale: i18n.language,
-        maxFractionDigits: AMOUNT_DISPLAY_FRACTION_DIGITS,
-      })} ${asset.symbol}`
+    ? `-${formatBalance(BigInt(record.value), asset.decimals)} ${asset.symbol}`
     : t('tx.unknownAsset');
   const recipient = shortenAddress(record.to);
   return (
@@ -46,6 +45,7 @@ function TxRow({ record }: { record: LocalTxRecord }) {
 }
 
 function EmptyState() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   return (
     <View className="items-center gap-2 py-6">

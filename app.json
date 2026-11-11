@@ -6,7 +6,7 @@
     "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cointmu.muvo"
@@ -37,7 +37,11 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 120,
           "resizeMode": "contain",
-          "backgroundColor": "#f8fafc"
+          "backgroundColor": "#f8fafc",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#030712"
+          }
         }
       ],
       [
@@ -46,6 +50,12 @@
           "cameraPermission": "Allow $(PRODUCT_NAME) to use the camera to scan wallet address QR codes.",
           "microphonePermission": false,
           "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID to unlock your wallet and confirm transactions."
         }
       ]
     ]

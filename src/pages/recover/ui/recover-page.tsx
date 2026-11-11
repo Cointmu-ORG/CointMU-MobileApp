@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { useWalletStore } from '@/entities/wallet';
 import { ImportWalletForm } from '@/features/import-wallet';
-import { Button, colors, FormScreen, Text } from '@/shared/ui';
+import { Button, FormScreen, Text, useThemeColors } from '@/shared/ui';
 
 const ICON_SIZE = 28;
 
@@ -13,6 +13,7 @@ const ICON_SIZE = 28;
  * wallet to PIN setup; "create new" leaves recovery for users without a backup.
  */
 export function RecoverPage() {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   return (
     <FormScreen>

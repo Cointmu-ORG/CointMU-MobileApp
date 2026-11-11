@@ -6,7 +6,7 @@ import { useWindowDimensions, View } from 'react-native';
 
 import { PressableSurface, SURFACE_PALETTE } from './pressable-surface';
 import { Text } from './text';
-import { colors } from './theme/colors';
+import { useThemeColors } from './theme/theme-root';
 
 const DIGIT_ROWS = [
   ['1', '2', '3'],
@@ -77,6 +77,7 @@ function DigitKey({ digit, ...rest }: { digit: string } & Omit<PadKeyProps, 'lab
 }
 
 export function PinPad({ onDigit, onDelete, onBiometrics, isDisabled = false }: PinPadProps) {
+  const colors = useThemeColors();
   const { t } = useTranslation();
   const { width, height } = useWindowDimensions();
   const size = pinKeySize(width, height);
@@ -104,7 +105,7 @@ export function PinPad({ onDigit, onDelete, onBiometrics, isDisabled = false }: 
             onPress={onBiometrics}
             isDisabled={isDisabled}
           >
-            <Fingerprint size={iconSize} color={colors.primary[600]} />
+            <Fingerprint size={iconSize} color={colors.accent.DEFAULT} />
           </PadKey>
         ) : (
           <View style={{ width: size, height: size }} />

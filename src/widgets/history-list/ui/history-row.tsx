@@ -2,15 +2,15 @@ import { router } from 'expo-router';
 import ArrowDownLeft from 'lucide-react-native/icons/arrow-down-left';
 import ArrowLeftRight from 'lucide-react-native/icons/arrow-left-right';
 import ArrowUpRight from 'lucide-react-native/icons/arrow-up-right';
-import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { findAsset } from '@/entities/asset';
 import { TxStatusBadge, type HistoryItem } from '@/entities/transaction';
-import { AMOUNT_DISPLAY_FRACTION_DIGITS, ROUTES } from '@/shared/config';
-import { dateLocale, formatAmount, shortenAddress } from '@/shared/lib';
-import { colors, ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text } from '@/shared/ui';
+import { ROUTES } from '@/shared/config';
+import { formatTime, shortenAddress } from '@/shared/lib';
+import { useAmountDisplay, useAppearanceStore } from '@/shared/model';
+import { ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 const DIRECTION = {
   in: { Icon: ArrowDownLeft, sign: '+' },
@@ -20,17 +20,17 @@ const DIRECTION = {
 
 /** One transaction: direction, counterparty, signed amount, status and time. */
 export function HistoryRow({ item }: { item: HistoryItem }) {
+  const colors = useThemeColors();
   const { t, i18n } = useTranslation();
+  const { formatBalance } = useAmountDisplay();
+  const timeFormat = useAppearanceStore((state) => state.timeFormat);
   const { Icon, sign } = DIRECTION[item.direction];
   const asset = findAsset(item.assetKey);
   const amount = asset
-    ? `${sign}${formatAmount(BigInt(item.value), asset.decimals, {
-        locale: i18n.language,
-        maxFractionDigits: AMOUNT_DISPLAY_FRACTION_DIGITS,
-      })} ${asset.symbol}`
+    ? `${sign}${formatBalance(BigInt(item.value), asset.decimals)} ${asset.symbol}`
     : t('tx.unknownAsset');
   const counterparty = shortenAddress(item.direction === 'in' ? item.from : item.to);
-  const time = format(item.timestamp, 'p', { locale: dateLocale(i18n.language) });
+  const time = formatTime(item.timestamp, i18n.language, timeFormat);
 
   return (
     <PressableSurface
@@ -46,7 +46,7 @@ export function HistoryRow({ item }: { item: HistoryItem }) {
       })}
     >
       <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-50">
-        <Icon size={ICON_SIZE.md} color={colors.primary[600]} />
+        <Icon size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
       </View>
       <View className="flex-1 gap-1">
         <Text variant="label">{t(`tx.direction.${item.direction}`)}</Text>

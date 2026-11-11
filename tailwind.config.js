@@ -1,8 +1,22 @@
 // Design tokens ported from the desktop app (CointMU-App src/renderer/src/app/styles/index.css).
 // Desktop is on Tailwind v4 (@theme); NativeWind v4 needs Tailwind v3, so values are copied (D-30).
-// Light mode only (D-18). Spacing uses the Tailwind default scale, same as desktop.
+// Every color is a CSS variable set on the root view (ThemeRoot), so one class follows the
+// light/dark theme and the accent at runtime (D-66). colors.json only lists the token names here;
+// the values live in src/shared/ui/theme. Spacing uses the Tailwind default scale, same as desktop.
 const { platformSelect } = require('nativewind/theme');
-const colors = require('./src/shared/ui/theme/colors.json');
+const tokens = require('./src/shared/ui/theme/colors.json');
+
+const colors = Object.fromEntries(
+  Object.entries(tokens).map(([group, keys]) => [
+    group,
+    Object.fromEntries(
+      Object.keys(keys).map((key) => {
+        const name = key === 'DEFAULT' ? group : `${group}-${key}`;
+        return [key, `rgb(var(--color-${name}) / <alpha-value>)`];
+      }),
+    ),
+  ]),
+);
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
