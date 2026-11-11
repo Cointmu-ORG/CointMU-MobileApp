@@ -24,8 +24,20 @@ updates:
       - dependency-name: "jest-expo"
       - dependency-name: "@types/react"
       - dependency-name: "typescript"
+      # NativeWind v4 (react-native-css-interop) needs Tailwind v3 (D-30).
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      # eslint-config-expo's plugins (react, import) do not load on a newer
+      # ESLint major; it moves with the Expo SDK's eslint-config-expo.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    # One PR for all actions: codeql-action's init and analyze steps must be
+    # on the same version, and separate PRs fail CodeQL on each one.
+    groups:
+      actions:
+        patterns: ["*"]
