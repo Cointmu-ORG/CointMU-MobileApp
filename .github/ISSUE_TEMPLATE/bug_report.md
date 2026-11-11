@@ -30,6 +30,15 @@ A clear and concise description of what actually happened. Include any error mes
 If applicable, add screenshots or paste relevant log output to help explain the problem.
 Remember to redact any seed phrases, private keys, PINs, or passwords.
 
+## Build Info
+
+In Muvo, open Settings > About, tap "Copy build info" and paste it here. It holds the version,
+commit, build time and channel, and no wallet data.
+
+```
+(paste here)
+```
+
 ## Environment
 
 - Muvo version: [e.g. 1.0.0]

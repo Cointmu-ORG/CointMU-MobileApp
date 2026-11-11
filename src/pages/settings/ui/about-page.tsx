@@ -25,6 +25,8 @@ import {
   useThemeColors,
 } from '@/shared/ui';
 
+import { BuildInfoSection } from './build-info-section';
+
 const LOGO_SIZE = 72;
 
 type LinkRowProps = { icon: LucideIcon; title: string; description: string; url: string };
@@ -92,6 +94,7 @@ export function AboutPage() {
           value={build ?? t('settings.about.devBuild')}
         />
       </SettingsSection>
+      <BuildInfoSection />
       <SettingsSection title={t('settings.about.networkTitle')}>
         <SettingsRow icon={Layers} title={t('settings.about.network')} value={network.name} />
         <SettingsRow

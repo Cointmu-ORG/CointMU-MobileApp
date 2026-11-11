@@ -24,7 +24,7 @@ function useCopy(address: string) {
   }, [isCopied]);
   const copy = async () => {
     try {
-      // The user's own public address is the only thing Muvo ever puts on the clipboard.
+      // Public data only: the address here and the build info in About are all Muvo ever copies.
       await Clipboard.setStringAsync(address);
       setIsCopied(true);
     } catch (error) {

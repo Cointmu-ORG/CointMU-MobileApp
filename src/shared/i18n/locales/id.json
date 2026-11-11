@@ -300,7 +300,21 @@
       "releaseNotesTitle": "Catatan rilis",
       "releaseNotesDesc": "Perubahan di setiap versi",
       "copyright": "© 2026 CointMU Foundation • Lisensi MIT",
-      "disclaimer": "Muvo adalah dompet non-kustodian. Kunci Anda tetap berada di ponsel ini, dan tidak ada yang bisa memulihkannya untuk Anda, termasuk kami."
+      "disclaimer": "Muvo adalah dompet non-kustodian. Kunci Anda tetap berada di ponsel ini, dan tidak ada yang bisa memulihkannya untuk Anda, termasuk kami.",
+      "buildInfo": "Info build",
+      "commit": "Commit",
+      "commitModified": "{{commit}} (diubah)",
+      "builtAt": "Dibuat",
+      "channel": "Kanal",
+      "channels": {
+        "dev": "Pengembangan",
+        "ci": "CI",
+        "release": "Rilis"
+      },
+      "unknown": "tidak diketahui",
+      "copyBuildInfo": "Salin info build",
+      "copyBuildInfoDesc": "Tempelkan ke laporan bug. Tidak berisi data dompet.",
+      "copied": "Disalin"
     },
     "groups": {
       "general": "Umum",

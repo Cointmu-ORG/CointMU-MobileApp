@@ -300,7 +300,21 @@
       "releaseNotesTitle": "Release notes",
       "releaseNotesDesc": "What changed in each version",
       "copyright": "© 2026 CointMU Foundation • MIT License",
-      "disclaimer": "Muvo is a non-custodial wallet. Your keys stay on this phone, and nobody, including us, can recover them for you."
+      "disclaimer": "Muvo is a non-custodial wallet. Your keys stay on this phone, and nobody, including us, can recover them for you.",
+      "buildInfo": "Build info",
+      "commit": "Commit",
+      "commitModified": "{{commit}} (modified)",
+      "builtAt": "Built",
+      "channel": "Channel",
+      "channels": {
+        "dev": "Development",
+        "ci": "CI",
+        "release": "Release"
+      },
+      "unknown": "unknown",
+      "copyBuildInfo": "Copy build info",
+      "copyBuildInfoDesc": "Paste it into a bug report. It holds no wallet data.",
+      "copied": "Copied"
     },
     "groups": {
       "general": "General",

@@ -24,8 +24,8 @@ export function CopyAddress({ address }: { address: string }) {
 
   const copy = async () => {
     try {
-      // The only clipboard write in the app: the user's own public address. Mnemonics and
-      // private keys must never reach the clipboard (forbidden rule 2).
+      // Only public data is ever copied: the user's own address here, the build info in About.
+      // Mnemonics and private keys must never reach the clipboard (forbidden rule 2).
       await Clipboard.setStringAsync(address);
       setIsCopied(true);
     } catch (error) {

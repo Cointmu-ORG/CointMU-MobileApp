@@ -48,6 +48,12 @@ jobs:
       # and macOS-only fsevents; nothing below needs them.
       - run: npm ci --ignore-scripts
 
+      # --ignore-scripts skips the `prepare` hook that writes build-info.json
+      # (D-72), which the app imports. Only HEAD is read, so the shallow
+      # checkout is enough; CI sets the channel to "ci" and adds the run number.
+      - name: Build info
+        run: npm run build-info
+
       - run: npm run format:check
 
       - run: npm run typecheck
@@ -61,7 +67,8 @@ jobs:
 
       # Bundles both platforms with Metro, like the desktop's build step.
       # EXPO_PUBLIC_* are inlined at bundle time, so harmless dummies are set;
-      # nothing is uploaded and no device or RPC is involved.
+      # nothing is uploaded and no device or RPC is involved. The bundle carries
+      # the build info written by the "Build info" step above.
       - name: Bundle (expo export)
         run: npx --no expo export --platform android --platform ios --output-dir dist
         env:
@@ -99,6 +106,10 @@ jobs:
           restore-keys: npm-${{ runner.os }}-
 
       - run: npm ci --ignore-scripts
+
+      # The app imports build-info.json (D-72); see the ci job.
+      - name: Build info
+        run: npm run build-info
 
       # Blocking: the codebase is at 0 ESLint errors and warnings.
       - name: eslint
