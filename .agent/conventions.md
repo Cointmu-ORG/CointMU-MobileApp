@@ -42,8 +42,9 @@
 - ESLint + Prettier + Steiger. CI fails on boundary violations.
 
 ## Logging and errors
-- Use the `shared/lib/logger` wrapper only. No raw `console.log` in committed code.
-- Logger and Sentry must redact: mnemonic, private key, PIN, anything resembling a 64-hex string.
+- Use the `shared/lib` logger wrapper only. No raw `console.log` in committed code.
+- Logger and error reports must redact: mnemonic, private key, PIN, anything resembling a 64-hex string. Reports also redact wallet addresses, tx hashes and everything in a URL but its host (D-77).
+- Report errors with `logger.error` (it becomes a GlitchTip report when reporting is on). Never import `@sentry/*` outside `shared/lib/diagnostics`, and never add an SDK integration, tag, context or breadcrumb without extending the scrubber's allowlist and its tests.
 
 ## Forbidden (hard rules)
 1. Never log, print, serialize, or send to any service: mnemonic, private key, PIN, or derived seed.
