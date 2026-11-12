@@ -1,5 +1,7 @@
 import type { CardColorId } from '@/shared/ui';
 
+import type { AccountLucideName } from '../config/account-icons';
+
 /**
  * Onboarding lifecycle of the app (architecture §5), driven by the first wallet:
  * create: none → pendingBackup → (quiz passed) pendingPin → (PIN set) active
@@ -10,6 +12,15 @@ export type WalletStatus = 'none' | 'pendingBackup' | 'pendingPin' | 'active';
 export type WalletSource = 'mnemonic' | 'private-key';
 export type WalletOrigin = 'created' | 'imported';
 
+/**
+ * The picture on an account card (D-84): one of the offered lucide icons or one of the offered
+ * emoji. Public data. Read it through `resolveAccountIcon`, which replaces a stored icon that
+ * is no longer offered with the default.
+ */
+export type AccountIcon =
+  | { readonly kind: 'lucide'; readonly name: AccountLucideName }
+  | { readonly kind: 'emoji'; readonly value: string };
+
 /** One address of a wallet. `index` is the BIP-44 account index (D-44). */
 export type WalletAccount = {
   readonly index: number;
@@ -17,6 +28,7 @@ export type WalletAccount = {
   /** Null shows the default name ("Account 1"). */
   readonly name: string | null;
   readonly color: CardColorId;
+  readonly icon: AccountIcon;
 };
 
 /**
