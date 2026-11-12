@@ -168,9 +168,9 @@ export function RootLayout() {
 
   return (
     <ThemeRoot theme={theme}>
-      <ReducedMotionConfig
-        mode={motion === 'reduced' ? ReduceMotion.Always : ReduceMotion.System}
-      />
+      {/* Only when overriding: following the system is Reanimated's default, and the component
+          logs a dev warning on every mount. */}
+      {motion === 'reduced' ? <ReducedMotionConfig mode={ReduceMotion.Always} /> : null}
       <RootNavigator />
       <NavigationBreadcrumbs />
       <ErrorReportingNoticeGate />
