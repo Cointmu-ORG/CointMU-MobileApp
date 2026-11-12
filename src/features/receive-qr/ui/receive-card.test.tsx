@@ -7,6 +7,8 @@ import { i18n } from '@/shared/i18n';
 
 import { ReceiveCard } from './receive-card';
 
+import { seedWalletRecord } from '../../../../jest.seed-wallet';
+
 const CHECKSUMMED = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(async () => true) }));
@@ -14,7 +16,7 @@ jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(async () => true) }
 beforeEach(async () => {
   await i18n.changeLanguage('en');
   // Stored lowercase on purpose: the QR, copy and share must still use the checksummed form.
-  useWalletStore.getState().startPinSetup(CHECKSUMMED.toLowerCase(), 'mnemonic');
+  seedWalletRecord({ source: 'mnemonic', address: CHECKSUMMED.toLowerCase() });
   useWalletStore.getState().activate();
 });
 

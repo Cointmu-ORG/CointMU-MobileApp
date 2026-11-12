@@ -7,6 +7,8 @@ import { i18n } from '@/shared/i18n';
 
 import { HistoryList } from './history-list';
 
+import { seedWalletRecord } from '../../../../jest.seed-wallet';
+
 const OWNER = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const OTHER = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 const HEAD = 5_000;
@@ -49,7 +51,7 @@ beforeEach(async () => {
   mockChain.isDown = false;
   useHistoryStore.getState().clear();
   useTxStore.getState().clear();
-  useWalletStore.getState().startPinSetup(OWNER, 'private-key');
+  seedWalletRecord({ source: 'private-key', address: OWNER });
   useWalletStore.getState().activate();
 });
 

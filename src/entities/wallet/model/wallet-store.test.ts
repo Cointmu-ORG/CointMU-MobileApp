@@ -1,42 +1,296 @@
-import { migrateWalletState, useWalletStore } from './wallet-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { secureStorage } from '@/shared/lib';
+
+import { createWalletId, readWalletSecret } from '../api/wallet-secret';
+import { LEGACY_WALLET_ID } from '../config/wallet-config';
+import { migrateWalletState } from './migrate';
+import type { NewWallet, WalletRecord } from './types';
+import { useWalletStore } from './wallet-store';
 
 const A0 = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const A1 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+const B0 = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
+const PHRASE = 'test test test test test test test test test test test junk';
+const STORAGE_KEY = 'muvo.wallet';
+const LEGACY_SECRET_KEY = 'muvo.wallet.secret';
 
-beforeEach(() => useWalletStore.getState().reset());
+const state = () => useWalletStore.getState();
+const wallet = (id: string) => state().wallets.find((candidate) => candidate.id === id);
+
+function newWallet(address: string, change: Partial<NewWallet> = {}): NewWallet {
+  return {
+    id: createWalletId(),
+    source: 'mnemonic',
+    origin: 'imported',
+    address,
+    addedAt: 1,
+    ...change,
+  };
+}
+
+/** A finished single wallet, then a second one: returns both ids. */
+function seedTwoWallets(second: Partial<NewWallet> = {}) {
+  const first = newWallet(A0);
+  state().addWallet(first);
+  state().activate();
+  const other = newWallet(B0, second);
+  state().addWallet(other);
+  return { firstId: first.id, secondId: other.id };
+}
+
+beforeEach(() => state().reset());
 
 describe('migrateWalletState', () => {
-  it('turns the single v0 address into the first account', () => {
-    const v0 = { status: 'active', address: A0, source: 'mnemonic', accountIndex: 0 };
-    expect(migrateWalletState(v0, 0)).toEqual({
-      ...v0,
-      accounts: [{ index: 0, address: A0, name: null }],
+  const V1_MNEMONIC = {
+    status: 'active',
+    address: A1,
+    source: 'mnemonic',
+    accountIndex: 1,
+    accounts: [
+      { index: 0, address: A0, name: 'Savings' },
+      { index: 1, address: A1, name: null },
+    ],
+    isRecoveryRequired: false,
+  };
+
+  it('leaves a fresh install with no wallets', () => {
+    const v1 = { status: 'none', address: null, source: null, accountIndex: 0, accounts: [] };
+    expect(migrateWalletState(v1, 1)).toMatchObject({
+      status: 'none',
+      wallets: [],
+      activeWalletId: null,
     });
   });
 
-  it('keeps an empty list for a wallet that was never set up', () => {
-    expect(migrateWalletState({ status: 'none', address: null }, 0)).toMatchObject({
-      accounts: [],
+  it('turns a recovery-phrase wallet with several accounts into wallet 1, names kept', () => {
+    const migrated = migrateWalletState(V1_MNEMONIC, 1) as ReturnType<typeof state>;
+    expect(migrated).toMatchObject({
+      status: 'active',
+      activeWalletId: LEGACY_WALLET_ID,
+      accountIndex: 1,
+      address: A1,
+      source: 'mnemonic',
     });
+    expect(migrated).not.toHaveProperty('accounts');
+    expect(migrated.wallets).toHaveLength(1);
+    expect(migrated.wallets[0]).toMatchObject({
+      id: LEGACY_WALLET_ID,
+      number: 1,
+      source: 'mnemonic',
+      isBackupPending: false,
+      needsRecovery: false,
+    });
+    expect(migrated.wallets[0]?.accounts).toMatchObject([
+      { index: 0, address: A0, name: 'Savings' },
+      { index: 1, address: A1, name: null },
+    ]);
+  });
+
+  it('turns a private-key wallet into an imported wallet with its one account', () => {
+    const v1 = {
+      status: 'active',
+      address: A0,
+      source: 'private-key',
+      accountIndex: 0,
+      accounts: [{ index: 0, address: A0, name: null }],
+    };
+    const migrated = migrateWalletState(v1, 1) as ReturnType<typeof state>;
+    expect(migrated.wallets[0]).toMatchObject({ source: 'private-key', origin: 'imported' });
+    expect(migrated.wallets[0]?.accounts).toHaveLength(1);
+  });
+
+  it('keeps a wallet that was waiting for its backup waiting', () => {
+    const v1 = { ...V1_MNEMONIC, status: 'pendingBackup', accountIndex: 0, address: A0 };
+    const migrated = migrateWalletState(v1, 1) as ReturnType<typeof state>;
+    expect(migrated.status).toBe('pendingBackup');
+    expect(migrated.wallets[0]?.isBackupPending).toBe(true);
+  });
+
+  it('carries a v0 store (one address, no account list) all the way', () => {
+    const v0 = { status: 'active', address: A0, source: 'mnemonic', accountIndex: 0 };
+    const migrated = migrateWalletState(v0, 0) as ReturnType<typeof state>;
+    expect(migrated.wallets[0]?.accounts).toMatchObject([{ index: 0, address: A0, name: null }]);
+  });
+
+  it('is idempotent: the same input gives the same output, and v2 passes through', () => {
+    const once = migrateWalletState(V1_MNEMONIC, 1);
+    expect(migrateWalletState(V1_MNEMONIC, 1)).toEqual(once);
+    expect(migrateWalletState(once, 2)).toBe(once);
   });
 });
 
-describe('accounts', () => {
-  it('starts with account 0 and switches between added accounts', () => {
-    const store = useWalletStore.getState();
-    store.startPinSetup(A0, 'mnemonic');
-    store.addAccount({ index: 1, address: A1 });
-    useWalletStore.getState().switchAccount(1);
-    expect(useWalletStore.getState()).toMatchObject({ accountIndex: 1, address: A1 });
-    expect(useWalletStore.getState().accounts).toHaveLength(2);
+describe('upgrading an existing install', () => {
+  const V1_RECORD = {
+    version: 1,
+    state: {
+      status: 'active',
+      address: A0,
+      source: 'mnemonic',
+      accountIndex: 0,
+      accounts: [
+        { index: 0, address: A0, name: null },
+        { index: 1, address: A1, name: 'Spending' },
+      ],
+      isRecoveryRequired: false,
+    },
+  };
+
+  async function upgradeFrom(record: unknown) {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(record));
+    await useWalletStore.persist.rehydrate();
+  }
+
+  beforeEach(() =>
+    secureStorage.set(LEGACY_SECRET_KEY, JSON.stringify({ kind: 'mnemonic', phrase: PHRASE })),
+  );
+
+  it('makes the wallet usable with no user action and never moves its secret', async () => {
+    await upgradeFrom(V1_RECORD);
+
+    expect(state()).toMatchObject({ status: 'active', activeWalletId: LEGACY_WALLET_ID });
+    expect(state().wallets[0]?.accounts).toHaveLength(2);
+    await expect(readWalletSecret(LEGACY_WALLET_ID)).resolves.toEqual({
+      kind: 'mnemonic',
+      phrase: PHRASE,
+    });
+    // The secret is where it always was; nothing was copied or indexed.
+    await expect(secureStorage.get(LEGACY_SECRET_KEY)).resolves.not.toBeNull();
+    await expect(secureStorage.get('muvo.wallet.ids')).resolves.toBeNull();
+    const stored = JSON.parse((await AsyncStorage.getItem(STORAGE_KEY)) ?? '{}');
+    expect(stored.version).toBe(2);
   });
 
-  it('ignores a duplicate index and an unknown switch target', () => {
-    const store = useWalletStore.getState();
-    store.startPinSetup(A0, 'mnemonic');
-    store.addAccount({ index: 0, address: A1 });
-    useWalletStore.getState().switchAccount(7);
-    expect(useWalletStore.getState()).toMatchObject({ accountIndex: 0, address: A0 });
-    expect(useWalletStore.getState().accounts).toHaveLength(1);
+  it('gives the same wallet when the migrated state was never written back (crash)', async () => {
+    await upgradeFrom(V1_RECORD);
+    const first = state().wallets;
+
+    // The app died before AsyncStorage got the v2 state: the next launch sees v1 again.
+    state().reset();
+    await upgradeFrom(V1_RECORD);
+
+    expect(state().wallets).toEqual(first);
+    await expect(readWalletSecret(LEGACY_WALLET_ID)).resolves.not.toBeNull();
+  });
+
+  it('does not migrate again once the store is v2', async () => {
+    await upgradeFrom(V1_RECORD);
+    state().renameAccount(LEGACY_WALLET_ID, 0, 'Renamed');
+    await useWalletStore.persist.rehydrate();
+    expect(state().wallets[0]?.accounts[0]?.name).toBe('Renamed');
+  });
+});
+
+describe('first wallet (onboarding)', () => {
+  it('a created wallet waits for its backup, then for the PIN', () => {
+    const created = newWallet(A0, { origin: 'created' });
+    state().addWallet(created);
+    expect(state()).toMatchObject({ status: 'pendingBackup', address: A0, source: 'mnemonic' });
+
+    state().completeBackup(created.id);
+    expect(state().status).toBe('pendingPin');
+    state().activate();
+    expect(state()).toMatchObject({ status: 'active', activeWalletId: created.id });
+  });
+
+  it('an imported wallet goes straight to PIN setup', () => {
+    state().addWallet(newWallet(A0, { source: 'private-key' }));
+    expect(state()).toMatchObject({ status: 'pendingPin', source: 'private-key' });
+  });
+});
+
+describe('several wallets', () => {
+  it('makes an imported second wallet active and numbers it', () => {
+    const { firstId, secondId } = seedTwoWallets({ source: 'private-key' });
+    expect(state().wallets.map((entry) => entry.number)).toEqual([1, 2]);
+    expect(state()).toMatchObject({
+      status: 'active',
+      activeWalletId: secondId,
+      address: B0,
+      source: 'private-key',
+    });
+    state().selectAccount(firstId, 0);
+    expect(state()).toMatchObject({ activeWalletId: firstId, address: A0, source: 'mnemonic' });
+  });
+
+  it('keeps a created second wallet out of use until its quiz is passed', () => {
+    const { firstId, secondId } = seedTwoWallets({ origin: 'created' });
+    expect(state()).toMatchObject({ status: 'active', activeWalletId: firstId });
+    expect(wallet(secondId)?.isBackupPending).toBe(true);
+
+    state().selectAccount(secondId, 0);
+    expect(state().activeWalletId).toBe(firstId);
+
+    state().completeBackup(secondId);
+    expect(state().status).toBe('active');
+    state().selectAccount(secondId, 0);
+    expect(state()).toMatchObject({ activeWalletId: secondId, address: B0 });
+  });
+
+  it('adds accounts to the named wallet only, and ignores a duplicate index', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().addAccount(firstId, { index: 1, address: A1 });
+    state().addAccount(firstId, { index: 1, address: B0 });
+    expect(wallet(firstId)?.accounts).toHaveLength(2);
+    expect(wallet(secondId)?.accounts).toHaveLength(1);
+    state().selectAccount(firstId, 1);
+    expect(state()).toMatchObject({ activeWalletId: firstId, accountIndex: 1, address: A1 });
+    state().selectAccount(firstId, 7);
+    expect(state().accountIndex).toBe(1);
+  });
+
+  it('renames and recolors one account without touching the same index elsewhere', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().renameAccount(firstId, 0, 'Rent');
+    state().setAccountColor(firstId, 0, 'rose');
+    state().updateWallet(secondId, { name: 'Trading' });
+    expect(wallet(firstId)?.accounts[0]).toMatchObject({ name: 'Rent', color: 'rose' });
+    expect(wallet(secondId)?.accounts[0]?.name).toBeNull();
+    expect(wallet(secondId)?.name).toBe('Trading');
+  });
+});
+
+describe('removeWallet', () => {
+  it('removes one wallet and moves the active account to another', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().removeWallet(secondId);
+    expect(state()).toMatchObject({ status: 'active', activeWalletId: firstId, address: A0 });
+    expect(state().wallets).toHaveLength(1);
+  });
+
+  it('keeps the active account when another wallet is removed', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().removeWallet(firstId);
+    expect(state()).toMatchObject({ status: 'active', activeWalletId: secondId, address: B0 });
+  });
+
+  it('returns to onboarding when the last wallet is removed', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().removeWallet(firstId);
+    state().removeWallet(secondId);
+    expect(state()).toMatchObject({ status: 'none', wallets: [], address: null });
+  });
+
+  it('gives a later wallet a number that was never used by a present one', () => {
+    const { firstId } = seedTwoWallets();
+    state().removeWallet(firstId);
+    state().addWallet(newWallet(A1));
+    expect(state().wallets.map((entry: WalletRecord) => entry.number)).toEqual([2, 3]);
+  });
+});
+
+describe('setUnreadableWallets', () => {
+  it('flags only the named wallets and moves the active account off them', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().setUnreadableWallets([secondId]);
+    expect(wallet(secondId)?.needsRecovery).toBe(true);
+    expect(wallet(firstId)?.needsRecovery).toBe(false);
+    expect(state()).toMatchObject({ activeWalletId: firstId, address: A0 });
+
+    state().selectAccount(secondId, 0);
+    expect(state().activeWalletId).toBe(firstId);
+
+    state().setUnreadableWallets([]);
+    expect(wallet(secondId)?.needsRecovery).toBe(false);
   });
 });

@@ -1,10 +1,12 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
-import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
+import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 import { MOTION } from '@/shared/ui';
 
 import { MnemonicQuiz } from './mnemonic-quiz';
+
+import { seedWallet } from '../../../../jest.seed-wallet';
 
 const PHRASE =
   'abandon ability able about above absent absorb abstract absurd abuse access accident';
@@ -14,9 +16,12 @@ const ADDRESS = '0x0000000000000000000000000000000000000001';
 const firstPositions = () => 0;
 
 async function renderQuiz() {
-  await saveWalletSecret({ kind: 'mnemonic', phrase: PHRASE });
-  useWalletStore.getState().startBackup(ADDRESS);
-  await render(<MnemonicQuiz randomInt={firstPositions} />);
+  const walletId = await seedWallet({
+    secret: { kind: 'mnemonic', phrase: PHRASE },
+    address: ADDRESS,
+    origin: 'created',
+  });
+  await render(<MnemonicQuiz walletId={walletId} randomInt={firstPositions} />);
   return screen.findAllByLabelText(/^Word #\d$/);
 }
 

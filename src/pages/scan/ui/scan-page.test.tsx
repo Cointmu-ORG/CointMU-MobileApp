@@ -2,11 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 
 import { storeNewPin, useSessionStore } from '@/entities/auth';
-import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
+import { useWalletStore } from '@/entities/wallet';
 import { useSendFlowStore } from '@/features/send-transaction';
 import { i18n } from '@/shared/i18n';
 
 import { preloadRoutes } from '../../../../jest.preload-routes';
+
+import { seedWallet } from '../../../../jest.seed-wallet';
 
 preloadRoutes();
 
@@ -58,9 +60,8 @@ beforeEach(async () => {
   await i18n.changeLanguage('en');
   await AsyncStorage.setItem('muvo.installed', '1');
   // A complete wallet, so the startup integrity check (D-39) keeps it.
-  await saveWalletSecret({ kind: 'private-key', privateKey: KEY });
   await storeNewPin('135790');
-  useWalletStore.getState().startPinSetup(FROM, 'private-key');
+  await seedWallet({ secret: { kind: 'private-key', privateKey: KEY }, address: FROM });
   useWalletStore.getState().activate();
   useWalletStore.setState({ hasHydrated: true });
   useSessionStore.getState().unlock();

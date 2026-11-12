@@ -9,6 +9,8 @@ type TxState = {
   /** Saves a just-broadcast tx. Ignores a hash that is already stored. */
   add: (record: LocalTxRecord) => void;
   update: (hash: string, update: TxRecordUpdate) => void;
+  /** Drops the records sent from these addresses (a wallet was removed). */
+  removeSentFrom: (addresses: readonly string[]) => void;
   clear: () => void;
 };
 
@@ -34,6 +36,10 @@ export const useTxStore = create<TxState>()(
             record.hash === hash ? { ...record, ...update } : record,
           ),
         }),
+      removeSentFrom: (addresses) => {
+        const senders = new Set(addresses.map((address) => address.toLowerCase()));
+        set({ records: get().records.filter((record) => !senders.has(record.from.toLowerCase())) });
+      },
       clear: () => set({ records: [] }),
     }),
     {

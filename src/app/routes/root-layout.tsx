@@ -40,7 +40,8 @@ const SUB_SCREENS = [
   { name: 'network', titleKey: 'settings.network.title' },
   { name: 'security', titleKey: 'settings.security.title' },
   { name: 'enable-biometrics', titleKey: 'settings.biometrics.title' },
-  { name: 'accounts', titleKey: 'settings.accounts.title' },
+  { name: 'wallet-create', titleKey: 'wallets.create.header' },
+  { name: 'wallet-import', titleKey: 'onboarding.import.title' },
   { name: 'change-pin', titleKey: 'settings.changePin.title' },
   { name: 'recovery-phrase', titleKey: 'settings.recoveryPhrase.title' },
   { name: 'private-key', titleKey: 'settings.privateKey.title' },
@@ -51,9 +52,11 @@ const SUB_SCREENS = [
   { name: 'tx/[hash]', titleKey: 'history.detail.title' },
 ] as const;
 
-// Half height first; drag up to full height for a long account list.
-const ACCOUNT_SHEET_DETENTS = [0.5, 1];
-const ACCOUNT_SHEET_CORNER_RADIUS = 24;
+/** Bottom sheets: the account switcher, the "+" sheet, an account's menu and a wallet's details. */
+const SHEET_SCREENS = ['account-switcher', 'wallet-add', 'account-menu', 'wallet-edit'] as const;
+// Half height first; drag up to full height for a long list.
+const SHEET_DETENTS = [0.5, 1];
+const SHEET_CORNER_RADIUS = 24;
 
 /** React Navigation paints the container, headers and tab bar it owns with these. */
 function useNavigationTheme(): Theme {
@@ -119,18 +122,21 @@ function RootNavigator() {
               options={{ ...subScreenHeader, headerTitle: t(titleKey) }}
             />
           ))}
-          {/* Bottom sheet; Android renders no native header inside a form sheet. */}
-          <Stack.Screen
-            name="account-switcher"
-            options={{
-              presentation: 'formSheet',
-              animation: 'slide_from_bottom',
-              sheetAllowedDetents: ACCOUNT_SHEET_DETENTS,
-              sheetGrabberVisible: true,
-              sheetCornerRadius: ACCOUNT_SHEET_CORNER_RADIUS,
-              contentStyle: { backgroundColor: colors.surface.card },
-            }}
-          />
+          {/* Bottom sheets; Android renders no native header inside a form sheet. */}
+          {SHEET_SCREENS.map((name) => (
+            <Stack.Screen
+              key={name}
+              name={name}
+              options={{
+                presentation: 'formSheet',
+                animation: 'slide_from_bottom',
+                sheetAllowedDetents: SHEET_DETENTS,
+                sheetGrabberVisible: true,
+                sheetCornerRadius: SHEET_CORNER_RADIUS,
+                contentStyle: { backgroundColor: colors.surface.card },
+              }}
+            />
+          ))}
           {/* Already broadcast: no back button or swipe-back into the signing step (D-53). */}
           <Stack.Screen
             name="send/result"

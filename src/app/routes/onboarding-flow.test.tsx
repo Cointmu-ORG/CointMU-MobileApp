@@ -43,7 +43,7 @@ describe('onboarding flow', () => {
         await screen.findByText('Your recovery phrase', {}, { timeout: SLOW_STEP_TIMEOUT_MS }),
       ).toBeOnTheScreen();
       expect(useWalletStore.getState().status).toBe('pendingBackup');
-      const secret = await readWalletSecret();
+      const secret = await readWalletSecret(useWalletStore.getState().activeWalletId ?? '');
       if (secret?.kind !== 'mnemonic') throw new Error('expected a stored mnemonic');
       const words = splitWords(secret.phrase);
       expect(await screen.findByText(words[0] as string)).toBeOnTheScreen();

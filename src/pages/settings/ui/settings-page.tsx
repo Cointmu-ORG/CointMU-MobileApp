@@ -7,7 +7,7 @@ import Palette from 'lucide-react-native/icons/palette';
 import Server from 'lucide-react-native/icons/server';
 import ShieldCheck from 'lucide-react-native/icons/shield-check';
 import Trash2 from 'lucide-react-native/icons/trash-2';
-import Users from 'lucide-react-native/icons/users';
+import WalletCards from 'lucide-react-native/icons/wallet-cards';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthPrefsStore } from '@/entities/auth';
@@ -73,10 +73,10 @@ export function SettingsPage() {
       </SettingsSection>
       <SettingsSection title={t('settings.groups.wallet')}>
         <SettingsRow
-          icon={Users}
+          icon={WalletCards}
           title={t('settings.accounts.title')}
           value={account ? label(account) : undefined}
-          onPress={() => router.push(ROUTES.accounts)}
+          onPress={() => router.navigate(ROUTES.wallets)}
         />
         <SettingsRow
           icon={Server}

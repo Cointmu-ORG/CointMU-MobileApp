@@ -4,55 +4,69 @@ import { useBalanceStore } from '@/entities/account';
 import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
+import { addWalletRecord, seedWalletRecord } from '../../../../jest.seed-wallet';
 import { AccountSwitcher } from './account-switcher';
 
 // Public Hardhat test accounts; never hold real funds.
 const A0 = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const A1 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+const B0 = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
 const TWO_CMU = 2n * 10n ** 18n;
 
-async function setUp(source: 'mnemonic' | 'private-key') {
-  useWalletStore.getState().startPinSetup(A0, source);
-  useWalletStore.getState().activate();
-  if (source === 'mnemonic') {
-    useWalletStore.getState().addAccount({ index: 1, address: A1 });
-  }
+const state = () => useWalletStore.getState();
+
+/** Wallet 1 (phrase, two accounts, active) and wallet 2 (private key). */
+async function setUp() {
+  const firstId = seedWalletRecord({ source: 'mnemonic', address: A0 });
+  state().activate();
+  state().addAccount(firstId, { index: 1, address: A1 });
+  const secondId = addWalletRecord({ source: 'private-key', address: B0 });
+  state().selectAccount(firstId, 0);
   useBalanceStore.setState({ wei: TWO_CMU, status: 'success' });
-  const onDone = jest.fn();
-  const onManage = jest.fn();
-  await render(<AccountSwitcher onDone={onDone} onManage={onManage} />);
-  return { onDone, onManage };
+  const handlers = { onDone: jest.fn(), onAdd: jest.fn(), onManage: jest.fn() };
+  await render(<AccountSwitcher {...handlers} />);
+  return { ...handlers, firstId, secondId };
 }
 
 beforeEach(async () => {
   await i18n.changeLanguage('en');
-  useWalletStore.getState().reset();
+  state().reset();
 });
 
 describe('AccountSwitcher', () => {
-  it('marks the active account with its loaded balance and switches on tap, then closes', async () => {
-    const { onDone } = await setUp('mnemonic');
+  it('lists the accounts of every wallet under the wallet name', async () => {
+    await setUp();
+    expect(screen.getByRole('header', { name: 'Wallet 1' })).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: 'Wallet 2' })).toBeOnTheScreen();
+    expect(screen.getAllByRole('radio')).toHaveLength(3);
     expect(screen.getByRole('radio', { name: 'Account 1, 2 CMU' })).toBeChecked();
-    expect(screen.getByText('0xf39F…2266')).toBeOnTheScreen();
+  });
 
-    await fireEvent.press(screen.getByRole('radio', { name: 'Account 2' }));
+  it('switches to an account of another wallet on tap, clears the balance and closes', async () => {
+    const { onDone, secondId } = await setUp();
 
-    expect(useWalletStore.getState()).toMatchObject({ accountIndex: 1, address: A1 });
+    await fireEvent.press(screen.getByText('0x3C44…93BC'));
+
+    expect(state()).toMatchObject({ activeWalletId: secondId, accountIndex: 0, address: B0 });
     // The old account's balance never shows under the new one.
     expect(useBalanceStore.getState().wei).toBeNull();
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('opens the accounts page from Manage', async () => {
-    const { onManage, onDone } = await setUp('mnemonic');
-    await fireEvent.press(screen.getByRole('button', { name: 'Manage accounts' }));
-    expect(onManage).toHaveBeenCalledTimes(1);
-    expect(onDone).not.toHaveBeenCalled();
+  it('leaves out a wallet that cannot be used yet', async () => {
+    const { secondId } = await setUp();
+    state().setUnreadableWallets([secondId]);
+    await screen.findAllByRole('radio');
+    expect(screen.queryByRole('header', { name: 'Wallet 2' })).toBeNull();
+    expect(screen.getAllByRole('radio')).toHaveLength(2);
   });
 
-  it('cannot add accounts to a private-key wallet and says why', async () => {
-    await setUp('private-key');
-    expect(screen.getByRole('button', { name: 'Add account' })).toBeDisabled();
-    expect(screen.getByText(/imported from a private key/)).toBeOnTheScreen();
+  it('opens the add sheet and the Wallets tab', async () => {
+    const { onAdd, onManage, onDone } = await setUp();
+    await fireEvent.press(screen.getByRole('button', { name: 'Add an account or a wallet' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Open Wallets' }));
+    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(onManage).toHaveBeenCalledTimes(1);
+    expect(onDone).not.toHaveBeenCalled();
   });
 });

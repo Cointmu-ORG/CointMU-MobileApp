@@ -1,4 +1,4 @@
-import { useBalanceStore } from '@/entities/account';
+import { useAccountBalancesStore, useBalanceStore } from '@/entities/account';
 import { getVisibleTokens, useTokenBalanceStore } from '@/entities/asset';
 import {
   getProvider,
@@ -25,6 +25,8 @@ function refreshBalance(): void {
   const tokenBalances = useTokenBalanceStore.getState();
   balance.clear();
   tokenBalances.clear();
+  // The Wallets tab fetches its cards again when it is next shown.
+  useAccountBalancesStore.getState().clear();
   if (address === null) return;
   void balance.refresh(address);
   void tokenBalances.refresh(getProvider(), address, getVisibleTokens());

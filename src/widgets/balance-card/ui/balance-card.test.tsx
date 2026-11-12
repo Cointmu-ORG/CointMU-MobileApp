@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { useBalanceStore } from '@/entities/account';
-import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 import { DEFAULT_APPEARANCE, useAppearanceStore, usePrivacyRevealStore } from '@/shared/model';
 
 import { BalanceCard } from './balance-card';
+
+import { seedWalletRecord } from '../../../../jest.seed-wallet';
 
 const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const ONE_AND_A_HALF_CMU = 1_500_000_000_000_000_000n;
@@ -16,7 +17,7 @@ beforeEach(async () => {
   await i18n.changeLanguage('en');
   useAppearanceStore.setState(DEFAULT_APPEARANCE);
   usePrivacyRevealStore.getState().hide();
-  useWalletStore.getState().startPinSetup(ADDRESS, 'mnemonic');
+  seedWalletRecord({ source: 'mnemonic', address: ADDRESS });
   useBalanceStore.setState({ wei: ONE_AND_A_HALF_CMU, status: 'success' });
 });
 

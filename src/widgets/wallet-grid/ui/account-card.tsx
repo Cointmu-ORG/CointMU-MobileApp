@@ -1,0 +1,196 @@
+import Check from 'lucide-react-native/icons/check';
+import Ellipsis from 'lucide-react-native/icons/ellipsis';
+import KeyRound from 'lucide-react-native/icons/key-round';
+import WalletMinimal from 'lucide-react-native/icons/wallet-minimal';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, View } from 'react-native';
+
+import { balanceOf, useAccountBalancesStore } from '@/entities/account';
+import { NATIVE_ASSET } from '@/entities/asset';
+import { useAccountLabel, type WalletAccount, type WalletSource } from '@/entities/wallet';
+import { shortenAddress } from '@/shared/lib';
+import { useAmountDisplay } from '@/shared/model';
+import {
+  ICON_SIZE,
+  PressableSurface,
+  Skeleton,
+  SURFACE_PALETTE,
+  Text,
+  useCardFill,
+  useThemeColors,
+} from '@/shared/ui';
+
+type AccountCardProps = {
+  account: WalletAccount;
+  source: WalletSource;
+  isActive: boolean;
+  onPress: () => void;
+  /** The "…" button and a long press both open the account's menu. */
+  onMenu: () => void;
+};
+
+/** The balance line: the amount, a placeholder while it loads, or a short failure note. */
+function CardBalance({ address }: { address: string }) {
+  const { t } = useTranslation();
+  const { formatBalance } = useAmountDisplay();
+  const { wei, status } = useAccountBalancesStore((state) => balanceOf(state.balances, address));
+
+  if (wei !== null) {
+    return (
+      <Text variant="heading" tone="inverse" numberOfLines={1} adjustsFontSizeToFit>
+        {formatBalance(wei, NATIVE_ASSET.decimals)} {NATIVE_ASSET.symbol}
+      </Text>
+    );
+  }
+  if (status === 'error') {
+    return (
+      <Text variant="label" tone="inverse" numberOfLines={2}>
+        {t('wallets.card.balanceError')}
+      </Text>
+    );
+  }
+  return (
+    <View accessibilityLabel={t('wallets.card.balanceLoading')} style={styles.skeleton}>
+      <Skeleton className="h-6 w-24 rounded-lg" />
+    </View>
+  );
+}
+
+/** Two faint rings in the corner: Muvo's own mark for a card. Decoration only, behind no text. */
+function CardRings() {
+  const colors = useThemeColors();
+  const ring = { borderColor: colors.content.inverse };
+  return (
+    <View style={styles.rings} pointerEvents="none" accessibilityElementsHidden>
+      <View style={[styles.ring, styles.ringOuter, ring]} />
+      <View style={[styles.ring, styles.ringInner, ring]} />
+    </View>
+  );
+}
+
+function ActiveBadge({ fill }: { fill: string }) {
+  const { t } = useTranslation();
+  return (
+    <View className="flex-row items-center gap-1 rounded-full bg-content-inverse px-2 py-0.5">
+      <Check size={ICON_SIZE.sm} color={fill} accessibilityElementsHidden />
+      <Text variant="caption" className="font-semibold" style={{ color: fill }}>
+        {t('wallets.card.active')}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * One account as a card in the user's color (D-80): icon, name, native balance, short address
+ * and an "Active" badge. A tap makes it the active account; the menu holds the rest. Text and
+ * icons are white on the fill, which the palette test keeps at AA in both themes.
+ */
+export function AccountCard({ account, source, isActive, onPress, onMenu }: AccountCardProps) {
+  const { t } = useTranslation();
+  const colors = useThemeColors();
+  const label = useAccountLabel();
+  const fill = useCardFill()(account.color);
+  const name = label(account);
+  const Icon = source === 'private-key' ? KeyRound : WalletMinimal;
+
+  return (
+    <View className="w-[48%]">
+      <PressableSurface
+        palette={SURFACE_PALETTE.tinted}
+        className="min-h-40 justify-between overflow-hidden rounded-card p-3"
+        surfaceStyle={{ backgroundColor: fill }}
+        onPress={onPress}
+        onLongPress={onMenu}
+        accessibilityRole="button"
+        accessibilityLabel={t(isActive ? 'wallets.card.labelActive' : 'wallets.card.label', {
+          name,
+          address: shortenAddress(account.address),
+        })}
+        accessibilityHint={t('wallets.card.hint')}
+        accessibilityState={{ selected: isActive }}
+      >
+        <CardRings />
+        <View className="flex-row items-start justify-between">
+          <View style={styles.iconTile}>
+            <View
+              style={[styles.iconTileFill, { backgroundColor: colors.content.inverse }]}
+              accessibilityElementsHidden
+            />
+            <Icon size={ICON_SIZE.md} color={colors.content.inverse} />
+          </View>
+          <PressableSurface
+            palette={SURFACE_PALETTE.tinted}
+            className="-mr-2 -mt-2 h-11 w-11 items-center justify-center rounded-full"
+            onPress={onMenu}
+            accessibilityRole="button"
+            accessibilityLabel={t('wallets.card.menu', { name })}
+          >
+            <Ellipsis size={ICON_SIZE.md} color={colors.content.inverse} />
+          </PressableSurface>
+        </View>
+        <View className="gap-1">
+          <Text variant="label" tone="inverse" numberOfLines={1}>
+            {name}
+          </Text>
+          <CardBalance address={account.address} />
+          <View className="min-h-6 flex-row flex-wrap items-center justify-between gap-1">
+            <Text variant="caption" tone="inverse" className="font-mono">
+              {shortenAddress(account.address)}
+            </Text>
+            {isActive ? <ActiveBadge fill={fill} /> : null}
+          </View>
+        </View>
+      </PressableSurface>
+    </View>
+  );
+}
+
+const ICON_TILE_SIZE = 36;
+const ICON_TILE_OPACITY = 0.18;
+const RING_OUTER_SIZE = 132;
+const RING_INNER_SIZE = 84;
+const RING_WIDTH = 10;
+const RING_OPACITY = 0.14;
+const RINGS_OFFSET = -44;
+// The skeleton pulses in the muted surface color; on a colored card it reads as a soft bar.
+const SKELETON_OPACITY = 0.35;
+
+const styles = StyleSheet.create({
+  iconTile: {
+    width: ICON_TILE_SIZE,
+    height: ICON_TILE_SIZE,
+    borderRadius: ICON_TILE_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  iconTileFill: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    opacity: ICON_TILE_OPACITY,
+  },
+  rings: {
+    position: 'absolute',
+    top: RINGS_OFFSET,
+    right: RINGS_OFFSET,
+    width: RING_OUTER_SIZE,
+    height: RING_OUTER_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring: { position: 'absolute', borderWidth: RING_WIDTH, opacity: RING_OPACITY },
+  ringOuter: {
+    width: RING_OUTER_SIZE,
+    height: RING_OUTER_SIZE,
+    borderRadius: RING_OUTER_SIZE / 2,
+  },
+  ringInner: {
+    width: RING_INNER_SIZE,
+    height: RING_INNER_SIZE,
+    borderRadius: RING_INNER_SIZE / 2,
+  },
+  skeleton: { opacity: SKELETON_OPACITY },
+});
