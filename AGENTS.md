@@ -34,6 +34,10 @@ Run lint and typecheck before declaring any task done.
 Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
 Docs: https://docs.expo.dev/eas/index.md
 
+## Releases
+
+Android releases do not use EAS: `.github/workflows/release.yml` builds the APK on a GitHub runner (D-86). `node scripts/bump-version.js <bump-type> <codename>` pushes the `v*` tag that starts it; the result is a draft GitHub Release to review and publish. A manual run of the workflow (`gh workflow run release.yml --ref <branch>`) makes a test APK as a workflow artifact. The config plugins in `plugins/` set the versionCode, signing and network security config at prebuild time; change those, never a generated file. Secrets, variables and the full steps are in the README ("Android releases").
+
 ## Rules
 
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.

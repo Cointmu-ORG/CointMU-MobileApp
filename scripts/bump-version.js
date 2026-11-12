@@ -45,8 +45,9 @@ const USAGE = [
   `Updates ${PACKAGE_JSON}, package-lock.json and ${APP_JSON} (expo.version, without a`,
   'prerelease suffix), commits "chore: release version <version>-<codename>",',
   `tags ${TAG_PREFIX}<version> and pushes both to origin/${RELEASE_BRANCH}.`,
-  'Native build numbers (ios.buildNumber, android.versionCode) are not touched:',
-  'EAS remote versioning owns them (D-40, Q-31).',
+  'The pushed tag starts the release workflow, which builds the signed APK into a',
+  'draft GitHub Release. android.versionCode is derived from the version at',
+  'prebuild time (plugins/android-version.js, D-85); nothing stores it.',
 ].join('\n');
 
 /**
