@@ -1,0 +1,11 @@
+{
+  "version": "1.1.0",
+  "codename": "FelisCatus",
+  "commit": "0123456789abcdef0123456789abcdef01234567",
+  "commitShort": "0123456",
+  "branch": "test/fixture",
+  "dirty": true,
+  "builtAt": "2026-11-11T08:09:10.000Z",
+  "channel": "dev",
+  "ciRun": null
+}

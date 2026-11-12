@@ -5,7 +5,7 @@ import { Linking } from 'react-native';
 
 import { storeNewPin, useAuthPrefsStore, useSessionStore } from '@/entities/auth';
 import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
-import { EXTERNAL_LINKS, getAppInfo, getBuildInfo } from '@/shared/config';
+import { EXTERNAL_LINKS, getAppInfo } from '@/shared/config';
 import { i18n } from '@/shared/i18n';
 import { DEFAULT_APPEARANCE, useAppearanceStore } from '@/shared/model';
 
@@ -173,13 +173,10 @@ describe('Settings > About', () => {
   });
 
   it('shows the build info and copies a plain-text block without wallet data', async () => {
-    const { commitShort, isDirty, channel } = getBuildInfo();
     await open('/about', 'Build info');
-    const commit = commitShort ?? 'unknown';
-    expect(screen.getByText(isDirty ? `${commit} (modified)` : commit)).toBeOnTheScreen();
-    expect(
-      screen.getByText({ dev: 'Development', ci: 'CI', release: 'Release' }[channel]),
-    ).toBeOnTheScreen();
+    // The fixture Jest maps build-info.json to (jest.build-info.json), not this checkout.
+    expect(screen.getByText('0123456 (modified)')).toBeOnTheScreen();
+    expect(screen.getByText('Development')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: /^Copy build info/ }));
     expect(await screen.findByText('Copied')).toBeOnTheScreen();

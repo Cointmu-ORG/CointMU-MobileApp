@@ -5,9 +5,11 @@
  * build-info.json that About reads); mobile records the commit instead of a
  * random build id.
  *
- * Runs from npm hooks (prepare, prestart, pretest, pretypecheck, ...) and in
- * CI before `expo export`, so the file is always there and always current. It
- * is untracked: writing it never dirties the tree.
+ * Runs whenever Metro starts (metro.config.js calls refreshBuildInfo, so
+ * `npx expo start` and `expo export` are covered, not only the npm scripts),
+ * from npm hooks (prepare, prestart, pretypecheck, ...) and in CI, so the file
+ * is always there and always current. It is untracked: writing it never
+ * dirties the tree. Jest reads a fixed fixture instead (jest.config.js).
  *
  * It must never fail a build: without git (a tarball, a missing binary) the git
  * fields are null. It only needs HEAD, so a shallow clone is enough. It writes
@@ -150,10 +152,27 @@ function writeBuildInfo(root, { env = process.env, now = new Date(), gitBinary }
   return info;
 }
 
+/**
+ * writeBuildInfo for callers that must keep going (Metro's config): a failure
+ * is reported and the previous file, if any, stays in place.
+ * @param {string} root - Folder holding package.json.
+ * @param {Parameters<typeof writeBuildInfo>[1]} [options] - See writeBuildInfo.
+ * @returns {BuildInfo | null} What was written, or null when writing failed.
+ */
+function refreshBuildInfo(root, options) {
+  try {
+    return writeBuildInfo(root, options);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.warn(`build-info: not refreshed (${reason})`);
+    return null;
+  }
+}
+
 if (require.main === module) {
   const info = writeBuildInfo(ROOT);
   const state = info.dirty ? ', modified' : '';
   console.log(`build-info: ${info.commitShort ?? 'no commit'} (${info.channel}${state})`);
 }
 
-module.exports = { collectBuildInfo, createGitRunner, writeBuildInfo };
+module.exports = { collectBuildInfo, createGitRunner, refreshBuildInfo, writeBuildInfo };

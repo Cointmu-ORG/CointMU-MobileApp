@@ -67,6 +67,7 @@
     "ios": "expo start --ios",
     "preweb": "node scripts/generate-build-info.js",
     "web": "expo start --web",
+    "pretypecheck": "node scripts/generate-build-info.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fsd": "steiger ./src",
