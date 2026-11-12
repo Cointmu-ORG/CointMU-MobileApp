@@ -9,13 +9,13 @@ import {
   type NodeProbe,
 } from '@/entities/network';
 import { useWalletStore } from '@/entities/wallet';
-import { isHttpUrl } from '@/shared/config';
+import { isCleartextAllowed, isHttpUrl } from '@/shared/config';
 
 export type SelectNodeResult =
   | { readonly ok: true }
   | { readonly ok: false; readonly probe: Exclude<NodeProbe, { status: 'reachable' }> };
 
-export type AddNodeError = 'invalidUrl' | 'alreadyListed' | 'limitReached';
+export type AddNodeError = 'invalidUrl' | 'cleartextBlocked' | 'alreadyListed' | 'limitReached';
 export type AddNodeResult = SelectNodeResult | { readonly ok: false; readonly error: AddNodeError };
 
 /** Balances came from the old node; fetch them again from the new one. */
@@ -50,6 +50,10 @@ export async function addCustomNode(input: string): Promise<AddNodeResult> {
   const url = input.trim();
   const { customUrls } = useNetworkStore.getState();
   if (!isHttpUrl(url)) return { ok: false, error: 'invalidUrl' };
+  // A release build blocks http:// to hosts it was not built for (D-87); say so instead of
+  // reporting the node as unreachable. Development builds allow cleartext.
+  // ponytail: __DEV__ is also false in Expo Go started with --no-dev, where http:// would work.
+  if (!__DEV__ && !isCleartextAllowed(url)) return { ok: false, error: 'cleartextBlocked' };
   if (network.presetUrls.includes(url) || customUrls.includes(url)) {
     return { ok: false, error: 'alreadyListed' };
   }

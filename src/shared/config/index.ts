@@ -7,7 +7,7 @@ export {
   type BuildChannel,
   type BuildInfo,
 } from './build-info';
-export { env, explorerTxUrl, isHttpUrl, readEnv, type Env } from './env';
+export { env, explorerTxUrl, isCleartextAllowed, isHttpUrl, readEnv, type Env } from './env';
 export { EXTERNAL_LINKS } from './links';
 export {
   BALANCE_POLL_INTERVAL_MS,

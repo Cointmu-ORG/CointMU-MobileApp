@@ -1,4 +1,4 @@
-import { explorerTxUrl, isHttpUrl, readEnv } from './env';
+import { explorerTxUrl, isCleartextAllowed, isHttpUrl, readEnv } from './env';
 
 const CHAIN = { EXPO_PUBLIC_CHAIN_ID: '1912' };
 
@@ -49,5 +49,21 @@ describe('isHttpUrl', () => {
     ['https://', false],
   ])('%s → %s', (value, expected) => {
     expect(isHttpUrl(value)).toBe(expected);
+  });
+});
+
+describe('isCleartextAllowed', () => {
+  const permitted = ['http://10.0.0.1:8545', 'https://rpc.example.invalid', null];
+
+  it.each([
+    ['https://anything.example.invalid', true],
+    ['http://10.0.0.1:8545', true],
+    // The Android rule is per host: another port on a permitted host passes.
+    ['http://10.0.0.1:9000', true],
+    ['http://10.0.0.2:8545', false],
+    // Permitted over https only, so http:// to it is still blocked.
+    ['http://rpc.example.invalid', false],
+  ])('%s → %s', (value, expected) => {
+    expect(isCleartextAllowed(value, permitted)).toBe(expected);
   });
 });

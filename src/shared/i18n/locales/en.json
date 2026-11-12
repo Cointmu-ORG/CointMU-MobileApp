@@ -188,6 +188,7 @@
       "addHint": "Use https://. Plain http:// is blocked in release builds.",
       "add": "Add and use",
       "invalidUrl": "Enter an http:// or https:// URL.",
+      "cleartextBlocked": "This version of Muvo blocks plain http:// to this address. Use an https:// node.",
       "alreadyListed": "That node is already in the list.",
       "pingAll": "Ping all",
       "pinging": "Pinging…",
@@ -307,6 +308,7 @@
       "channels": {
         "dev": "Development",
         "ci": "CI",
+        "preview": "Preview",
         "release": "Release"
       },
       "unknown": "unknown",

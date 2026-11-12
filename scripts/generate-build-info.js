@@ -23,7 +23,8 @@ const { execFileSync } = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const BUILD_INFO_JSON = 'build-info.json';
-const CHANNELS = ['dev', 'ci', 'release'];
+// preview: a test APK from the release workflow's manual run (D-86).
+const CHANNELS = ['dev', 'ci', 'preview', 'release'];
 const FULL_HASH = /^[0-9a-f]{40}$/;
 const SHORT_HASH_LENGTH = 7;
 const GIT_TIMEOUT_MS = 5_000;
@@ -40,7 +41,7 @@ const DETACHED_HEAD = 'HEAD';
  * @property {string | null} branch - Branch name; null when unknown.
  * @property {boolean | null} dirty - Uncommitted changes at build time; null without git.
  * @property {string} builtAt - Build time, ISO 8601 in UTC.
- * @property {'dev' | 'ci' | 'release'} channel - What kind of build this is.
+ * @property {'dev' | 'ci' | 'preview' | 'release'} channel - What kind of build this is.
  * @property {string | null} ciRun - CI run number, when built in CI.
  */
 
@@ -76,7 +77,7 @@ function createGitRunner(cwd, gitBinary = 'git') {
 /**
  * An explicit BUILD_CHANNEL wins; then a release build service (EAS); then CI.
  * @param {Record<string, string | undefined>} env - Process environment.
- * @returns {'dev' | 'ci' | 'release'} The build channel.
+ * @returns {'dev' | 'ci' | 'preview' | 'release'} The build channel.
  */
 function resolveChannel(env) {
   if (CHANNELS.includes(env.BUILD_CHANNEL)) return env.BUILD_CHANNEL;

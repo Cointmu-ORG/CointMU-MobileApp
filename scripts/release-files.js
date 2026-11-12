@@ -7,8 +7,8 @@
  * - package-lock.json   root "version" and packages[""].version (npm)
  * - app.json            expo.version (hook), without a prerelease suffix
  *
- * Native build numbers (ios.buildNumber, android.versionCode) are not touched:
- * EAS remote versioning owns them (D-40).
+ * Native build numbers are not stored: android.versionCode is derived from the
+ * version at prebuild time (plugins/android-version.js, D-85).
  */
 const fs = require('node:fs');
 const path = require('node:path');

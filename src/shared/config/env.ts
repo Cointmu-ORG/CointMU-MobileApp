@@ -34,6 +34,29 @@ export function isHttpUrl(value: string): boolean {
   }
 }
 
+function httpHost(value: string | null): string | null {
+  try {
+    const url = new URL(value ?? '');
+    return url.protocol === 'http:' ? url.hostname : null;
+  } catch {
+    // Not a URL: it names no host.
+    return null;
+  }
+}
+
+/**
+ * False for an http:// URL that an Android release build refuses: its network security config
+ * (plugins/android-network-security.js, D-87) allows cleartext only for the hosts of the http://
+ * URLs known at build time, the preset nodes and the GlitchTip DSN. https:// is always allowed.
+ */
+export function isCleartextAllowed(
+  value: string,
+  permitted: readonly (string | null)[] = [...env.rpcUrls, env.glitchtipDsn],
+): boolean {
+  const host = httpHost(value);
+  return host === null || permitted.some((url) => httpHost(url) === host);
+}
+
 function parseRpcUrls(raw: string): string[] {
   const urls = [
     ...new Set(
