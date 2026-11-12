@@ -4,11 +4,13 @@ import { View } from 'react-native';
 
 import { NATIVE_ASSET } from '@/entities/asset';
 import { useActiveRpcUrl } from '@/entities/network';
-import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
+import { AccountBadge, useAccountLabel, useActiveAccount } from '@/entities/wallet';
 import { formatAmount, formatUrlHost } from '@/shared/lib';
 import { Card, Text } from '@/shared/ui';
 
 import type { SendDraft } from '../model/send-flow-store';
+
+const FROM_BADGE_SIZE = 28;
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -40,7 +42,12 @@ export function ReviewDetails({ draft }: { draft: SendDraft }) {
   return (
     <Card className="gap-0">
       <Row label={t('send.review.from')}>
-        <Text variant="label">{account ? labelOf(account) : ''}</Text>
+        <View className="flex-row items-center gap-2">
+          {account ? <AccountBadge account={account} size={FROM_BADGE_SIZE} /> : null}
+          <Text variant="label" className="flex-1">
+            {account ? labelOf(account) : ''}
+          </Text>
+        </View>
         <Text variant="mono" tone="secondary" selectable>
           {account?.address ?? ''}
         </Text>

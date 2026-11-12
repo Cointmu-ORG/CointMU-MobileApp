@@ -26,7 +26,7 @@ function StepHeading({ step }: { step: 'creating' | Step | 'details' }) {
 
 /**
  * Creating another wallet (D-78): generate, show the phrase once with screenshots blocked, the
- * 3-word quiz, then name and color. The route may carry the id of a wallet whose backup was left
+ * 3-word quiz, then name, color and icon. The route may carry the id of a wallet whose backup was left
  * unfinished, to resume it. The phrase is only ever shown while the wallet's backup is pending:
  * a link to this screen for a finished wallet goes straight to its name and color, so it can
  * never reveal a phrase without the PIN.
@@ -61,6 +61,7 @@ export function WalletCreatePage() {
         <StepHeading step="details" />
         <WalletDetailsForm
           wallet={wallet}
+          firstAccount={wallet.accounts[0]}
           submitLabel={t('wallets.create.details.finish')}
           onSaved={finish}
         />

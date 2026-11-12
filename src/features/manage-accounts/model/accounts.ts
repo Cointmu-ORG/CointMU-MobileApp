@@ -5,6 +5,7 @@ import {
   findWallet,
   readWalletSecret,
   useWalletStore,
+  type AccountIcon,
   type WalletRecord,
 } from '@/entities/wallet';
 import type { CardColorId } from '@/shared/ui';
@@ -59,6 +60,10 @@ export function renameAccount({ walletId, index }: AccountRef, input: string): v
 
 export function setAccountColor({ walletId, index }: AccountRef, color: CardColorId): void {
   useWalletStore.getState().setAccountColor(walletId, index, color);
+}
+
+export function setAccountIcon({ walletId, index }: AccountRef, icon: AccountIcon): void {
+  useWalletStore.getState().setAccountIcon(walletId, index, icon);
 }
 
 /**

@@ -53,7 +53,13 @@ const SUB_SCREENS = [
 ] as const;
 
 /** Bottom sheets: the account switcher, the "+" sheet, an account's menu and a wallet's details. */
-const SHEET_SCREENS = ['account-switcher', 'wallet-add', 'account-menu', 'wallet-edit'] as const;
+const SHEET_SCREENS = [
+  'account-switcher',
+  'wallet-add',
+  'account-menu',
+  'account-icon',
+  'wallet-edit',
+] as const;
 // Half height first; drag up to full height for a long list.
 const SHEET_DETENTS = [0.5, 1];
 const SHEET_CORNER_RADIUS = 24;

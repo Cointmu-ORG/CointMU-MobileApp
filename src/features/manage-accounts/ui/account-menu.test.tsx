@@ -18,7 +18,7 @@ async function openMenu() {
   state().activate();
   const secondId = addWalletRecord({ source: 'private-key', address: B0 });
   state().selectAccount(firstId, 0);
-  const callbacks = { onDone: jest.fn(), onReceive: jest.fn() };
+  const callbacks = { onDone: jest.fn(), onChangeIcon: jest.fn(), onReceive: jest.fn() };
   await render(<AccountMenu account={{ walletId: secondId, index: 0 }} {...callbacks} />);
   return { ...callbacks, firstId, secondId };
 }
@@ -54,6 +54,12 @@ describe('AccountMenu', () => {
     await fireEvent.press(screen.getByRole('button', { name: 'Set as active account' }));
     expect(state()).toMatchObject({ activeWalletId: secondId, address: B0 });
     expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('names the current icon and opens the icon picker', async () => {
+    const { onChangeIcon } = await openMenu();
+    await fireEvent.press(screen.getByRole('button', { name: 'Change icon, Key' }));
+    expect(onChangeIcon).toHaveBeenCalledTimes(1);
   });
 
   it('opens the receive code of that account', async () => {

@@ -28,6 +28,7 @@ export const ROUTES = {
   walletImport: '/wallet-import',
   walletEdit: '/wallet-edit',
   accountMenu: '/account-menu',
+  accountIcon: '/account-icon',
   accountSwitcher: '/account-switcher',
   changePin: '/change-pin',
   recoveryPhrase: '/recovery-phrase',
