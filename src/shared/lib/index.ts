@@ -8,7 +8,19 @@ export {
   type FormatAmountOptions,
 } from './amount';
 export { dateLocale, formatDateTime, formatTime, type ClockStyle } from './date';
-export { logger, redact } from './logger';
+export {
+  addNavigationBreadcrumb,
+  applyErrorReportingConsent,
+  flushErrorReports,
+  getErrorReportingHost,
+  initErrorReporting,
+  isErrorReportingAvailable,
+  logger,
+  QUEUE_MAX_REPORTS,
+  redact,
+  sendTestErrorReport,
+  type ReportingConsent,
+} from './diagnostics';
 export { secureRandomInt, type RandomInt } from './random';
 export { secureStorage } from './secure-storage';
 export { formatUrlHost } from './url';

@@ -1,5 +1,26 @@
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 type LogContext = Readonly<Record<string, unknown>>;
+
+/** One written log line, already redacted, plus the first Error from its context. */
+export type LogEntry = {
+  readonly level: Exclude<LogLevel, 'debug'>;
+  readonly message: string;
+  readonly context: LogContext | undefined;
+  /** Kept as an object for its stack trace; its text is scrubbed by whoever sends it. */
+  readonly error: Error | undefined;
+};
+
+type LogSink = (entry: LogEntry) => void;
+
+let logSink: LogSink | null = null;
+
+/**
+ * Sends every info, warn and error line to one more place: error reporting registers itself
+ * here, so the logger stays free of the reporting SDK. Pass null to stop.
+ */
+export function setLogSink(sink: LogSink | null): void {
+  logSink = sink;
+}
 
 const REDACTED = '[REDACTED]';
 // 64-hex strings: private keys, seeds, PIN hashes.
@@ -27,10 +48,17 @@ function redactContext(context: LogContext | undefined): LogContext | undefined 
   );
 }
 
+function findError(context: LogContext | undefined): Error | undefined {
+  return Object.values(context ?? {}).find((value): value is Error => value instanceof Error);
+}
+
 function write(level: LogLevel, message: string, context?: LogContext): void {
   if (level === 'debug' && !__DEV__) return;
-  const entry = { level, message: redact(message), ...redactContext(context) };
-  console[level](JSON.stringify(entry));
+  const safeMessage = redact(message);
+  const safeContext = redactContext(context);
+  console[level](JSON.stringify({ level, message: safeMessage, ...safeContext }));
+  if (level === 'debug') return;
+  logSink?.({ level, message: safeMessage, context: safeContext, error: findError(context) });
 }
 
 export const logger = {

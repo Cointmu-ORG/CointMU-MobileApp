@@ -1,6 +1,7 @@
 const expoPreset = require('jest-expo/jest-preset');
 
-// Packages that ship untranspiled ESM and must go through Babel (added: lucide-react-native).
+// Packages that ship untranspiled ESM and must go through Babel (added: lucide-react-native,
+// and all of @sentry: Jest resolves @sentry/core to its ESM build).
 const TRANSPILED_PACKAGES = [
   '.pnpm',
   'react-native',
@@ -11,7 +12,7 @@ const TRANSPILED_PACKAGES = [
   '@expo-google-fonts',
   'react-navigation',
   '@react-navigation',
-  '@sentry/react-native',
+  '@sentry',
   'native-base',
   'standard-navigation',
   'lucide-react-native',

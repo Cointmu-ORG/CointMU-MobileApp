@@ -12,6 +12,12 @@ export {
   type TimeFormat,
 } from './appearance-prefs';
 export { useAppearanceStore } from './appearance-store';
+export {
+  DEFAULT_ERROR_REPORTING,
+  migrateErrorReporting,
+  useErrorReportingStore,
+  type ErrorReportingPrefs,
+} from './error-reporting-store';
 export { REVEAL_DURATION_MS, usePrivacyRevealStore } from './privacy-store';
 export {
   AMOUNT_MASK,

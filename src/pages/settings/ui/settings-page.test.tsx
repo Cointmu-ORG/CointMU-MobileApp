@@ -61,6 +61,7 @@ describe('Settings tab', () => {
       'Accounts, Account 1',
       'Network, rpc.test.invalid',
       'Security, Auto-lock: 1 min',
+      'Privacy, Reports not set up',
       `About, v${getAppInfo().version}`,
     ]) {
       expect(screen.getByRole('button', { name })).toBeOnTheScreen();
@@ -161,7 +162,20 @@ describe('Settings > Security', () => {
   });
 });
 
+describe('Settings > Privacy', () => {
+  it('says error reporting is not set up in a build without a DSN', async () => {
+    await open('/privacy', /Error reporting is not set up in this build/);
+    expect(screen.queryByLabelText('Send error reports')).toBeNull();
+  });
+});
+
 describe('Settings > About', () => {
+  it('has the development-only test error row, which sends nothing without a DSN', async () => {
+    await open('/about', 'Developer');
+    await fireEvent.press(screen.getByRole('button', { name: /^Send test error/ }));
+    expect(await screen.findByText(/Nothing was sent/)).toBeOnTheScreen();
+  });
+
   it('shows the app, version with codename, chain and node', async () => {
     const { version, codename, build } = getAppInfo();
     await open('/about', `Version ${version}-${codename} (build ${build ?? 'development'})`);

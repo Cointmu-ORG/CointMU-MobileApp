@@ -44,7 +44,7 @@ module.exports = defineConfig([
   },
   {
     // The logger is the one place allowed to write to the console (conventions: logging).
-    files: ['src/shared/lib/logger.ts'],
+    files: ['src/shared/lib/diagnostics/logger.ts'],
     rules: { 'no-console': 'off' },
   },
 ]);
