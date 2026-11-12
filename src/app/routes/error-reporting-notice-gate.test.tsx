@@ -7,6 +7,8 @@ import { DEFAULT_ERROR_REPORTING, useErrorReportingStore } from '@/shared/model'
 
 import { ErrorReportingNoticeGate } from './error-reporting-notice-gate';
 
+import { seedWalletRecord } from '../../../jest.seed-wallet';
+
 const ADDRESS = '0x0000000000000000000000000000000000000001';
 const mockReporting = { isAvailable: true };
 
@@ -19,7 +21,7 @@ jest.mock('@/shared/lib', () => ({
 const notice = () => screen.queryByTestId('error-reporting-notice');
 
 function activateWallet() {
-  useWalletStore.getState().startPinSetup(ADDRESS, 'mnemonic');
+  seedWalletRecord({ source: 'mnemonic', address: ADDRESS });
   useWalletStore.getState().activate();
 }
 

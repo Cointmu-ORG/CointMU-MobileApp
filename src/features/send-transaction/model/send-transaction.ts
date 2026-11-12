@@ -21,13 +21,16 @@ import { logger } from '@/shared/lib';
 
 import { BROADCAST_TIMEOUT_MS } from '../config/send-config';
 import { buildTxRequest } from '../lib/send-math';
-import type { SendDraft, SendOutcome } from './send-flow-store';
-
-export type SendStage = 'checkingNetwork' | 'signing' | 'broadcasting';
+import type { SendDraft, SendOutcome, SendStage } from './send-flow-store';
 
 type SendInput = {
   readonly draft: SendDraft;
-  readonly account: { readonly index: number; readonly address: string };
+  /** The sending account and the wallet whose secret signs for it. */
+  readonly account: {
+    readonly walletId: string;
+    readonly index: number;
+    readonly address: string;
+  };
   readonly onStage: (stage: SendStage) => void;
 };
 
@@ -51,10 +54,13 @@ async function ensureCointMuNode(url: string): Promise<SendOutcome | null> {
   return null;
 }
 
-/** Signs with the stored secret. Read only now, after the caller verified the user. */
+/**
+ * Signs with the secret of the account's own wallet, read only now, after the caller verified
+ * the user. `signWithSecret` refuses a secret that does not produce the account's address.
+ */
 async function sign(input: SendInput, nonce: number): Promise<string> {
   const { draft, account } = input;
-  const secret = await readWalletSecret();
+  const secret = await readWalletSecret(account.walletId);
   if (secret === null) throw new Error('No wallet secret stored');
   return signWithSecret(secret, account, {
     ...buildTxRequest({ ...draft, from: account.address }),

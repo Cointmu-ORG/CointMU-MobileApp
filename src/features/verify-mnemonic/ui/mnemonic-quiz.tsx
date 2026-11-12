@@ -11,9 +11,14 @@ import { QuizField } from './quiz-field';
 
 const QUIZ_WORD_COUNT = 3; // D-14
 
-type QuizFormProps = { words: readonly string[]; randomInt: RandomInt };
+type QuizFormProps = {
+  words: readonly string[];
+  randomInt: RandomInt;
+  walletId: string;
+  onPassed?: () => void;
+};
 
-function QuizForm({ words, randomInt }: QuizFormProps) {
+function QuizForm({ words, randomInt, walletId, onPassed }: QuizFormProps) {
   const { t } = useTranslation();
   const [indices] = useState(() => pickQuizIndices(words.length, QUIZ_WORD_COUNT, randomInt));
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -34,8 +39,11 @@ function QuizForm({ words, randomInt }: QuizFormProps) {
       return;
     }
     setIsPassed(true);
-    // Let the "correct" feedback show before the router moves on to set-pin.
-    setTimeout(() => useWalletStore.getState().completeBackup(), MOTION.slowMs);
+    // Let the "correct" feedback show before the flow moves on (in onboarding, to set-pin).
+    setTimeout(() => {
+      useWalletStore.getState().completeBackup(walletId);
+      onPassed?.();
+    }, MOTION.slowMs);
   };
 
   return (
@@ -58,16 +66,28 @@ function QuizForm({ words, randomInt }: QuizFormProps) {
   );
 }
 
-type MnemonicQuizProps = { randomInt?: RandomInt };
+type MnemonicQuizProps = {
+  /** The wallet whose backup is being verified. */
+  walletId: string;
+  /** Called once the wallet's backup is marked done. Onboarding needs none. */
+  onPassed?: () => void;
+  randomInt?: RandomInt;
+};
 
-/** Re-enter 3 random words; only a full pass moves the wallet past pendingBackup (D-14). */
-export function MnemonicQuiz({ randomInt = secureRandomInt }: MnemonicQuizProps) {
+/** Re-enter 3 random words; only a full pass clears the wallet's pending backup (D-14). */
+export function MnemonicQuiz({
+  walletId,
+  onPassed,
+  randomInt = secureRandomInt,
+}: MnemonicQuizProps) {
   const colors = useThemeColors();
   const { t } = useTranslation();
-  const state = useMnemonicWords();
+  const state = useMnemonicWords(walletId);
   if (state.status === 'loading') return <ActivityIndicator color={colors.accent.DEFAULT} />;
   if (state.status === 'error') {
     return <Text tone="danger">{t('onboarding.backup.loadError')}</Text>;
   }
-  return <QuizForm words={state.words} randomInt={randomInt} />;
+  return (
+    <QuizForm words={state.words} randomInt={randomInt} walletId={walletId} onPassed={onPassed} />
+  );
 }

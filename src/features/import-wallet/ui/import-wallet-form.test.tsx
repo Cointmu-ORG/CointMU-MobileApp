@@ -41,7 +41,9 @@ describe('ImportWalletForm', () => {
     await waitFor(() =>
       expect(useWalletStore.getState()).toMatchObject({ status: 'pendingPin', address: ADDRESS }),
     );
-    await expect(readWalletSecret()).resolves.toEqual({ kind: 'private-key', privateKey: KEY });
+    await expect(readWalletSecret(useWalletStore.getState().activeWalletId ?? '')).resolves.toEqual(
+      { kind: 'private-key', privateKey: KEY },
+    );
   });
 
   it('closes the keyboard from the phrase field instead of adding a new line', async () => {

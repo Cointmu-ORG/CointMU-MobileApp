@@ -1,1 +1,1 @@
-export { AccountSwitcherPage as default } from '@/pages/accounts';
+export { AccountSwitcherPage as default } from '@/pages/wallets';

@@ -7,8 +7,13 @@ import { Button, Spinner, Text } from '@/shared/ui';
 
 import { createWallet } from '../model/create-wallet';
 
-/** Starts wallet creation on mount. Success flips wallet status, and the router moves on. */
-export function CreateWalletProgress() {
+type CreateWalletProgressProps = {
+  /** Called with the new wallet's id. Onboarding needs none: the wallet status moves the router. */
+  onCreated?: (walletId: string) => void;
+};
+
+/** Starts wallet creation on mount. In onboarding, success flips wallet status and the router moves on. */
+export function CreateWalletProgress({ onCreated }: CreateWalletProgressProps) {
   const { t } = useTranslation();
   const [hasFailed, setHasFailed] = useState(false);
   const hasStarted = useRef(false);
@@ -16,12 +21,14 @@ export function CreateWalletProgress() {
   const run = useCallback(async () => {
     setHasFailed(false);
     try {
-      await createWallet();
+      // Not `onCreated?.(await createWallet())`: without a callback that skips the creation too.
+      const walletId = await createWallet();
+      onCreated?.(walletId);
     } catch (error) {
       logger.error('Wallet creation failed', { error });
       setHasFailed(true);
     }
-  }, []);
+  }, [onCreated]);
 
   useEffect(() => {
     if (hasStarted.current) return;

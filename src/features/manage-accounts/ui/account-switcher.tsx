@@ -1,27 +1,34 @@
 import Check from 'lucide-react-native/icons/check';
+import LayoutGrid from 'lucide-react-native/icons/layout-grid';
 import Plus from 'lucide-react-native/icons/plus';
-import Settings from 'lucide-react-native/icons/settings';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useBalanceStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
-import { useAccountLabel, useActiveAccount, useWalletStore } from '@/entities/wallet';
+import {
+  isWalletUsable,
+  useAccountLabel,
+  useActiveAccount,
+  useWalletLabel,
+  useWalletStore,
+} from '@/entities/wallet';
 import { shortenAddress } from '@/shared/lib';
 import { useAmountDisplay } from '@/shared/model';
 import { ICON_SIZE, ListRow, ListSection, Text, useThemeColors } from '@/shared/ui';
 
 import { switchToAccount } from '../model/accounts';
-import { useAddAccount } from './use-add-account';
 
 type AccountSwitcherProps = {
-  /** Called after a switch or a successful add: the sheet closes. */
+  /** Called after a switch: the sheet closes. */
   onDone: () => void;
-  /** Opens the full accounts page (rename). */
+  /** Opens the "add" sheet (account, new wallet, import). */
+  onAdd: () => void;
+  /** Opens the Wallets tab (rename, color, receive). */
   onManage: () => void;
 };
 
-/** Only the active account's balance is ever loaded; other rows show none. */
+/** Only the active account's balance is loaded here; other rows show none. */
 function useActiveBalanceText(): string | undefined {
   const { formatBalance } = useAmountDisplay();
   const wei = useBalanceStore((state) => state.wei);
@@ -29,77 +36,61 @@ function useActiveBalanceText(): string | undefined {
   return `${formatBalance(wei, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`;
 }
 
-/** Quick account switcher for the home sheet: pick an account, add one, or open Manage. */
-export function AccountSwitcher({ onDone, onManage }: AccountSwitcherProps) {
+/**
+ * Quick account switcher for the home sheet: the accounts of every usable wallet, grouped by
+ * wallet (D-78). Pick one, or open the add sheet or the Wallets tab.
+ */
+export function AccountSwitcher({ onDone, onAdd, onManage }: AccountSwitcherProps) {
   const colors = useThemeColors();
   const { t } = useTranslation();
-  const label = useAccountLabel();
-  const accounts = useWalletStore((state) => state.accounts);
-  const canAdd = useWalletStore((state) => state.source) === 'mnemonic';
+  const accountLabel = useAccountLabel();
+  const walletLabel = useWalletLabel();
+  const wallets = useWalletStore((state) => state.wallets);
   const active = useActiveAccount();
   const activeBalance = useActiveBalanceText();
-  const { add, isAdding, hasFailed } = useAddAccount();
-
-  const pick = (index: number) => {
-    switchToAccount(index);
-    onDone();
-  };
-  const addAndClose = async () => {
-    if (await add()) onDone();
-  };
 
   return (
     <View className="gap-4">
       <Text variant="heading" accessibilityRole="header">
         {t('accounts.switcher.title')}
       </Text>
+      {wallets.filter(isWalletUsable).map((wallet) => (
+        <ListSection key={wallet.id} title={walletLabel(wallet)}>
+          {wallet.accounts.map((account) => {
+            const isActive = active?.walletId === wallet.id && active.index === account.index;
+            return (
+              <ListRow
+                key={account.index}
+                title={accountLabel(account)}
+                description={shortenAddress(account.address)}
+                value={isActive ? activeBalance : undefined}
+                trailing={
+                  isActive ? (
+                    <Check size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
+                  ) : (
+                    <View className="w-5" />
+                  )
+                }
+                onPress={() => {
+                  switchToAccount({ walletId: wallet.id, index: account.index });
+                  onDone();
+                }}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: isActive }}
+              />
+            );
+          })}
+        </ListSection>
+      ))}
       <ListSection>
-        {accounts.map((account) => {
-          const isActive = account.index === active?.index;
-          return (
-            <ListRow
-              key={account.index}
-              title={label(account)}
-              description={shortenAddress(account.address)}
-              value={isActive ? activeBalance : undefined}
-              trailing={
-                isActive ? (
-                  <Check size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
-                ) : (
-                  <View className="w-5" />
-                )
-              }
-              onPress={() => pick(account.index)}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: isActive }}
-            />
-          );
-        })}
-      </ListSection>
-      <ListSection>
-        <ListRow
-          title={t('settings.accounts.add')}
-          icon={Plus}
-          trailing={<View className="w-5" />}
-          onPress={() => void addAndClose()}
-          isDisabled={!canAdd || isAdding}
-        />
+        <ListRow title={t('accounts.switcher.add')} icon={Plus} onPress={onAdd} />
         <ListRow
           title={t('accounts.switcher.manage')}
           description={t('accounts.switcher.manageHint')}
-          icon={Settings}
+          icon={LayoutGrid}
           onPress={onManage}
         />
       </ListSection>
-      {hasFailed || !canAdd ? (
-        <Text
-          variant="caption"
-          tone={hasFailed ? 'danger' : 'secondary'}
-          accessibilityLiveRegion="polite"
-        >
-          {t(hasFailed ? 'settings.accounts.addFailed' : 'settings.accounts.privateKeyHint')}
-        </Text>
-      ) : null}
     </View>
   );
 }

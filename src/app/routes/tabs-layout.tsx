@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router/js-tabs';
 import History from 'lucide-react-native/icons/history';
 import House from 'lucide-react-native/icons/house';
 import Settings from 'lucide-react-native/icons/settings';
+import WalletCards from 'lucide-react-native/icons/wallet-cards';
 import type { LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import type { ColorValue } from 'react-native';
@@ -35,6 +36,10 @@ export function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: t('tabs.home'), tabBarIcon: tabIcon(House) }} />
+      <Tabs.Screen
+        name="wallets"
+        options={{ title: t('tabs.wallets'), tabBarIcon: tabIcon(WalletCards) }}
+      />
       <Tabs.Screen
         name="history"
         options={{ title: t('tabs.history'), tabBarIcon: tabIcon(History) }}

@@ -4,12 +4,14 @@ import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import { Linking } from 'react-native';
 
 import { storeNewPin, useAuthPrefsStore, useSessionStore } from '@/entities/auth';
-import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
+import { useWalletStore } from '@/entities/wallet';
 import { EXTERNAL_LINKS, getAppInfo } from '@/shared/config';
 import { i18n } from '@/shared/i18n';
 import { DEFAULT_APPEARANCE, useAppearanceStore } from '@/shared/model';
 
 import { preloadRoutes } from '../../../../jest.preload-routes';
+
+import { seedWallet } from '../../../../jest.seed-wallet';
 
 preloadRoutes();
 
@@ -31,9 +33,8 @@ beforeEach(async () => {
   jest.useRealTimers();
   await i18n.changeLanguage('en');
   await AsyncStorage.setItem('muvo.installed', '1');
-  await saveWalletSecret({ kind: 'mnemonic', phrase: PHRASE });
   await storeNewPin('135790');
-  useWalletStore.getState().startPinSetup(ADDRESS, 'mnemonic');
+  await seedWallet({ secret: { kind: 'mnemonic', phrase: PHRASE }, address: ADDRESS });
   useWalletStore.getState().activate();
   useWalletStore.setState({ hasHydrated: true });
   useSessionStore.getState().unlock();
@@ -58,7 +59,7 @@ describe('Settings tab', () => {
     for (const name of [
       'Appearance, System',
       'Language, English',
-      'Accounts, Account 1',
+      'Wallets and accounts, Account 1',
       'Network, rpc.test.invalid',
       'Security, Auto-lock: 1 min',
       'Privacy, Reports not set up',

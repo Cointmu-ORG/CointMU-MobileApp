@@ -4,7 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { AppState, ScrollView, View } from 'react-native';
 
 import { PinPrompt } from '@/entities/auth';
-import { useAccountLabel, useActiveAccount, useWalletStore } from '@/entities/wallet';
+import {
+  useAccountLabel,
+  useActiveAccount,
+  useActiveWallet,
+  useWalletLabel,
+  useWalletStore,
+} from '@/entities/wallet';
 import { logger } from '@/shared/lib';
 import { Button, Card, Notice, SecretEye, Text, useTimedReveal } from '@/shared/ui';
 
@@ -14,6 +20,20 @@ import { loadActivePrivateKey } from '../model/load-private-key';
 const MASKED_KEY = '•'.repeat(24);
 
 type State = { step: 'intro' | 'auth' | 'error' } | { step: 'shown'; privateKey: string };
+
+/** "Account 2 in Savings": which account of which wallet the key belongs to (D-78). */
+function useOwnerText(): string {
+  const { t } = useTranslation();
+  const account = useActiveAccount();
+  const wallet = useActiveWallet();
+  const accountLabel = useAccountLabel();
+  const walletLabel = useWalletLabel();
+  if (account === null || wallet === null) return '';
+  return t('settings.privateKey.owner', {
+    account: accountLabel(account),
+    wallet: walletLabel(wallet),
+  });
+}
 
 /** Why this key matters for this kind of wallet. */
 function useScopeText(): string {
@@ -29,8 +49,12 @@ function useScopeText(): string {
 function Intro({ onReveal, isFailed }: { onReveal: () => void; isFailed: boolean }) {
   const { t } = useTranslation();
   const scope = useScopeText();
+  const owner = useOwnerText();
   return (
     <ScrollView contentContainerClassName="gap-6 pb-8">
+      <Text variant="heading" accessibilityRole="header">
+        {owner}
+      </Text>
       <Text tone="secondary">{scope}</Text>
       <Notice tone="danger" title={t('settings.privateKey.warningTitle')}>
         {t('settings.privateKey.warning')}
@@ -49,7 +73,7 @@ function Intro({ onReveal, isFailed }: { onReveal: () => void; isFailed: boolean
 function ShownKey({ privateKey, onHide }: { privateKey: string; onHide: () => void }) {
   const { t } = useTranslation();
   const account = useActiveAccount();
-  const label = useAccountLabel();
+  const owner = useOwnerText();
   const { isRevealed, toggle } = useTimedReveal();
   return (
     <ScrollView contentContainerClassName="gap-6 pb-8">
@@ -59,7 +83,7 @@ function ShownKey({ privateKey, onHide }: { privateKey: string; onHide: () => vo
       <Card className="gap-3">
         {account ? (
           <View className="gap-0.5">
-            <Text variant="label">{label(account)}</Text>
+            <Text variant="label">{owner}</Text>
             <Text variant="mono" tone="secondary">
               {account.address}
             </Text>

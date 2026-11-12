@@ -4,10 +4,11 @@ import * as SecureStore from 'expo-secure-store';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { storeNewPin } from '@/entities/auth';
-import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
 import { RevealPrivateKey } from './reveal-private-key';
+
+import { seedWallet, seedWalletRecord } from '../../../../jest.seed-wallet';
 
 jest.mock('expo-screen-capture', () => ({ usePreventScreenCapture: jest.fn() }));
 // The derivation itself is covered in entities/wallet; here it would only slow the suite down.
@@ -23,7 +24,8 @@ const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const SECRET_KEY = 'muvo.wallet.secret';
 
 const secretReads = () =>
-  jest.mocked(SecureStore.getItemAsync).mock.calls.filter(([key]) => key === SECRET_KEY).length;
+  jest.mocked(SecureStore.getItemAsync).mock.calls.filter(([key]) => key.startsWith(SECRET_KEY))
+    .length;
 
 async function typePin(pin: string) {
   for (const digit of pin) {
@@ -45,9 +47,8 @@ async function revealWithPin() {
 
 beforeEach(async () => {
   await i18n.changeLanguage('en');
-  await saveWalletSecret({ kind: 'private-key', privateKey: PRIVATE_KEY });
   await storeNewPin(PIN);
-  useWalletStore.getState().startPinSetup(ADDRESS, 'private-key');
+  await seedWallet({ secret: { kind: 'private-key', privateKey: PRIVATE_KEY }, address: ADDRESS });
   jest.mocked(SecureStore.getItemAsync).mockClear();
 });
 
@@ -152,7 +153,7 @@ describe('RevealPrivateKey', () => {
   });
 
   it('tells a phrase wallet that the key covers the active account only', async () => {
-    useWalletStore.getState().startPinSetup(ADDRESS, 'mnemonic');
+    seedWalletRecord({ source: 'mnemonic', address: ADDRESS });
     await render(<RevealPrivateKey />);
     expect(screen.getByText(/key of Account 1 only/)).toBeOnTheScreen();
   });

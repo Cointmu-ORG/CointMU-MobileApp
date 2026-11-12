@@ -1,0 +1,10 @@
+{
+  "ocean": { "light": "#1d4ed8", "dark": "#1d4ed8" },
+  "teal": { "light": "#0f766e", "dark": "#0f766e" },
+  "forest": { "light": "#047857", "dark": "#047857" },
+  "violet": { "light": "#6d28d9", "dark": "#6d28d9" },
+  "plum": { "light": "#a21caf", "dark": "#a21caf" },
+  "rose": { "light": "#be123c", "dark": "#be123c" },
+  "amber": { "light": "#b45309", "dark": "#b45309" },
+  "slate": { "light": "#334155", "dark": "#475569" }
+}

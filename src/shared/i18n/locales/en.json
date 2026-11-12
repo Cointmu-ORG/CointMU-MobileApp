@@ -46,7 +46,10 @@
       "privateKeyAck": "I have my own backup of this private key",
       "submit": "Import wallet",
       "error": "Couldn't import the wallet. Please try again.",
-      "modeLabel": "Import with"
+      "modeLabel": "Import with",
+      "duplicate": "This wallet is already in Muvo. Its accounts are in the Wallets tab.",
+      "limitReached": "Muvo already holds the maximum number of wallets. Remove one to import another.",
+      "wrongWallet": "That phrase or key is valid, but it belongs to a different wallet. Enter the one for the wallet you're restoring."
     },
     "setPin": {
       "titleCreate": "Create a 6-digit PIN",
@@ -83,8 +86,8 @@
     }
   },
   "reset": {
-    "confirmTitle": "Reset this wallet?",
-    "confirmBody": "This deletes the wallet from this phone. Without your recovery phrase or private key, the funds are lost.",
+    "confirmTitle": "Remove all wallets?",
+    "confirmBody": "This deletes every wallet and your PIN from this phone. Without a wallet's recovery phrase or private key, its funds are lost.",
     "finalTitle": "Are you sure?",
     "finalBody": "This can't be undone.",
     "confirm": "Reset"
@@ -97,7 +100,8 @@
   "tabs": {
     "home": "Home",
     "history": "History",
-    "settings": "Settings"
+    "settings": "Settings",
+    "wallets": "Wallets"
   },
   "home": {
     "balance": {
@@ -193,16 +197,7 @@
       "limitReached": "The list holds at most {{max}} nodes. Remove one of yours to add another."
     },
     "accounts": {
-      "title": "Accounts",
-      "listTitle": "Accounts in this wallet",
-      "add": "Add account",
-      "addHint": "New accounts come from your recovery phrase, so it restores all of them.",
-      "privateKeyHint": "This wallet was imported from a private key, so it has no recovery phrase to create more accounts from. To use several accounts, use a wallet with a recovery phrase.",
-      "addFailed": "Couldn't add an account. Please try again.",
-      "nameField": "Name for {{account}}",
-      "nameHint": "Only shown on this phone.",
-      "save": "Save name",
-      "saved": "Name saved"
+      "title": "Wallets and accounts"
     },
     "security": {
       "title": "Security",
@@ -252,26 +247,29 @@
       "masked": "Hidden. Tap the eye to show the words.",
       "revealed": "Shown for 30 seconds.",
       "showWords": "Show words",
-      "hideWords": "Hide words"
+      "hideWords": "Hide words",
+      "wallet": "Recovery phrase of {{wallet}}"
     },
     "logout": {
       "title": "Log out",
       "lockNow": "Lock now",
       "lockNowDesc": "Lock Muvo until you enter your PIN. Nothing is deleted.",
       "remove": "Remove wallet from this device",
-      "removeDesc": "Deletes the keys from this phone. You need your recovery phrase to get the wallet back."
+      "removeDesc": "Deletes the active wallet's key from this phone. You need its recovery phrase or private key to get it back."
     },
     "removeWallet": {
       "title": "Remove wallet",
       "warningTitle": "Make sure you have your recovery phrase",
       "warning": "This action is irreversible. If you have not backed up your recovery phrase or private key, your funds will be lost forever. CointMU cannot recover them for you.",
-      "description": "This permanently removes all accounts and keys from this device. Your funds stay on the CointMU network; you can restore the wallet later with your recovery phrase or private key.",
+      "description": "This permanently removes this wallet's accounts and key from this device. Your other wallets and your PIN stay. The funds stay on the CointMU network; you can import the wallet again later with its recovery phrase or private key.",
       "ack": "I have my recovery phrase or private key written down",
       "continue": "Remove wallet",
       "authTitle": "Enter your PIN",
       "authSubtitle": "to remove the wallet from this phone",
       "finalTitle": "Remove the wallet now?",
-      "confirm": "Remove"
+      "confirm": "Remove",
+      "target": "Remove {{wallet}}",
+      "descriptionLast": "This is your only wallet, so removing it also removes your PIN and takes Muvo back to the start. The funds stay on the CointMU network; you can restore the wallet later with its recovery phrase or private key."
     },
     "about": {
       "title": "About",
@@ -426,7 +424,8 @@
       "hide": "Hide",
       "autoHide": "The key hides again after 30 seconds, when you leave this screen and when Muvo goes to the background. It can't be copied or captured in a screenshot.",
       "showKey": "Show key",
-      "hideKey": "Hide key"
+      "hideKey": "Hide key",
+      "owner": "{{account}} in {{wallet}}"
     },
     "privacy": {
       "title": "Privacy",
@@ -502,8 +501,6 @@
       "broadcasting": "Sending to the network…"
     },
     "result": {
-      "sentTitle": "Sent",
-      "sentBody": "Your transaction is on its way. It shows as pending until it is mined, then confirmed, then final after 12 blocks.",
       "uncertainTitle": "Sent, waiting for the network",
       "uncertainBody": "The network didn't answer in time, so it may or may not have the transaction. Muvo keeps checking. Don't send again until its status updates.",
       "failedTitle": "Not sent",
@@ -522,6 +519,29 @@
       "wrongChain": "The selected node is not on the CointMU network. Pick another node in Settings > Network.",
       "reverted": "The network would reject this transfer (for a token, the contract refused it). Nothing was sent.",
       "unknown": "Something went wrong and nothing was sent. Try again."
+    },
+    "status": {
+      "from": "From",
+      "to": "To",
+      "sendingBody": "Keep Muvo open until this finishes.",
+      "sentToNetwork": "Sent to the network",
+      "broadcastBody": "The network has your transaction. It isn't in a block yet.",
+      "confirmedTitle": "Confirmed",
+      "confirmedBody": "Your transaction is in a block. It becomes final after {{total}} blocks.",
+      "finalTitle": "Final",
+      "finalBody": "Settled, {{total}} blocks deep.",
+      "revertedTitle": "Failed on the network",
+      "droppedTitle": "Dropped by the network",
+      "replacedTitle": "Replaced",
+      "progress": "{{count}} of {{total}} confirmations",
+      "steps": {
+        "sent": "Sent to the network",
+        "confirmed": "Confirmed",
+        "final": "Final"
+      },
+      "stepDone": "{{step}}: done",
+      "stepCurrent": "{{step}}: in progress",
+      "stepWaiting": "{{step}}: not yet"
     }
   },
   "receive": {
@@ -589,8 +609,9 @@
     "defaultName": "Account {{number}}",
     "switcher": {
       "title": "Switch account",
-      "manage": "Manage accounts",
-      "manageHint": "Rename accounts in Settings"
+      "manage": "Open Wallets",
+      "manageHint": "Rename, change colors and show a receive code",
+      "add": "Add an account or a wallet"
     }
   },
   "tokens": {
@@ -644,6 +665,120 @@
       "failed": "Included in a block but rejected by the contract. Only the network fee was spent.",
       "dropped": "The network no longer knows this transaction and it was never mined. Nothing was sent; you can send again.",
       "replaced": "Another transaction with the same nonce was mined instead. This one will never be mined."
+    }
+  },
+  "wallets": {
+    "title": "Wallets",
+    "defaultName": "Wallet {{number}}",
+    "editWallet": "Edit {{wallet}}",
+    "source": {
+      "mnemonic_one": "Recovery phrase, {{count}} account",
+      "mnemonic_other": "Recovery phrase, {{count}} accounts",
+      "private-key_one": "Private key, {{count}} account",
+      "private-key_other": "Private key, {{count}} accounts"
+    },
+    "colors": {
+      "ocean": "Ocean blue",
+      "teal": "Teal",
+      "forest": "Forest green",
+      "violet": "Violet",
+      "plum": "Plum",
+      "rose": "Rose",
+      "amber": "Amber",
+      "slate": "Slate"
+    },
+    "card": {
+      "active": "Active",
+      "label": "{{name}}, {{address}}",
+      "labelActive": "{{name}}, {{address}}, active account",
+      "hint": "Makes this the active account and opens Home",
+      "menu": "More options for {{name}}",
+      "balanceError": "Balance unavailable",
+      "balanceLoading": "Loading balance"
+    },
+    "menu": {
+      "subtitle": "{{wallet}}, {{address}}",
+      "name": "Account name",
+      "nameHint": "Only shown on this phone.",
+      "nameSaved": "Name saved",
+      "saveName": "Save name",
+      "color": "Card color",
+      "setActive": "Set as active account",
+      "isActive": "This is the active account",
+      "receive": "Show receive QR code"
+    },
+    "details": {
+      "name": "Wallet name",
+      "nameHint": "Only shown on this phone. Leave it empty to keep the default name.",
+      "color": "Wallet color",
+      "save": "Save",
+      "backupHint": "The active wallet's recovery phrase and private key are in Settings, under Security."
+    },
+    "add": {
+      "title": "Add",
+      "accountTitle": "New account",
+      "accountIn": "Add an account to {{wallet}}",
+      "accountCount_one": "Has {{count}} account now",
+      "accountCount_other": "Has {{count}} accounts now",
+      "accountHint": "A new account comes from that wallet's recovery phrase, so the same phrase restores it.",
+      "accountNone": "Accounts can only be added to a wallet that has a recovery phrase.",
+      "accountFailed": "Couldn't add an account. Please try again.",
+      "walletTitle": "New wallet",
+      "create": "Create a new wallet",
+      "createHint": "With a new recovery phrase to write down",
+      "import": "Import a wallet",
+      "importHint": "With a recovery phrase or a private key",
+      "limit": "Muvo holds up to {{max}} wallets. Remove one to add another."
+    },
+    "create": {
+      "header": "New wallet",
+      "creating": {
+        "title": "Creating your wallet",
+        "subtitle": "Generating a new recovery phrase and keys. This can take a few seconds."
+      },
+      "phrase": {
+        "title": "Your new recovery phrase",
+        "subtitle": "This phrase belongs to the new wallet only. Write the words down in order and keep them offline. Anyone who has them can take its funds, and nobody can recover them for you."
+      },
+      "quiz": {
+        "title": "Check your backup",
+        "subtitle": "Enter these words from the new wallet's recovery phrase.",
+        "back": "Show the phrase again"
+      },
+      "details": {
+        "title": "Name your wallet",
+        "subtitle": "A name and a color help you tell your wallets apart.",
+        "finish": "Finish"
+      }
+    },
+    "import": {
+      "subtitle": "The wallet is added next to the ones you already have."
+    },
+    "recover": {
+      "title": "Restore {{wallet}}",
+      "body": "Muvo couldn't read this wallet's key on this phone. Enter the recovery phrase or private key of this same wallet to put it back. Your other wallets are not affected."
+    },
+    "attention": {
+      "backup": {
+        "title": "Backup not finished",
+        "body": "This wallet can't be used until you have written down its recovery phrase and passed the check.",
+        "resolve": "Finish backup"
+      },
+      "recovery": {
+        "title": "This wallet's key can't be read",
+        "body": "Restore it with its recovery phrase or private key, or remove it from this phone. Your funds stay on the CointMU network, and your other wallets keep working.",
+        "resolve": "Restore wallet"
+      },
+      "remove": "Remove this wallet"
+    },
+    "empty": {
+      "title": "No wallets yet",
+      "body": "Create a wallet or import one to see its accounts here.",
+      "action": "Add a wallet"
+    },
+    "error": {
+      "network": "Can't reach the CointMU network, so balances can't be loaded. Pull down to refresh or try again.",
+      "retry": "Try again"
     }
   }
 }

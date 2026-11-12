@@ -36,6 +36,14 @@ export {
   type ThemeColors,
   type ThemePreference,
 } from './theme/build-theme';
+export {
+  CARD_COLOR_IDS,
+  cardColorAt,
+  DEFAULT_CARD_COLOR,
+  isCardColorId,
+  useCardFill,
+  type CardColorId,
+} from './theme/card-colors';
 export { defaultColors, splashBackground } from './theme/colors';
 export {
   ThemeRoot,

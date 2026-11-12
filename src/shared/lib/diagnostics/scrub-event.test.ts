@@ -251,6 +251,35 @@ describe('scrubEvent', () => {
     expect(JSON.stringify(scrubbed)).not.toMatch(/Naomi|10\.64\.24\.7|device-id/);
   });
 
+  it('keeps only the debug id and file name of source map images', () => {
+    const withDebugMeta: ErrorEvent = {
+      ...event,
+      debug_meta: {
+        images: [
+          {
+            type: 'sourcemap',
+            debug_id: '6f2c1e0a-1b2c-4d3e-8f90-a1b2c3d4e5f6',
+            code_file: 'http://10.64.24.7:8081/index.bundle?platform=ios&dev=true',
+          },
+          {
+            type: 'macho',
+            debug_id: 'native-id',
+            code_file: '/Users/naomi/Library/Muvo.app/Muvo',
+            image_addr: '0x1000',
+          },
+        ],
+      },
+    };
+    const meta = scrubEvent(withDebugMeta).debug_meta;
+    expect(meta?.images).toHaveLength(1);
+    expect(meta?.images?.[0]).toMatchObject({
+      type: 'sourcemap',
+      debug_id: '6f2c1e0a-1b2c-4d3e-8f90-a1b2c3d4e5f6',
+    });
+    expect(JSON.stringify(meta)).not.toMatch(/naomi|platform=ios|macho|0x1000/);
+    expect(scrubEvent(event).debug_meta).toBeUndefined();
+  });
+
   it('copes with an event that has almost nothing', () => {
     const bare: ErrorEvent = { type: undefined, message: 'boom' };
     const crumbs: Breadcrumb[] = [];

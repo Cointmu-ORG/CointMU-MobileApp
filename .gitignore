@@ -47,3 +47,7 @@ graphify-out
 
 # machine-specific Claude Code notes (D-35)
 CLAUDE.local.md
+
+# Sentry build credentials, if a tool writes them locally (D-82)
+.env.sentry-build-plugin
+sentry.properties

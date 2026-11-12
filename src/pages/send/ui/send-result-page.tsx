@@ -1,10 +1,10 @@
-import { SendResult } from '@/features/send-transaction';
+import { SendStatus } from '@/features/send-transaction';
 import { FormScreen } from '@/shared/ui';
 
 export function SendResultPage() {
   return (
     <FormScreen>
-      <SendResult />
+      <SendStatus />
     </FormScreen>
   );
 }

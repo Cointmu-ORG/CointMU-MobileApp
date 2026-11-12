@@ -3,10 +3,11 @@ import * as SecureStore from 'expo-secure-store';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { storeNewPin } from '@/entities/auth';
-import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
 import { RevealPhrase } from './reveal-phrase';
+
+import { seedWallet, seedWalletRecord } from '../../../../jest.seed-wallet';
 
 const PIN = '135790';
 const PHRASE =
@@ -15,7 +16,8 @@ const ADDRESS = '0x0000000000000000000000000000000000000001';
 const SECRET_KEY = 'muvo.wallet.secret';
 
 const secretReads = () =>
-  jest.mocked(SecureStore.getItemAsync).mock.calls.filter(([key]) => key === SECRET_KEY).length;
+  jest.mocked(SecureStore.getItemAsync).mock.calls.filter(([key]) => key.startsWith(SECRET_KEY))
+    .length;
 
 async function typePin(pin: string) {
   for (const digit of pin) {
@@ -25,9 +27,8 @@ async function typePin(pin: string) {
 
 beforeEach(async () => {
   await i18n.changeLanguage('en');
-  await saveWalletSecret({ kind: 'mnemonic', phrase: PHRASE });
   await storeNewPin(PIN);
-  useWalletStore.getState().startPinSetup(ADDRESS, 'mnemonic');
+  await seedWallet({ secret: { kind: 'mnemonic', phrase: PHRASE }, address: ADDRESS });
   jest.mocked(SecureStore.getItemAsync).mockClear();
 });
 
@@ -103,7 +104,7 @@ describe('RevealPhrase', () => {
   });
 
   it('never offers a phrase for a private-key wallet', async () => {
-    useWalletStore.getState().startPinSetup(ADDRESS, 'private-key');
+    seedWalletRecord({ source: 'private-key', address: ADDRESS });
     await render(<RevealPhrase />);
     expect(screen.getByText(/has no recovery phrase/)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reveal recovery phrase' })).toBeNull();

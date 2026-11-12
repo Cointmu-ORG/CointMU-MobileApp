@@ -6,6 +6,8 @@ import { useMnemonicWords } from '@/entities/wallet';
 import { Button, Text, useThemeColors, WordGrid } from '@/shared/ui';
 
 type MnemonicBackupProps = {
+  /** The wallet whose phrase is shown. */
+  walletId: string;
   onConfirmed: () => void;
 };
 
@@ -13,11 +15,11 @@ type MnemonicBackupProps = {
  * Shows the recovery phrase with screenshots blocked (D-14).
  * Deliberately no copy button: the clipboard is forbidden for secrets (forbidden rule 2).
  */
-export function MnemonicBackup({ onConfirmed }: MnemonicBackupProps) {
+export function MnemonicBackup({ walletId, onConfirmed }: MnemonicBackupProps) {
   const colors = useThemeColors();
   usePreventScreenCapture();
   const { t } = useTranslation();
-  const state = useMnemonicWords();
+  const state = useMnemonicWords(walletId);
 
   if (state.status === 'loading') return <ActivityIndicator color={colors.accent.DEFAULT} />;
   if (state.status === 'error') {

@@ -46,7 +46,10 @@
       "privateKeyAck": "Saya punya cadangan sendiri untuk kunci privat ini",
       "submit": "Impor dompet",
       "error": "Gagal mengimpor dompet. Silakan coba lagi.",
-      "modeLabel": "Impor dengan"
+      "modeLabel": "Impor dengan",
+      "duplicate": "Dompet ini sudah ada di Muvo. Akunnya ada di tab Dompet.",
+      "limitReached": "Muvo sudah menyimpan jumlah dompet maksimum. Hapus satu untuk mengimpor yang lain.",
+      "wrongWallet": "Frasa atau kunci itu valid, tetapi milik dompet lain. Masukkan milik dompet yang sedang Anda pulihkan."
     },
     "setPin": {
       "titleCreate": "Buat PIN 6 digit",
@@ -83,8 +86,8 @@
     }
   },
   "reset": {
-    "confirmTitle": "Reset dompet ini?",
-    "confirmBody": "Dompet akan dihapus dari HP ini. Tanpa frasa pemulihan atau kunci privat, dana akan hilang.",
+    "confirmTitle": "Hapus semua dompet?",
+    "confirmBody": "Ini menghapus semua dompet dan PIN dari HP ini. Tanpa frasa pemulihan atau kunci privat sebuah dompet, dananya akan hilang.",
     "finalTitle": "Yakin?",
     "finalBody": "Tindakan ini tidak bisa dibatalkan.",
     "confirm": "Reset"
@@ -97,7 +100,8 @@
   "tabs": {
     "home": "Beranda",
     "history": "Riwayat",
-    "settings": "Pengaturan"
+    "settings": "Pengaturan",
+    "wallets": "Dompet"
   },
   "home": {
     "balance": {
@@ -193,16 +197,7 @@
       "limitReached": "Daftar ini memuat paling banyak {{max}} node. Hapus salah satu node Anda untuk menambah yang lain."
     },
     "accounts": {
-      "title": "Akun",
-      "listTitle": "Akun di dompet ini",
-      "add": "Tambah akun",
-      "addHint": "Akun baru dibuat dari frasa pemulihan Anda, jadi frasa itu memulihkan semuanya.",
-      "privateKeyHint": "Dompet ini diimpor dari kunci privat, jadi tidak punya frasa pemulihan untuk membuat akun lain. Untuk memakai beberapa akun, gunakan dompet dengan frasa pemulihan.",
-      "addFailed": "Akun tidak dapat ditambahkan. Silakan coba lagi.",
-      "nameField": "Nama untuk {{account}}",
-      "nameHint": "Hanya tampil di ponsel ini.",
-      "save": "Simpan nama",
-      "saved": "Nama tersimpan"
+      "title": "Dompet dan akun"
     },
     "security": {
       "title": "Keamanan",
@@ -252,26 +247,29 @@
       "masked": "Tersembunyi. Ketuk ikon mata untuk menampilkan kata.",
       "revealed": "Ditampilkan selama 30 detik.",
       "showWords": "Tampilkan kata",
-      "hideWords": "Sembunyikan kata"
+      "hideWords": "Sembunyikan kata",
+      "wallet": "Frasa pemulihan {{wallet}}"
     },
     "logout": {
       "title": "Keluar",
       "lockNow": "Kunci sekarang",
       "lockNowDesc": "Kunci Muvo sampai Anda memasukkan PIN. Tidak ada yang dihapus.",
       "remove": "Hapus dompet dari perangkat ini",
-      "removeDesc": "Menghapus kunci dari ponsel ini. Anda perlu frasa pemulihan untuk mendapatkan dompet kembali."
+      "removeDesc": "Menghapus kunci dompet aktif dari ponsel ini. Anda memerlukan frasa pemulihan atau kunci privatnya untuk mendapatkannya kembali."
     },
     "removeWallet": {
       "title": "Hapus dompet",
       "warningTitle": "Pastikan Anda memiliki frasa pemulihan",
       "warning": "Tindakan ini tidak dapat dibatalkan. Jika Anda belum mencadangkan frasa pemulihan atau kunci privat, dana Anda akan hilang selamanya. CointMU tidak dapat memulihkannya untuk Anda.",
-      "description": "Ini menghapus semua akun dan kunci dari perangkat ini secara permanen. Dana Anda tetap ada di jaringan CointMU; Anda bisa memulihkan dompet nanti dengan frasa pemulihan atau kunci privat.",
+      "description": "Ini menghapus akun dan kunci dompet ini dari perangkat ini secara permanen. Dompet lain dan PIN Anda tetap ada. Dana tetap ada di jaringan CointMU; Anda bisa mengimpor dompet ini lagi nanti dengan frasa pemulihan atau kunci privatnya.",
       "ack": "Saya sudah mencatat frasa pemulihan atau kunci privat saya",
       "continue": "Hapus dompet",
       "authTitle": "Masukkan PIN Anda",
       "authSubtitle": "untuk menghapus dompet dari ponsel ini",
       "finalTitle": "Hapus dompet sekarang?",
-      "confirm": "Hapus"
+      "confirm": "Hapus",
+      "target": "Hapus {{wallet}}",
+      "descriptionLast": "Ini satu-satunya dompet Anda, jadi menghapusnya juga menghapus PIN dan mengembalikan Muvo ke awal. Dana tetap ada di jaringan CointMU; Anda bisa memulihkan dompet nanti dengan frasa pemulihan atau kunci privatnya."
     },
     "about": {
       "title": "Tentang",
@@ -426,7 +424,8 @@
       "hide": "Sembunyikan",
       "autoHide": "Kunci disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar.",
       "showKey": "Tampilkan kunci",
-      "hideKey": "Sembunyikan kunci"
+      "hideKey": "Sembunyikan kunci",
+      "owner": "{{account}} di {{wallet}}"
     },
     "privacy": {
       "title": "Privasi",
@@ -502,8 +501,6 @@
       "broadcasting": "Mengirim ke jaringan…"
     },
     "result": {
-      "sentTitle": "Terkirim",
-      "sentBody": "Transaksimu sedang diproses. Statusnya tertunda sampai ditambang, lalu terkonfirmasi, lalu final setelah 12 blok.",
       "uncertainTitle": "Terkirim, menunggu jaringan",
       "uncertainBody": "Jaringan tidak menjawab tepat waktu, jadi transaksi ini mungkin sudah atau belum diterima. Muvo terus memeriksanya. Jangan kirim ulang sampai statusnya berubah.",
       "failedTitle": "Tidak terkirim",
@@ -522,6 +519,29 @@
       "wrongChain": "Node yang dipilih bukan jaringan CointMU. Pilih node lain di Pengaturan > Jaringan.",
       "reverted": "Jaringan akan menolak transfer ini (untuk token, kontraknya menolak). Tidak ada yang terkirim.",
       "unknown": "Terjadi kesalahan dan tidak ada yang terkirim. Coba lagi."
+    },
+    "status": {
+      "from": "Dari",
+      "to": "Ke",
+      "sendingBody": "Biarkan Muvo terbuka sampai ini selesai.",
+      "sentToNetwork": "Terkirim ke jaringan",
+      "broadcastBody": "Jaringan sudah menerima transaksi Anda. Transaksi belum masuk blok.",
+      "confirmedTitle": "Terkonfirmasi",
+      "confirmedBody": "Transaksi Anda sudah masuk blok. Transaksi menjadi final setelah {{total}} blok.",
+      "finalTitle": "Final",
+      "finalBody": "Selesai, sedalam {{total}} blok.",
+      "revertedTitle": "Gagal di jaringan",
+      "droppedTitle": "Dibatalkan jaringan",
+      "replacedTitle": "Digantikan",
+      "progress": "{{count}} dari {{total}} konfirmasi",
+      "steps": {
+        "sent": "Terkirim ke jaringan",
+        "confirmed": "Terkonfirmasi",
+        "final": "Final"
+      },
+      "stepDone": "{{step}}: selesai",
+      "stepCurrent": "{{step}}: sedang berjalan",
+      "stepWaiting": "{{step}}: belum"
     }
   },
   "receive": {
@@ -589,8 +609,9 @@
     "defaultName": "Akun {{number}}",
     "switcher": {
       "title": "Ganti akun",
-      "manage": "Kelola akun",
-      "manageHint": "Ubah nama akun di Pengaturan"
+      "manage": "Buka Dompet",
+      "manageHint": "Ubah nama, ganti warna, dan tampilkan kode terima",
+      "add": "Tambah akun atau dompet"
     }
   },
   "tokens": {
@@ -644,6 +665,120 @@
       "failed": "Masuk blok tetapi ditolak oleh kontrak. Hanya biaya jaringan yang terpakai.",
       "dropped": "Jaringan tidak lagi mengenal transaksi ini dan tidak pernah ditambang. Tidak ada yang terkirim; kamu bisa mengirim lagi.",
       "replaced": "Transaksi lain dengan nonce yang sama yang ditambang. Transaksi ini tidak akan pernah ditambang."
+    }
+  },
+  "wallets": {
+    "title": "Dompet",
+    "defaultName": "Dompet {{number}}",
+    "editWallet": "Ubah {{wallet}}",
+    "source": {
+      "mnemonic_one": "Frasa pemulihan, {{count}} akun",
+      "mnemonic_other": "Frasa pemulihan, {{count}} akun",
+      "private-key_one": "Kunci privat, {{count}} akun",
+      "private-key_other": "Kunci privat, {{count}} akun"
+    },
+    "colors": {
+      "ocean": "Biru laut",
+      "teal": "Toska",
+      "forest": "Hijau hutan",
+      "violet": "Ungu",
+      "plum": "Plum",
+      "rose": "Merah mawar",
+      "amber": "Kuning tua",
+      "slate": "Abu batu"
+    },
+    "card": {
+      "active": "Aktif",
+      "label": "{{name}}, {{address}}",
+      "labelActive": "{{name}}, {{address}}, akun aktif",
+      "hint": "Menjadikan ini akun aktif dan membuka Beranda",
+      "menu": "Opsi lain untuk {{name}}",
+      "balanceError": "Saldo tidak tersedia",
+      "balanceLoading": "Memuat saldo"
+    },
+    "menu": {
+      "subtitle": "{{wallet}}, {{address}}",
+      "name": "Nama akun",
+      "nameHint": "Hanya tampil di ponsel ini.",
+      "nameSaved": "Nama tersimpan",
+      "saveName": "Simpan nama",
+      "color": "Warna kartu",
+      "setActive": "Jadikan akun aktif",
+      "isActive": "Ini akun aktif",
+      "receive": "Tampilkan kode QR terima"
+    },
+    "details": {
+      "name": "Nama dompet",
+      "nameHint": "Hanya tampil di ponsel ini. Kosongkan untuk memakai nama bawaan.",
+      "color": "Warna dompet",
+      "save": "Simpan",
+      "backupHint": "Frasa pemulihan dan kunci privat dompet aktif ada di Pengaturan, di bagian Keamanan."
+    },
+    "add": {
+      "title": "Tambah",
+      "accountTitle": "Akun baru",
+      "accountIn": "Tambah akun ke {{wallet}}",
+      "accountCount_one": "Saat ini punya {{count}} akun",
+      "accountCount_other": "Saat ini punya {{count}} akun",
+      "accountHint": "Akun baru dibuat dari frasa pemulihan dompet itu, jadi frasa yang sama memulihkannya.",
+      "accountNone": "Akun hanya bisa ditambahkan ke dompet yang punya frasa pemulihan.",
+      "accountFailed": "Akun tidak dapat ditambahkan. Silakan coba lagi.",
+      "walletTitle": "Dompet baru",
+      "create": "Buat dompet baru",
+      "createHint": "Dengan frasa pemulihan baru untuk dicatat",
+      "import": "Impor dompet",
+      "importHint": "Dengan frasa pemulihan atau kunci privat",
+      "limit": "Muvo menyimpan hingga {{max}} dompet. Hapus satu untuk menambah yang lain."
+    },
+    "create": {
+      "header": "Dompet baru",
+      "creating": {
+        "title": "Membuat dompet Anda",
+        "subtitle": "Membuat frasa pemulihan dan kunci baru. Ini bisa memakan beberapa detik."
+      },
+      "phrase": {
+        "title": "Frasa pemulihan baru Anda",
+        "subtitle": "Frasa ini hanya untuk dompet baru. Catat kata-katanya secara berurutan dan simpan secara offline. Siapa pun yang memilikinya bisa mengambil dananya, dan tidak ada yang bisa memulihkannya untuk Anda."
+      },
+      "quiz": {
+        "title": "Periksa cadangan Anda",
+        "subtitle": "Masukkan kata-kata ini dari frasa pemulihan dompet baru.",
+        "back": "Tampilkan frasa lagi"
+      },
+      "details": {
+        "title": "Beri nama dompet Anda",
+        "subtitle": "Nama dan warna membantu Anda membedakan dompet.",
+        "finish": "Selesai"
+      }
+    },
+    "import": {
+      "subtitle": "Dompet ditambahkan di samping dompet yang sudah Anda miliki."
+    },
+    "recover": {
+      "title": "Pulihkan {{wallet}}",
+      "body": "Muvo tidak dapat membaca kunci dompet ini di ponsel ini. Masukkan frasa pemulihan atau kunci privat dompet yang sama untuk mengembalikannya. Dompet lain tidak terpengaruh."
+    },
+    "attention": {
+      "backup": {
+        "title": "Pencadangan belum selesai",
+        "body": "Dompet ini belum bisa dipakai sampai Anda mencatat frasa pemulihannya dan lulus pemeriksaan.",
+        "resolve": "Selesaikan pencadangan"
+      },
+      "recovery": {
+        "title": "Kunci dompet ini tidak dapat dibaca",
+        "body": "Pulihkan dengan frasa pemulihan atau kunci privatnya, atau hapus dari ponsel ini. Dana Anda tetap ada di jaringan CointMU, dan dompet lain tetap berfungsi.",
+        "resolve": "Pulihkan dompet"
+      },
+      "remove": "Hapus dompet ini"
+    },
+    "empty": {
+      "title": "Belum ada dompet",
+      "body": "Buat atau impor dompet untuk melihat akunnya di sini.",
+      "action": "Tambah dompet"
+    },
+    "error": {
+      "network": "Tidak dapat terhubung ke jaringan CointMU, jadi saldo tidak bisa dimuat. Tarik ke bawah untuk memuat ulang atau coba lagi.",
+      "retry": "Coba lagi"
     }
   }
 }

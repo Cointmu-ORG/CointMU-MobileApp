@@ -1,28 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 
-import { readWalletSecret, saveWalletSecret, useWalletStore } from '@/entities/wallet';
+import { readWalletSecret, useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
 import { preloadRoutes } from '../../../jest.preload-routes';
+import { seedWallet } from '../../../jest.seed-wallet';
 
 preloadRoutes();
 
 const PHRASE = 'test test test test test test test test test test test junk';
 const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+let walletId = '';
 
 beforeEach(async () => {
   await i18n.changeLanguage('en');
   // A normal launch (install marker present) with an active wallet whose PIN record is gone.
   await AsyncStorage.setItem('muvo.installed', '1');
-  await saveWalletSecret({ kind: 'mnemonic', phrase: PHRASE });
-  useWalletStore.setState({
-    status: 'active',
-    address: ADDRESS,
-    source: 'mnemonic',
-    isRecoveryRequired: false,
-    hasHydrated: true,
-  });
+  walletId = await seedWallet({ secret: { kind: 'mnemonic', phrase: PHRASE }, address: ADDRESS });
+  useWalletStore.getState().activate();
+  useWalletStore.setState({ hasHydrated: true });
 });
 
 describe('startup with unreadable wallet data', () => {
@@ -33,7 +30,7 @@ describe('startup with unreadable wallet data', () => {
     expect(router.getPathname()).toBe('/recover');
     expect(screen.queryByText('Enter your PIN')).toBeNull();
     expect(useWalletStore.getState()).toMatchObject({ status: 'none', isRecoveryRequired: true });
-    await expect(readWalletSecret()).resolves.toBeNull();
+    await expect(readWalletSecret(walletId)).resolves.toBeNull();
     // The import form is offered right on the recovery screen.
     expect(screen.getByRole('button', { name: 'Import wallet' })).toBeOnTheScreen();
   });

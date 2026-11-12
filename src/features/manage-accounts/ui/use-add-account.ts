@@ -9,11 +9,11 @@ export function useAddAccount() {
   const [isAdding, setIsAdding] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
 
-  const add = useCallback(async (): Promise<boolean> => {
+  const add = useCallback(async (walletId: string): Promise<boolean> => {
     setIsAdding(true);
     setHasFailed(false);
     try {
-      const result = await addNextAccount();
+      const result = await addNextAccount(walletId);
       if (!result.ok) setHasFailed(true);
       return result.ok;
     } catch (error) {

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppState, ScrollView, View } from 'react-native';
 
 import { PinPrompt } from '@/entities/auth';
-import { useWalletStore } from '@/entities/wallet';
+import { useActiveWallet, useWalletLabel } from '@/entities/wallet';
 import { logger } from '@/shared/lib';
 import { Button, SecretEye, Text, useTimedReveal, WordGrid } from '@/shared/ui';
 
@@ -13,10 +13,15 @@ import { PhraseWarning } from './phrase-warning';
 
 type State = { step: 'intro' | 'auth' | 'error' } | { step: 'shown'; words: string[] };
 
-function Intro({ onReveal, isFailed }: { onReveal: () => void; isFailed: boolean }) {
+type IntroProps = { walletName: string; onReveal: () => void; isFailed: boolean };
+
+function Intro({ walletName, onReveal, isFailed }: IntroProps) {
   const { t } = useTranslation();
   return (
     <ScrollView contentContainerClassName="gap-6 pb-8">
+      <Text variant="heading" accessibilityRole="header">
+        {t('settings.recoveryPhrase.wallet', { wallet: walletName })}
+      </Text>
       <Text tone="secondary">{t('settings.recoveryPhrase.description')}</Text>
       <PhraseWarning />
       {isFailed ? (
@@ -30,11 +35,16 @@ function Intro({ onReveal, isFailed }: { onReveal: () => void; isFailed: boolean
 }
 
 /** The words stay masked until the eye is pressed, and mask themselves again after 30 s. */
-function ShownPhrase({ words, onHide }: { words: readonly string[]; onHide: () => void }) {
+type ShownPhraseProps = { walletName: string; words: readonly string[]; onHide: () => void };
+
+function ShownPhrase({ walletName, words, onHide }: ShownPhraseProps) {
   const { t } = useTranslation();
   const { isRevealed, toggle } = useTimedReveal();
   return (
     <ScrollView contentContainerClassName="gap-6 pb-8">
+      <Text variant="heading" accessibilityRole="header">
+        {t('settings.recoveryPhrase.wallet', { wallet: walletName })}
+      </Text>
       <PhraseWarning />
       <View className="gap-1">
         <View className="flex-row items-center justify-between">
@@ -61,15 +71,18 @@ function ShownPhrase({ words, onHide }: { words: readonly string[]; onHide: () =
 }
 
 /**
- * Settings > Recovery phrase. Screenshots are blocked for the whole screen. The words are read
- * from SecureStore only after a PIN or biometric check, kept in component state, shown masked
+ * Settings > Recovery phrase, for the active wallet, whose name is shown (D-78). Screenshots are
+ * blocked for the whole screen. The words are read from that wallet's SecureStore item only
+ * after a PIN or biometric check, kept in component state, shown masked
  * until the eye is pressed, and dropped on "Hide", on leaving the screen, and as soon as Muvo
  * leaves the foreground.
  */
 export function RevealPhrase() {
   usePreventScreenCapture();
   const { t } = useTranslation();
-  const source = useWalletStore((state) => state.source);
+  const wallet = useActiveWallet();
+  const walletLabel = useWalletLabel();
+  const walletId = wallet?.id;
   const [state, setState] = useState<State>({ step: 'intro' });
 
   useEffect(() => {
@@ -80,15 +93,18 @@ export function RevealPhrase() {
   }, []);
 
   const reveal = useCallback(async () => {
+    if (walletId === undefined) return;
     try {
-      setState({ step: 'shown', words: await loadRecoveryWords() });
+      setState({ step: 'shown', words: await loadRecoveryWords(walletId) });
     } catch (error) {
       logger.error('Revealing the recovery phrase failed', { error });
       setState({ step: 'error' });
     }
-  }, []);
+  }, [walletId]);
 
-  if (source === 'private-key') {
+  if (wallet === null) return null;
+  const walletName = walletLabel(wallet);
+  if (wallet.source === 'private-key') {
     return <Text tone="secondary">{t('settings.recoveryPhrase.privateKey')}</Text>;
   }
   if (state.step === 'auth') {
@@ -102,7 +118,19 @@ export function RevealPhrase() {
     );
   }
   if (state.step === 'shown') {
-    return <ShownPhrase words={state.words} onHide={() => setState({ step: 'intro' })} />;
+    return (
+      <ShownPhrase
+        walletName={walletName}
+        words={state.words}
+        onHide={() => setState({ step: 'intro' })}
+      />
+    );
   }
-  return <Intro onReveal={() => setState({ step: 'auth' })} isFailed={state.step === 'error'} />;
+  return (
+    <Intro
+      walletName={walletName}
+      onReveal={() => setState({ step: 'auth' })}
+      isFailed={state.step === 'error'}
+    />
+  );
 }

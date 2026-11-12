@@ -5,13 +5,21 @@ import { View } from 'react-native';
 import { logger } from '@/shared/lib';
 import { Button, Input } from '@/shared/ui';
 
-import { importFromMnemonic, importFromPrivateKey, type ImportError } from '../model/import-wallet';
+import {
+  importFromMnemonic,
+  importFromPrivateKey,
+  type ImportError,
+  type ImportTarget,
+} from '../model/import-wallet';
 import { ImportModeToggle, type ImportMode } from './import-mode-toggle';
 import { PrivateKeyWarning } from './private-key-warning';
 
 const ERROR_KEYS: Record<ImportError | 'failed', string> = {
   invalidMnemonic: 'onboarding.import.invalidMnemonic',
   invalidPrivateKey: 'onboarding.import.invalidPrivateKey',
+  duplicate: 'onboarding.import.duplicate',
+  limitReached: 'onboarding.import.limitReached',
+  wrongWallet: 'onboarding.import.wrongWallet',
   failed: 'onboarding.import.error',
 };
 
@@ -24,8 +32,15 @@ const SECRET_INPUT_PROPS = {
   importantForAutofill: 'no',
 } as const;
 
-/** On success the wallet status changes and the router moves on to set-pin. */
-export function ImportWalletForm() {
+type ImportWalletFormProps = {
+  /** Defaults to adding a new wallet; `recover` restores one wallet's unreadable secret. */
+  target?: ImportTarget;
+  /** Called with the wallet's id. Onboarding needs none: the wallet status moves the router. */
+  onImported?: (walletId: string) => void;
+};
+
+/** In onboarding, success changes the wallet status and the router moves on to set-pin. */
+export function ImportWalletForm({ target, onImported }: ImportWalletFormProps) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<ImportMode>('mnemonic');
   const [value, setValue] = useState('');
@@ -39,9 +54,10 @@ export function ImportWalletForm() {
     setError(null);
     try {
       const result = isPrivateKey
-        ? await importFromPrivateKey(value)
-        : await importFromMnemonic(value);
-      if (!result.ok) setError(result.error);
+        ? await importFromPrivateKey(value, target)
+        : await importFromMnemonic(value, target);
+      if (result.ok) onImported?.(result.walletId);
+      else setError(result.error);
     } catch (caught) {
       logger.error('Wallet import failed', { error: caught });
       setError('failed');

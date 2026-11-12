@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Share, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
-import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
+import { useAccountLabel, useActiveAccount, useWalletStore } from '@/entities/wallet';
 import { logger } from '@/shared/lib';
 import { Button, Card, ICON_SIZE, Notice, Text, useTheme } from '@/shared/ui';
 
@@ -34,14 +34,27 @@ function useCopy(address: string) {
   return { isCopied, copy };
 }
 
+type ReceiveCardProps = {
+  /** Another account to show (from its card in the Wallets tab); the active one when omitted. */
+  account?: { readonly walletId: string; readonly index: number };
+};
+
 /**
- * The active account's address as a QR code (the plain checksummed address, no URI, D-50),
- * with copy and share. A note says which assets belong on this address.
+ * An account's address as a QR code (the plain checksummed address, no URI, D-50), with copy
+ * and share. A note says which assets belong on this address.
  */
-export function ReceiveCard() {
+export function ReceiveCard({ account: ref }: ReceiveCardProps) {
   const { colors, scheme } = useTheme();
   const { t } = useTranslation();
-  const account = useActiveAccount();
+  const activeAccount = useActiveAccount();
+  const chosen = useWalletStore((state) =>
+    ref === undefined
+      ? null
+      : (state.wallets
+          .find((wallet) => wallet.id === ref.walletId)
+          ?.accounts.find((candidate) => candidate.index === ref.index) ?? null),
+  );
+  const account = ref === undefined ? activeAccount : chosen;
   const labelOf = useAccountLabel();
   const address = account ? getAddress(account.address) : '';
   const { isCopied, copy } = useCopy(address);
