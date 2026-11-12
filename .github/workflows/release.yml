@@ -6,7 +6,6 @@ name: Release
 # pull_request.
 on:
   push:
-    branches: [ci/android-release-apk]
     tags:
       - "v*"
   workflow_dispatch:
