@@ -35,7 +35,11 @@ export function ScanPage() {
 
   return (
     <Screen className="gap-4">
-      <QrScanner onScanned={onScanned} isPaused={problem !== null} />
+      <QrScanner
+        onScanned={onScanned}
+        isPaused={problem !== null}
+        onDismiss={() => router.back()}
+      />
       {problem === null ? (
         <Text tone="secondary" className="text-center">
           {t('scan.hint')}

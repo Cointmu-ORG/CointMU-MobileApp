@@ -5,6 +5,11 @@ export type Env = {
   readonly chainId: number;
   /** Block explorer base URL for tx links (Q-27); null hides the links. */
   readonly explorerUrl: string | null;
+  /**
+   * GlitchTip DSN for error reports (D-77); null turns reporting off. Kept as written: error
+   * reporting validates it, and a bad value must switch reporting off, never stop the app.
+   */
+  readonly glitchtipDsn: string | null;
 };
 
 type EnvSource = Readonly<Record<string, string | undefined>>;
@@ -52,7 +57,12 @@ export function readEnv(source: EnvSource): Env {
   if (!Number.isSafeInteger(chainId) || chainId <= 0) {
     throw new Error('EXPO_PUBLIC_CHAIN_ID must be a positive integer.');
   }
-  return { rpcUrls, chainId, explorerUrl: parseExplorerUrl(source.EXPO_PUBLIC_EXPLORER_URL) };
+  return {
+    rpcUrls,
+    chainId,
+    explorerUrl: parseExplorerUrl(source.EXPO_PUBLIC_EXPLORER_URL),
+    glitchtipDsn: source.EXPO_PUBLIC_GLITCHTIP_DSN?.trim() || null,
+  };
 }
 
 function parseExplorerUrl(raw: string | undefined): string | null {
@@ -72,4 +82,5 @@ export const env: Env = readEnv({
   EXPO_PUBLIC_RPC_URLS: process.env.EXPO_PUBLIC_RPC_URLS,
   EXPO_PUBLIC_CHAIN_ID: process.env.EXPO_PUBLIC_CHAIN_ID,
   EXPO_PUBLIC_EXPLORER_URL: process.env.EXPO_PUBLIC_EXPLORER_URL,
+  EXPO_PUBLIC_GLITCHTIP_DSN: process.env.EXPO_PUBLIC_GLITCHTIP_DSN,
 });

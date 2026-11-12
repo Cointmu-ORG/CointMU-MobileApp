@@ -5,6 +5,21 @@ import { setUpTests } from 'react-native-reanimated';
 // Public test values only; RPC calls are mocked wherever a provider is used.
 process.env.EXPO_PUBLIC_RPC_URLS = 'http://rpc.test.invalid,https://rpc2.test.invalid';
 process.env.EXPO_PUBLIC_CHAIN_ID = '1912';
+// Tests never report anywhere: no DSN (a developer's .env may hold one), and the SDK is a stub.
+delete process.env.EXPO_PUBLIC_GLITCHTIP_DSN;
+
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  close: jest.fn(async () => undefined),
+  flush: jest.fn(async () => true),
+  addBreadcrumb: jest.fn(),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  reactNativeErrorHandlersIntegration: jest.fn(() => ({ name: 'ReactNativeErrorHandlers' })),
+  dedupeIntegration: jest.fn(() => ({ name: 'Dedupe' })),
+  createReactNativeRewriteFrames: jest.fn(() => ({ name: 'RewriteFrames' })),
+  deviceContextIntegration: jest.fn(() => ({ name: 'DeviceContext' })),
+}));
 
 jest.mock('expo-secure-store', () => {
   const store = new Map<string, string>();

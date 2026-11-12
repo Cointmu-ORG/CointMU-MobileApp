@@ -1,6 +1,7 @@
 const expoPreset = require('jest-expo/jest-preset');
 
-// Packages that ship untranspiled ESM and must go through Babel (added: lucide-react-native).
+// Packages that ship untranspiled ESM and must go through Babel (added: lucide-react-native,
+// and all of @sentry: Jest resolves @sentry/core to its ESM build).
 const TRANSPILED_PACKAGES = [
   '.pnpm',
   'react-native',
@@ -11,7 +12,7 @@ const TRANSPILED_PACKAGES = [
   '@expo-google-fonts',
   'react-navigation',
   '@react-navigation',
-  '@sentry/react-native',
+  '@sentry',
   'native-base',
   'standard-navigation',
   'lucide-react-native',
@@ -30,7 +31,11 @@ module.exports = {
   // run at >= 1.5 GB free with every suite green. CI runners (4 vCPU) get 2 workers either way.
   maxWorkers: '50%',
   workerIdleMemoryLimit: '700MB',
-  moduleNameMapper: { '\\.css$': '<rootDir>/jest.style-stub.js' },
+  moduleNameMapper: {
+    '\\.css$': '<rootDir>/jest.style-stub.js',
+    // The generated, untracked build-info.json changes with every commit; tests read a fixture.
+    '/build-info\\.json$': '<rootDir>/jest.build-info.json',
+  },
   testPathIgnorePatterns: ['/node_modules/', '/graphify-out/'],
   // lucide-react-native's react-native entry is .mjs, which the preset's transform does not match.
   transform: { '\\.mjs$': expoPreset.transform['\\.[jt]sx?$'] },

@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Linking, View } from 'react-native';
 
 import { network, useActiveRpcUrl } from '@/entities/network';
+import { SendTestErrorRow } from '@/features/error-reporting';
 import { EXTERNAL_LINKS, getAppInfo } from '@/shared/config';
 import { formatUrlHost, logger } from '@/shared/lib';
 import {
@@ -95,6 +96,11 @@ export function AboutPage() {
         />
       </SettingsSection>
       <BuildInfoSection />
+      {__DEV__ ? (
+        <SettingsSection title={t('settings.about.developer')}>
+          <SendTestErrorRow />
+        </SettingsSection>
+      ) : null}
       <SettingsSection title={t('settings.about.networkTitle')}>
         <SettingsRow icon={Layers} title={t('settings.about.network')} value={network.name} />
         <SettingsRow

@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const { collectBuildInfo, writeBuildInfo } = require('./generate-build-info');
+const { collectBuildInfo, refreshBuildInfo, writeBuildInfo } = require('./generate-build-info');
 
 const COMMIT = '0123456789abcdef0123456789abcdef01234567';
 const OTHER_COMMIT = 'fedcba9876543210fedcba9876543210fedcba98';
@@ -194,5 +194,23 @@ describe('writeBuildInfo', () => {
 
     expect(info).toMatchObject({ version: '1.1.0', commit: null, branch: null, dirty: null });
     expect(fs.existsSync(path.join(repo, 'build-info.json'))).toBe(true);
+  });
+});
+
+describe('refreshBuildInfo', () => {
+  it('writes the file like writeBuildInfo', () => {
+    const dir = makeTempDir();
+    fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify(PKG));
+    const info = refreshBuildInfo(dir, { env: {}, now: NOW });
+    expect(info).toMatchObject({ version: '1.1.0', channel: 'dev', builtAt: NOW.toISOString() });
+    expect(JSON.parse(fs.readFileSync(path.join(dir, 'build-info.json'), 'utf8'))).toEqual(info);
+  });
+
+  it('reports a failure instead of throwing, so Metro still starts', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const missing = path.join(makeTempDir(), 'no-such-project');
+    expect(refreshBuildInfo(missing)).toBeNull();
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/^build-info: not refreshed \(/));
+    warn.mockRestore();
   });
 });

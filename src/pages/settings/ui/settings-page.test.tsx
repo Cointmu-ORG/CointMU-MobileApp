@@ -5,7 +5,7 @@ import { Linking } from 'react-native';
 
 import { storeNewPin, useAuthPrefsStore, useSessionStore } from '@/entities/auth';
 import { saveWalletSecret, useWalletStore } from '@/entities/wallet';
-import { EXTERNAL_LINKS, getAppInfo, getBuildInfo } from '@/shared/config';
+import { EXTERNAL_LINKS, getAppInfo } from '@/shared/config';
 import { i18n } from '@/shared/i18n';
 import { DEFAULT_APPEARANCE, useAppearanceStore } from '@/shared/model';
 
@@ -61,6 +61,7 @@ describe('Settings tab', () => {
       'Accounts, Account 1',
       'Network, rpc.test.invalid',
       'Security, Auto-lock: 1 min',
+      'Privacy, Reports not set up',
       `About, v${getAppInfo().version}`,
     ]) {
       expect(screen.getByRole('button', { name })).toBeOnTheScreen();
@@ -161,7 +162,20 @@ describe('Settings > Security', () => {
   });
 });
 
+describe('Settings > Privacy', () => {
+  it('says error reporting is not set up in a build without a DSN', async () => {
+    await open('/privacy', /Error reporting is not set up in this build/);
+    expect(screen.queryByLabelText('Send error reports')).toBeNull();
+  });
+});
+
 describe('Settings > About', () => {
+  it('has the development-only test error row, which sends nothing without a DSN', async () => {
+    await open('/about', 'Developer');
+    await fireEvent.press(screen.getByRole('button', { name: /^Send test error/ }));
+    expect(await screen.findByText(/Nothing was sent/)).toBeOnTheScreen();
+  });
+
   it('shows the app, version with codename, chain and node', async () => {
     const { version, codename, build } = getAppInfo();
     await open('/about', `Version ${version}-${codename} (build ${build ?? 'development'})`);
@@ -173,13 +187,10 @@ describe('Settings > About', () => {
   });
 
   it('shows the build info and copies a plain-text block without wallet data', async () => {
-    const { commitShort, isDirty, channel } = getBuildInfo();
     await open('/about', 'Build info');
-    const commit = commitShort ?? 'unknown';
-    expect(screen.getByText(isDirty ? `${commit} (modified)` : commit)).toBeOnTheScreen();
-    expect(
-      screen.getByText({ dev: 'Development', ci: 'CI', release: 'Release' }[channel]),
-    ).toBeOnTheScreen();
+    // The fixture Jest maps build-info.json to (jest.build-info.json), not this checkout.
+    expect(screen.getByText('0123456 (modified)')).toBeOnTheScreen();
+    expect(screen.getByText('Development')).toBeOnTheScreen();
 
     await fireEvent.press(screen.getByRole('button', { name: /^Copy build info/ }));
     expect(await screen.findByText('Copied')).toBeOnTheScreen();

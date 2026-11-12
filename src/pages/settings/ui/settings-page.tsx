@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import EyeOff from 'lucide-react-native/icons/eye-off';
 import Info from 'lucide-react-native/icons/info';
 import Languages from 'lucide-react-native/icons/languages';
 import Lock from 'lucide-react-native/icons/lock';
@@ -15,8 +16,8 @@ import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
 import { LANGUAGE_NAMES, useCurrentLanguage } from '@/features/change-language';
 import { lockNow } from '@/features/lock-settings';
 import { getAppInfo, ROUTES } from '@/shared/config';
-import { formatUrlHost } from '@/shared/lib';
-import { useAppearanceStore } from '@/shared/model';
+import { formatUrlHost, isErrorReportingAvailable } from '@/shared/lib';
+import { useAppearanceStore, useErrorReportingStore } from '@/shared/model';
 import { ScrollScreen, SettingsRow, SettingsSection, Text } from '@/shared/ui';
 
 const MINUTE_MS = 60_000;
@@ -27,6 +28,13 @@ function useAutoLockLabel(): string {
   return autoLockMs === 0
     ? t('settings.security.immediately')
     : t('settings.security.minutes', { count: autoLockMs / MINUTE_MS });
+}
+
+function usePrivacyLabel(): string {
+  const { t } = useTranslation();
+  const isEnabled = useErrorReportingStore((state) => state.isEnabled);
+  if (!isErrorReportingAvailable()) return t('settings.privacy.notSetUp');
+  return t(isEnabled ? 'settings.privacy.on' : 'settings.privacy.off');
 }
 
 /**
@@ -41,6 +49,7 @@ export function SettingsPage() {
   const account = useActiveAccount();
   const rpcUrl = useActiveRpcUrl();
   const autoLock = useAutoLockLabel();
+  const privacy = usePrivacyLabel();
   const { version } = getAppInfo();
 
   return (
@@ -97,7 +106,13 @@ export function SettingsPage() {
           isDestructive
         />
       </SettingsSection>
-      <SettingsSection>
+      <SettingsSection title={t('settings.groups.app')}>
+        <SettingsRow
+          icon={EyeOff}
+          title={t('settings.privacy.title')}
+          value={privacy}
+          onPress={() => router.push(ROUTES.privacy)}
+        />
         <SettingsRow
           icon={Info}
           title={t('settings.about.title')}

@@ -9,6 +9,7 @@ import { ReducedMotionConfig, ReduceMotion } from 'react-native-reanimated';
 
 import { useSessionStore } from '@/entities/auth';
 import { useWalletStore } from '@/entities/wallet';
+import { initErrorReporting } from '@/shared/lib';
 import { useAppearanceStore } from '@/shared/model';
 import { ThemeRoot, useResolvedTheme, useTheme } from '@/shared/ui';
 
@@ -16,12 +17,17 @@ import { useAppReady } from '../model/use-app-ready';
 import { resolveEntryRoute } from '../model/resolve-entry-route';
 import { useApplyTheme } from '../model/use-apply-theme';
 import { useAutoLock } from '../model/use-auto-lock';
+import { useErrorReporting } from '../model/use-error-reporting';
 import { useTxPolling } from '../model/use-tx-polling';
+import { ErrorReportingNoticeGate } from './error-reporting-notice-gate';
 import { useSubScreenHeader } from './header-options';
+import { NavigationBreadcrumbs } from './navigation-breadcrumbs';
 import { PrivacyCover } from './privacy-cover';
 import { holdNativeSplash, SplashHandoff } from './splash-handoff';
 
 holdNativeSplash();
+// Before the first screen, so an error during startup is already caught (D-77).
+initErrorReporting();
 
 /** Sub-screens, each below a native header with a back button and a translated title. */
 const SUB_SCREENS = [
@@ -39,6 +45,7 @@ const SUB_SCREENS = [
   { name: 'recovery-phrase', titleKey: 'settings.recoveryPhrase.title' },
   { name: 'private-key', titleKey: 'settings.privateKey.title' },
   { name: 'remove-wallet', titleKey: 'settings.removeWallet.title' },
+  { name: 'privacy', titleKey: 'settings.privacy.title' },
   { name: 'about', titleKey: 'settings.about.title' },
   { name: 'tokens', titleKey: 'tokens.title' },
   { name: 'tx/[hash]', titleKey: 'history.detail.title' },
@@ -147,6 +154,7 @@ export function RootLayout() {
   const theme = useResolvedTheme();
   useApplyTheme(theme);
   useAutoLock();
+  useErrorReporting();
   useTxPolling(isReady && status === 'active');
 
   // The native splash stays up until bootstrap is done, so nothing unstyled ever shows.
@@ -158,6 +166,8 @@ export function RootLayout() {
         mode={motion === 'reduced' ? ReduceMotion.Always : ReduceMotion.System}
       />
       <RootNavigator />
+      <NavigationBreadcrumbs />
+      <ErrorReportingNoticeGate />
       <PrivacyCover />
       <SplashHandoff />
     </ThemeRoot>

@@ -314,11 +314,17 @@
       "unknown": "tidak diketahui",
       "copyBuildInfo": "Salin info build",
       "copyBuildInfoDesc": "Tempelkan ke laporan bug. Tidak berisi data dompet.",
-      "copied": "Disalin"
+      "copied": "Disalin",
+      "testError": "Kirim galat uji",
+      "testErrorDesc": "Khusus pengembangan. Mengirim contoh laporan berisi rahasia palsu untuk memeriksa bahwa semuanya tiba dalam keadaan disamarkan.",
+      "testErrorQueued": "Laporan uji disimpan. Dikirim saat server bisa dijangkau.",
+      "testErrorOff": "Tidak ada yang dikirim: pelaporan galat mati atau belum diatur.",
+      "developer": "Pengembang"
     },
     "groups": {
       "general": "Umum",
-      "wallet": "Dompet"
+      "wallet": "Dompet",
+      "app": "Aplikasi"
     },
     "appearance": {
       "title": "Tampilan",
@@ -421,6 +427,37 @@
       "autoHide": "Kunci disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar.",
       "showKey": "Tampilkan kunci",
       "hideKey": "Sembunyikan kunci"
+    },
+    "privacy": {
+      "title": "Privasi",
+      "on": "Laporan aktif",
+      "off": "Laporan mati",
+      "notSetUp": "Laporan belum diatur",
+      "reporting": "Pelaporan galat",
+      "notConfigured": "Pelaporan galat belum diatur di build ini. Tidak ada yang dikirim.",
+      "toggleTitle": "Kirim laporan galat",
+      "toggleDesc": "Mengirim laporan galat yang sudah dibersihkan ke server CointMU di {{host}}. Jika dimatikan, laporan yang belum terkirim dihapus.",
+      "offline": "Server hanya bisa dijangkau dari jaringan kampus. Di luar itu, laporan menunggu di ponsel ini ({{count}} terbaru, paling lama 30 hari) dan dikirim saat server bisa dijangkau.",
+      "sentTitle": "Yang dikirim",
+      "sent": {
+        "error": "Jenis dan pesan galat",
+        "stack": "Bagian aplikasi tempat galat terjadi (stack trace)",
+        "versions": "Versi dan build aplikasi, model ponsel, dan versi sistem operasi",
+        "activity": "Layar yang dibuka sebelum galat dan catatan log aplikasi, dibersihkan dengan cara yang sama"
+      },
+      "neverSentTitle": "Tidak pernah dikirim",
+      "neverSent": {
+        "secrets": "Frasa pemulihan, kunci privat, dan PIN kamu",
+        "addresses": "Alamat dompet dan hash transaksi",
+        "screen": "Tangkapan layar, isi layar, dan isi papan klip"
+      },
+      "notice": {
+        "title": "Laporan galat membantu kami memperbaiki Muvo",
+        "what": "Saat terjadi masalah, Muvo menyimpan laporan berisi galat, bagian aplikasi tempat terjadinya, serta versi aplikasi dan sistem. Frasa pemulihan, kunci privat, PIN, alamat dompet, dan hash transaksi dihapus lebih dulu.",
+        "where": "Laporan dikirim ke server CointMU di {{host}}, yang hanya bisa dijangkau dari jaringan kampus. Di luar itu laporan menunggu di ponsel ini dan dikirim nanti.",
+        "howToDisable": "Kamu bisa mengubahnya kapan saja di Pengaturan > Privasi.",
+        "acknowledge": "Mengerti"
+      }
     }
   },
   "send": {
@@ -502,11 +539,14 @@
     "again": "Pindai lagi",
     "permission": {
       "checking": "Memeriksa akses kamera…",
-      "title": "Akses kamera",
-      "body": "Muvo memakai kamera hanya untuk membaca kode QR. Tidak ada yang direkam atau disimpan.",
+      "title": "Pindai dengan kamera",
       "denied": "Akses kamera untuk Muvo mati. Nyalakan di pengaturan ponsel untuk memindai kode QR.",
-      "allow": "Izinkan kamera",
-      "openSettings": "Buka pengaturan"
+      "openSettings": "Buka pengaturan",
+      "why": "Muvo memakai kamera untuk memindai kode QR alamat CointMU dan permintaan pembayaran, jadi kamu tidak perlu mengetiknya.",
+      "privacy": "Tidak ada foto atau video yang diambil atau disimpan. Kamera hanya menyala selama layar ini terbuka.",
+      "next": "Setelah ini ponsel kamu akan meminta izin.",
+      "continue": "Lanjut",
+      "notNow": "Nanti saja"
     },
     "errors": {
       "secret": {

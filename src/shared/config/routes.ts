@@ -20,6 +20,7 @@ export const ROUTES = {
   security: '/security',
   enableBiometrics: '/enable-biometrics',
   privateKey: '/private-key',
+  privacy: '/privacy',
   about: '/about',
   accounts: '/accounts',
   accountSwitcher: '/account-switcher',

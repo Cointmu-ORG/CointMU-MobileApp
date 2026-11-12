@@ -33,12 +33,18 @@ module.exports = defineConfig([
     // Jest globals for the scripts' tests (src tests are TypeScript and typed by @types/jest).
     files: ['scripts/**/*.test.js'],
     languageOptions: {
-      globals: { afterEach: 'readonly', describe: 'readonly', expect: 'readonly', it: 'readonly' },
+      globals: {
+        afterEach: 'readonly',
+        describe: 'readonly',
+        expect: 'readonly',
+        it: 'readonly',
+        jest: 'readonly',
+      },
     },
   },
   {
     // The logger is the one place allowed to write to the console (conventions: logging).
-    files: ['src/shared/lib/logger.ts'],
+    files: ['src/shared/lib/diagnostics/logger.ts'],
     rules: { 'no-console': 'off' },
   },
 ]);

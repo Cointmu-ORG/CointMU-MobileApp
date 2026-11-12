@@ -12,6 +12,7 @@ describe('readEnv', () => {
       rpcUrls: ['https://a.invalid', 'http://b.invalid:8545'],
       chainId: 1912,
       explorerUrl: null,
+      glitchtipDsn: null,
     });
   });
 

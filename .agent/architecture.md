@@ -40,7 +40,7 @@ Node selection (D-43, D-67): Settings > Network lists the preset nodes and the n
 | QR | `react-native-qrcode-svg` (show), `expo-camera` (scan) |
 | Icons | `lucide-react-native` |
 | Dates | date-fns |
-| Errors | `@sentry/react-native` (with scrubbing) |
+| Errors | `@sentry/react-native` to GlitchTip, opt-out, scrubbed, queued offline (D-77) |
 | Polyfill | `react-native-get-random-values`, imported first in the entry file |
 | Tests | Jest (`jest-expo`) + React Native Testing Library |
 | Lint | ESLint + Prettier + Steiger (FSD boundaries) |
@@ -63,7 +63,7 @@ app/                         # Expo Router routes ONLY. No logic.
   receive.tsx
   scan.tsx                   # ?from=send returns to the form; otherwise opens Send
   tokens.tsx                 # add, hide and remove ERC-20 tokens
-  appearance.tsx, language.tsx, security.tsx, about.tsx   # settings groups (D-71)
+  appearance.tsx, language.tsx, security.tsx, privacy.tsx, about.tsx   # settings groups (D-71, D-77)
   enable-biometrics.tsx, private-key.tsx                  # opened from Security (D-69, D-70)
   account-switcher.tsx       # form sheet opened from the home account chip (D-62)
   tx/[hash].tsx              # tx detail (local or scanned)
@@ -95,9 +95,9 @@ export { HomePage as default } from '@/pages/home';
 ```
 
 ### Features
-`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `manage-tokens`, `change-language`, `change-appearance`, `change-pin`, `lock-settings`, `reveal-mnemonic`, `reveal-private-key`, `reset-wallet`, `select-network`, `manage-accounts`.
+`create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `manage-tokens`, `change-language`, `change-appearance`, `change-pin`, `lock-settings`, `reveal-mnemonic`, `reveal-private-key`, `reset-wallet`, `select-network`, `manage-accounts`, `error-reporting`.
 
-A page slice may hold the screens of one flow: `pages/send` (form, review, result), `pages/history` (list, tx detail) and `pages/settings` (the tab, Appearance, Language, Security, enable biometrics, private key, About). This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
+A page slice may hold the screens of one flow: `pages/send` (form, review, result), `pages/history` (list, tx detail) and `pages/settings` (the tab, Appearance, Language, Security, enable biometrics, private key, Privacy, About). This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
 
 ### Slice segments
 `ui/`, `model/` (Zustand store, selectors, types), `api/` (RPC calls), `lib/` (pure helpers), `config/`. Each slice exposes only `index.ts`.
@@ -165,9 +165,14 @@ No indexer is assumed (Q-11). Three `TransactionSource`s (`entities/transaction/
 - Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`; a language picked in Settings is stored (`muvo.language`, AsyncStorage) and restored during bootstrap, before the splash hides. No hardcoded user-facing strings.
 - Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting; amount input accepts the locale's decimal separator (D-51). Dates via date-fns with the `id`/`en` locale. No fiat.
 - Status and warnings never rely on color alone: badges and notices carry an icon and text.
+- Camera (D-76): the scanner shows Muvo's own explanation (what the camera is for, nothing is captured, Continue / Not now) before the OS prompt, and "Open settings" after a permanent denial.
 
-## 10. Config
+## 10. Error reporting (D-77)
 
-Only non-secret values via `EXPO_PUBLIC_*`: `EXPO_PUBLIC_RPC_URLS` (comma-separated preset nodes), `EXPO_PUBLIC_CHAIN_ID`, and the optional `EXPO_PUBLIC_EXPLORER_URL` (tx links appear only when it is set, Q-27). Anything in the app bundle is public. Never put API keys or credentials in the app.
+`shared/lib/diagnostics` is the only code that touches the Sentry SDK. It starts before the first screen when `EXPO_PUBLIC_GLITCHTIP_DSN` is set, and is a no-op otherwise. Reporting is opt-out (`muvo.error-reporting`): a one-time notice over the app after PIN setup, or on the next unlock for an existing install, explains what is sent; nothing is sent before it is acknowledged, and the switch in Settings > Privacy closes or restarts the SDK at once. Every event is rebuilt from an allowlist and every string scrubbed (phrases, 64-hex, addresses, PIN-like digits, URLs down to their host); breadcrumbs are only our logger's lines and route patterns. Reports wait in a capped AsyncStorage queue (30 reports, 512 KB, 30 days) until the GlitchTip server, which is LAN/ZeroTier only, is reachable. `logger.error` is the way to report: features never call the SDK. Expo Go reports JS errors; native crashes need a development or release build.
 
-Build info (D-72): `scripts/generate-build-info.js` writes the untracked `build-info.json` (version, codename, commit, branch, dirty flag, build time, channel, CI run) on install, on start and in CI. `shared/config` reads it, and Settings > About shows and copies it. It holds nothing secret and nothing about the build machine.
+## 11. Config
+
+Only non-secret values via `EXPO_PUBLIC_*`: `EXPO_PUBLIC_RPC_URLS` (comma-separated preset nodes), `EXPO_PUBLIC_CHAIN_ID`, the optional `EXPO_PUBLIC_EXPLORER_URL` (tx links appear only when it is set, Q-27) and the optional `EXPO_PUBLIC_GLITCHTIP_DSN` (error reporting is fully off without it, D-77). Anything in the app bundle is public. Never put API keys or credentials in the app.
+
+Build info (D-72, D-75): `scripts/generate-build-info.js` writes the untracked `build-info.json` (version, codename, commit, branch, dirty flag, build time, channel, CI run) whenever Metro starts (`metro.config.js`), on install and in CI; Jest reads a fixture. `shared/config` reads it, and Settings > About shows and copies it. It holds nothing secret and nothing about the build machine.
