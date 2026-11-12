@@ -308,6 +308,7 @@
         "dev": "Pengembangan",
         "ci": "CI",
         "release": "Rilis"
+        "preview": "Pratinjau",
       },
       "unknown": "tidak diketahui",
       "copyBuildInfo": "Salin info build",

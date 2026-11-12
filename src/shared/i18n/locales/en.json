@@ -308,6 +308,7 @@
         "dev": "Development",
         "ci": "CI",
         "release": "Release"
+        "preview": "Preview",
       },
       "unknown": "unknown",
       "copyBuildInfo": "Copy build info",

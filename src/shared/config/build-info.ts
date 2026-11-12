@@ -1,7 +1,7 @@
 import rawBuildInfo from '../../../build-info.json';
 import type { AppInfo } from './app-info';
 
-export const BUILD_CHANNELS = ['dev', 'ci', 'release'] as const;
+export const BUILD_CHANNELS = ['dev', 'ci', 'preview', 'release'] as const;
 export type BuildChannel = (typeof BUILD_CHANNELS)[number];
 
 /** Where this bundle came from (D-72). Public data: nothing here is secret. */
