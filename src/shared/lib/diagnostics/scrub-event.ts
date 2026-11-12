@@ -105,10 +105,32 @@ function scrubContexts(contexts: ErrorEvent['contexts']): ErrorEvent['contexts']
   };
 }
 
+const SOURCE_MAP_IMAGE = 'sourcemap';
+
+/**
+ * What the server needs to pick the uploaded source map for a release stack trace (D-82): the
+ * bundle's debug id and its file name. Only source map images are kept, with those two fields;
+ * native images (paths on the build machine, load addresses) never pass.
+ */
+function scrubDebugMeta(meta: ErrorEvent['debug_meta']): ErrorEvent['debug_meta'] {
+  const images = (meta?.images ?? []).flatMap((image) =>
+    image.type === SOURCE_MAP_IMAGE
+      ? [
+          {
+            type: image.type,
+            debug_id: scrubText(image.debug_id),
+            code_file: scrubFilename(image.code_file),
+          },
+        ]
+      : [],
+  );
+  return images.length > 0 ? { images } : undefined;
+}
+
 /**
  * Rebuilds an event from an allowlist of fields and scrubs every string in it, like the
  * desktop app. Anything not listed (user, request, extra, tags, server_name, modules,
- * debug_meta, attachments, fields a future SDK adds) is dropped.
+ * attachments, fields a future SDK adds) is dropped.
  */
 export function scrubEvent(event: ErrorEvent): ErrorEvent {
   const breadcrumbs = (event.breadcrumbs ?? [])
@@ -131,5 +153,6 @@ export function scrubEvent(event: ErrorEvent): ErrorEvent {
     contexts: scrubContexts(event.contexts),
     breadcrumbs,
     fingerprint: event.fingerprint?.map(scrubText),
+    debug_meta: scrubDebugMeta(event.debug_meta),
   };
 }
