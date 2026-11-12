@@ -17,7 +17,8 @@ const openAdd = () => router.push(ROUTES.walletAdd);
 const ACTIONS: WalletGridActions = {
   onSelectAccount: (account) => {
     switchToAccount(account);
-    router.navigate(ROUTES.home);
+    // Pops to the tabs screen: `navigate` would push a second one above a sheet that is opening.
+    router.dismissTo(ROUTES.home);
   },
   onAccountMenu: ({ walletId, index }) =>
     router.push({ pathname: ROUTES.accountMenu, params: { walletId, index } }),
