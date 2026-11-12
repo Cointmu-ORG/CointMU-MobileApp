@@ -47,7 +47,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to use the camera to scan wallet address QR codes.",
+          "cameraPermission": "$(PRODUCT_NAME) uses the camera to scan QR codes of wallet addresses and payment requests. No photo or video is taken or stored.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
@@ -57,7 +57,9 @@
         {
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID to unlock your wallet and confirm transactions."
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-status-bar"
     ]
   }
 }

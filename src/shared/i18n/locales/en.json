@@ -502,11 +502,14 @@
     "again": "Scan again",
     "permission": {
       "checking": "Checking camera access…",
-      "title": "Camera access",
-      "body": "Muvo uses the camera only to read QR codes. Nothing is recorded or saved.",
+      "title": "Scan with your camera",
       "denied": "Camera access is off for Muvo. Turn it on in your phone's settings to scan QR codes.",
-      "allow": "Allow camera",
-      "openSettings": "Open settings"
+      "openSettings": "Open settings",
+      "why": "Muvo uses the camera to scan QR codes of CointMU addresses and payment requests, so you don't have to type them.",
+      "privacy": "No photo or video is taken or stored. The camera runs only while this screen is open.",
+      "next": "Your phone will ask for permission next.",
+      "continue": "Continue",
+      "notNow": "Not now"
     },
     "errors": {
       "secret": {

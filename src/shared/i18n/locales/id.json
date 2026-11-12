@@ -502,11 +502,14 @@
     "again": "Pindai lagi",
     "permission": {
       "checking": "Memeriksa akses kamera…",
-      "title": "Akses kamera",
-      "body": "Muvo memakai kamera hanya untuk membaca kode QR. Tidak ada yang direkam atau disimpan.",
+      "title": "Pindai dengan kamera",
       "denied": "Akses kamera untuk Muvo mati. Nyalakan di pengaturan ponsel untuk memindai kode QR.",
-      "allow": "Izinkan kamera",
-      "openSettings": "Buka pengaturan"
+      "openSettings": "Buka pengaturan",
+      "why": "Muvo memakai kamera untuk memindai kode QR alamat CointMU dan permintaan pembayaran, jadi kamu tidak perlu mengetiknya.",
+      "privacy": "Tidak ada foto atau video yang diambil atau disimpan. Kamera hanya menyala selama layar ini terbuka.",
+      "next": "Setelah ini ponsel kamu akan meminta izin.",
+      "continue": "Lanjut",
+      "notNow": "Nanti saja"
     },
     "errors": {
       "secret": {
