@@ -41,6 +41,15 @@ function seedTwoWallets(second: Partial<NewWallet> = {}) {
 
 beforeEach(() => state().reset());
 
+const V1_PRIVATE_KEY = {
+  status: 'active',
+  address: B0,
+  source: 'private-key',
+  accountIndex: 0,
+  accounts: [{ index: 0, address: B0, name: null }],
+  isRecoveryRequired: false,
+};
+
 describe('migrateWalletState', () => {
   const V1_MNEMONIC = {
     status: 'active',
@@ -113,10 +122,74 @@ describe('migrateWalletState', () => {
     expect(migrated.wallets[0]?.accounts).toMatchObject([{ index: 0, address: A0, name: null }]);
   });
 
-  it('is idempotent: the same input gives the same output, and v2 passes through', () => {
+  it('is idempotent: the same input gives the same output, and v3 passes through', () => {
     const once = migrateWalletState(V1_MNEMONIC, 1);
     expect(migrateWalletState(V1_MNEMONIC, 1)).toEqual(once);
-    expect(migrateWalletState(once, 2)).toBe(once);
+    expect(migrateWalletState(once, 2)).toEqual(once);
+    expect(migrateWalletState(once, 3)).toBe(once);
+  });
+});
+
+describe('migrateWalletState: card icons (v2 to v3)', () => {
+  const account = (index: number, address: string, change: object = {}) => ({
+    index,
+    address,
+    name: null,
+    color: 'ocean',
+    ...change,
+  });
+  const v2Wallet = (id: string, source: string, accounts: object[]) => ({
+    id,
+    number: 1,
+    name: 'Family',
+    color: 'teal',
+    source,
+    origin: 'imported',
+    addedAt: 1,
+    isBackupPending: false,
+    needsRecovery: false,
+    accounts,
+  });
+  const V2 = {
+    status: 'active',
+    wallets: [
+      v2Wallet('a'.repeat(32), 'mnemonic', [
+        account(0, A0, { name: 'Savings', color: 'plum' }),
+        account(1, A1),
+      ]),
+      v2Wallet('b'.repeat(32), 'private-key', [account(0, B0, { color: 'rose' })]),
+    ],
+    activeWalletId: 'a'.repeat(32),
+    accountIndex: 1,
+    address: A1,
+    source: 'mnemonic',
+    isRecoveryRequired: false,
+  };
+  const migrate = (input: unknown) => migrateWalletState(input, 2) as ReturnType<typeof state>;
+
+  it('gives every account the icon its card already had and keeps the rest', () => {
+    const migrated = migrate(V2);
+    expect(migrated).toMatchObject({ ...V2, wallets: [{ name: 'Family' }, { color: 'teal' }] });
+    expect(migrated.wallets[0]?.accounts).toEqual([
+      account(0, A0, {
+        name: 'Savings',
+        color: 'plum',
+        icon: { kind: 'lucide', name: 'wallet-minimal' },
+      }),
+      account(1, A1, { icon: { kind: 'lucide', name: 'wallet-minimal' } }),
+    ]);
+    expect(migrated.wallets[1]?.accounts).toEqual([
+      account(0, B0, { color: 'rose', icon: { kind: 'lucide', name: 'key-round' } }),
+    ]);
+  });
+
+  it('gives a v1 store icons on the way through', () => {
+    const migrated = migrateWalletState(V1_PRIVATE_KEY, 1) as ReturnType<typeof state>;
+    expect(migrated.wallets[0]?.accounts[0]?.icon).toEqual({ kind: 'lucide', name: 'key-round' });
+  });
+
+  it('is repeatable', () => {
+    expect(migrate(migrate(V2))).toEqual(migrate(V2));
   });
 });
 
@@ -158,7 +231,7 @@ describe('upgrading an existing install', () => {
     await expect(secureStorage.get(LEGACY_SECRET_KEY)).resolves.not.toBeNull();
     await expect(secureStorage.get('muvo.wallet.ids')).resolves.toBeNull();
     const stored = JSON.parse((await AsyncStorage.getItem(STORAGE_KEY)) ?? '{}');
-    expect(stored.version).toBe(2);
+    expect(stored.version).toBe(3);
   });
 
   it('gives the same wallet when the migrated state was never written back (crash)', async () => {
@@ -173,7 +246,7 @@ describe('upgrading an existing install', () => {
     await expect(readWalletSecret(LEGACY_WALLET_ID)).resolves.not.toBeNull();
   });
 
-  it('does not migrate again once the store is v2', async () => {
+  it('does not migrate again once the store is current', async () => {
     await upgradeFrom(V1_RECORD);
     state().renameAccount(LEGACY_WALLET_ID, 0, 'Renamed');
     await useWalletStore.persist.rehydrate();
@@ -247,6 +320,24 @@ describe('several wallets', () => {
     expect(wallet(firstId)?.accounts[0]).toMatchObject({ name: 'Rent', color: 'rose' });
     expect(wallet(secondId)?.accounts[0]?.name).toBeNull();
     expect(wallet(secondId)?.name).toBe('Trading');
+  });
+});
+
+describe('card icons', () => {
+  it('starts a card with the icon of its wallet kind and changes one card only', () => {
+    const { firstId, secondId } = seedTwoWallets({ source: 'private-key' });
+    state().addAccount(firstId, { index: 1, address: A1 });
+    expect(wallet(firstId)?.accounts.map((account) => account.icon)).toEqual([
+      { kind: 'lucide', name: 'wallet-minimal' },
+      { kind: 'lucide', name: 'wallet-minimal' },
+    ]);
+    expect(wallet(secondId)?.accounts[0]?.icon).toEqual({ kind: 'lucide', name: 'key-round' });
+
+    state().setAccountIcon(firstId, 1, { kind: 'emoji', value: '🏠' });
+
+    expect(wallet(firstId)?.accounts[1]?.icon).toEqual({ kind: 'emoji', value: '🏠' });
+    expect(wallet(firstId)?.accounts[0]?.icon).toEqual({ kind: 'lucide', name: 'wallet-minimal' });
+    expect(wallet(secondId)?.accounts[0]?.icon).toEqual({ kind: 'lucide', name: 'key-round' });
   });
 });
 

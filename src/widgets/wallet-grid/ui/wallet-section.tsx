@@ -69,7 +69,6 @@ export function WalletSection({ wallet, actions }: WalletSectionProps) {
               <AccountCard
                 key={account.index}
                 account={account}
-                source={wallet.source}
                 isActive={active?.walletId === wallet.id && active.index === account.index}
                 onPress={() => actions.onSelectAccount(ref)}
                 onMenu={() => actions.onAccountMenu(ref)}

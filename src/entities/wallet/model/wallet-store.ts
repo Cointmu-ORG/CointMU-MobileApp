@@ -5,9 +5,11 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { logger } from '@/shared/lib';
 import { cardColorAt, type CardColorId } from '@/shared/ui';
 
+import { defaultAccountIcon } from '../lib/account-icon';
 import { migrateWalletState, WALLET_PERSIST_VERSION } from './migrate';
 import {
   isWalletUsable,
+  type AccountIcon,
   type NewWallet,
   type WalletAccount,
   type WalletRecord,
@@ -42,6 +44,7 @@ type WalletState = WalletData & {
   selectAccount: (walletId: string, index: number) => void;
   renameAccount: (walletId: string, index: number, name: string | null) => void;
   setAccountColor: (walletId: string, index: number, color: CardColorId) => void;
+  setAccountIcon: (walletId: string, index: number, icon: AccountIcon) => void;
   updateWallet: (walletId: string, change: Partial<Pick<WalletRecord, 'name' | 'color'>>) => void;
   /** Flags exactly these wallets as unreadable; the active account moves off a flagged wallet. */
   setUnreadableWallets: (walletIds: readonly string[]) => void;
@@ -109,7 +112,15 @@ function buildWallet(input: NewWallet, existing: readonly WalletRecord[]): Walle
     addedAt: input.addedAt,
     isBackupPending: input.origin === 'created',
     needsRecovery: false,
-    accounts: [{ index: 0, address: input.address, name: null, color }],
+    accounts: [
+      {
+        index: 0,
+        address: input.address,
+        name: null,
+        color,
+        icon: defaultAccountIcon(input.source),
+      },
+    ],
   };
 }
 
@@ -134,7 +145,7 @@ function mapAccount(
   }));
 }
 
-// Public data only (status, addresses, names, colors). Secrets never enter this store
+// Public data only (status, addresses, names, colors, icons). Secrets never enter this store
 // (forbidden rule 2).
 export const useWalletStore = create<WalletState>()(
   persist(
@@ -192,7 +203,13 @@ export const useWalletStore = create<WalletState>()(
                   ...wallet,
                   accounts: [
                     ...wallet.accounts,
-                    { index, address, name: null, color: wallet.color },
+                    {
+                      index,
+                      address,
+                      name: null,
+                      color: wallet.color,
+                      icon: defaultAccountIcon(wallet.source),
+                    },
                   ],
                 },
           ),
@@ -214,6 +231,13 @@ export const useWalletStore = create<WalletState>()(
           wallets: mapAccount(get().wallets, { walletId, index }, (account) => ({
             ...account,
             color,
+          })),
+        }),
+      setAccountIcon: (walletId, index, icon) =>
+        set({
+          wallets: mapAccount(get().wallets, { walletId, index }, (account) => ({
+            ...account,
+            icon,
           })),
         }),
       updateWallet: (walletId, change) =>

@@ -1,11 +1,13 @@
 import CircleCheck from 'lucide-react-native/icons/circle-check';
 import QrCode from 'lucide-react-native/icons/qr-code';
+import Shapes from 'lucide-react-native/icons/shapes';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import {
   isWalletUsable,
+  useAccountIconLabel,
   useAccountLabel,
   useActiveAccount,
   useWalletLabel,
@@ -27,18 +29,21 @@ type AccountMenuProps = {
   account: AccountRef;
   /** Called after "Set as active": the sheet closes. */
   onDone: () => void;
+  /** Opens the icon picker for this account. */
+  onChangeIcon: () => void;
   /** Opens the receive screen for this account. */
   onReceive: () => void;
 };
 
 /**
- * The "…" menu of an account card: rename, change color, set active, show the receive QR. Name
+ * The "…" menu of an account card: rename, change color and icon, set active, show the receive QR. Name
  * and color are local and public; nothing here reads a secret.
  */
-export function AccountMenu({ account: ref, onDone, onReceive }: AccountMenuProps) {
+export function AccountMenu({ account: ref, onDone, onChangeIcon, onReceive }: AccountMenuProps) {
   const { t } = useTranslation();
   const accountLabel = useAccountLabel();
   const walletLabel = useWalletLabel();
+  const iconLabel = useAccountIconLabel();
   const wallet = useWalletStore(
     (state) => state.wallets.find((candidate) => candidate.id === ref.walletId) ?? null,
   );
@@ -94,6 +99,14 @@ export function AccountMenu({ account: ref, onDone, onReceive }: AccountMenuProp
         value={account.color}
         onChange={(color) => setAccountColor(ref, color)}
       />
+      <ListSection>
+        <ListRow
+          icon={Shapes}
+          title={t('wallets.menu.icon')}
+          value={iconLabel(account.icon)}
+          onPress={onChangeIcon}
+        />
+      </ListSection>
       <ListSection>
         <ListRow
           icon={CircleCheck}

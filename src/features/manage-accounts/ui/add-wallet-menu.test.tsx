@@ -10,7 +10,7 @@ const state = () => useWalletStore.getState();
 const address = (seed: number) => `0x${seed.toString(16).padStart(40, '0')}`;
 
 function handlers() {
-  return { onDone: jest.fn(), onCreate: jest.fn(), onImport: jest.fn() };
+  return { onAccountAdded: jest.fn(), onCreate: jest.fn(), onImport: jest.fn() };
 }
 
 beforeEach(async () => {

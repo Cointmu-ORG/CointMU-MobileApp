@@ -1,3 +1,4 @@
+export { AccountIconPage } from './ui/account-icon-page';
 export { AccountMenuPage } from './ui/account-menu-page';
 export { AccountSwitcherPage } from './ui/account-switcher-page';
 export { AddWalletPage } from './ui/add-wallet-page';

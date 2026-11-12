@@ -705,7 +705,8 @@
       "color": "Warna kartu",
       "setActive": "Jadikan akun aktif",
       "isActive": "Ini akun aktif",
-      "receive": "Tampilkan kode QR terima"
+      "receive": "Tampilkan kode QR terima",
+      "icon": "Ganti ikon"
     },
     "details": {
       "name": "Nama dompet",
@@ -747,7 +748,7 @@
       },
       "details": {
         "title": "Beri nama dompet Anda",
-        "subtitle": "Nama dan warna membantu Anda membedakan dompet.",
+        "subtitle": "Nama, warna, dan ikon membantu Anda membedakan dompet.",
         "finish": "Selesai"
       }
     },
@@ -779,6 +780,64 @@
     "error": {
       "network": "Tidak dapat terhubung ke jaringan CointMU, jadi saldo tidak bisa dimuat. Tarik ke bawah untuk memuat ulang atau coba lagi.",
       "retry": "Coba lagi"
+    },
+    "icons": {
+      "title": "Ganti ikon",
+      "label": "Ikon kartu",
+      "done": "Selesai",
+      "preview": "Pratinjau kartu: {{name}}, ikon: {{icon}}",
+      "tabs": {
+        "lucide": "Ikon",
+        "emoji": "Emoji"
+      },
+      "groups": {
+        "money": "Uang",
+        "places": "Tempat",
+        "travel": "Perjalanan",
+        "food": "Makanan",
+        "hobbies": "Hobi",
+        "family": "Keluarga",
+        "symbols": "Simbol"
+      },
+      "lucide": {
+        "wallet-minimal": "Dompet",
+        "wallet": "Dompet lipat",
+        "key-round": "Kunci",
+        "piggy-bank": "Celengan",
+        "coins": "Koin",
+        "banknote": "Uang kertas",
+        "landmark": "Bank",
+        "shield": "Perisai",
+        "umbrella": "Payung",
+        "house": "Rumah",
+        "car": "Mobil",
+        "bike": "Sepeda",
+        "plane": "Pesawat",
+        "briefcase": "Tas kerja",
+        "graduation-cap": "Topi wisuda",
+        "book-open": "Buku",
+        "shopping-bag": "Tas belanja",
+        "shopping-cart": "Keranjang belanja",
+        "shirt": "Pakaian",
+        "utensils": "Makanan",
+        "coffee": "Kopi",
+        "gift": "Hadiah",
+        "heart": "Hati",
+        "heart-pulse": "Kesehatan",
+        "baby": "Bayi",
+        "paw-print": "Hewan peliharaan",
+        "gamepad-2": "Gim",
+        "music": "Musik",
+        "palette": "Seni",
+        "smartphone": "Ponsel",
+        "wrench": "Perkakas",
+        "star": "Bintang",
+        "flag": "Bendera"
+      }
+    },
+    "setup": {
+      "title": "Atur akun baru",
+      "subtitle": "Nama, warna, dan ikon membantu Anda membedakan kartu."
     }
   }
 }

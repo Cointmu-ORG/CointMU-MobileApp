@@ -705,7 +705,8 @@
       "color": "Card color",
       "setActive": "Set as active account",
       "isActive": "This is the active account",
-      "receive": "Show receive QR code"
+      "receive": "Show receive QR code",
+      "icon": "Change icon"
     },
     "details": {
       "name": "Wallet name",
@@ -747,7 +748,7 @@
       },
       "details": {
         "title": "Name your wallet",
-        "subtitle": "A name and a color help you tell your wallets apart.",
+        "subtitle": "A name, a color and an icon help you tell your wallets apart.",
         "finish": "Finish"
       }
     },
@@ -779,6 +780,64 @@
     "error": {
       "network": "Can't reach the CointMU network, so balances can't be loaded. Pull down to refresh or try again.",
       "retry": "Try again"
+    },
+    "icons": {
+      "title": "Change icon",
+      "label": "Card icon",
+      "done": "Done",
+      "preview": "Card preview: {{name}}, icon: {{icon}}",
+      "tabs": {
+        "lucide": "Icons",
+        "emoji": "Emoji"
+      },
+      "groups": {
+        "money": "Money",
+        "places": "Places",
+        "travel": "Travel",
+        "food": "Food",
+        "hobbies": "Hobbies",
+        "family": "Family",
+        "symbols": "Symbols"
+      },
+      "lucide": {
+        "wallet-minimal": "Wallet",
+        "wallet": "Billfold",
+        "key-round": "Key",
+        "piggy-bank": "Piggy bank",
+        "coins": "Coins",
+        "banknote": "Banknote",
+        "landmark": "Bank",
+        "shield": "Shield",
+        "umbrella": "Umbrella",
+        "house": "Home",
+        "car": "Car",
+        "bike": "Bicycle",
+        "plane": "Plane",
+        "briefcase": "Briefcase",
+        "graduation-cap": "Graduation cap",
+        "book-open": "Book",
+        "shopping-bag": "Shopping bag",
+        "shopping-cart": "Shopping cart",
+        "shirt": "Clothes",
+        "utensils": "Food",
+        "coffee": "Coffee",
+        "gift": "Gift",
+        "heart": "Heart",
+        "heart-pulse": "Health",
+        "baby": "Baby",
+        "paw-print": "Pet",
+        "gamepad-2": "Games",
+        "music": "Music",
+        "palette": "Art",
+        "smartphone": "Phone",
+        "wrench": "Tools",
+        "star": "Star",
+        "flag": "Flag"
+      }
+    },
+    "setup": {
+      "title": "Set up the new account",
+      "subtitle": "A name, a color and an icon help you tell your cards apart."
     }
   }
 }

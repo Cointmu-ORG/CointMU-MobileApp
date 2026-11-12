@@ -16,6 +16,12 @@ export function AccountMenuPage() {
       <AccountMenu
         account={{ walletId, index: accountIndex }}
         onDone={() => router.back()}
+        onChangeIcon={() =>
+          router.replace({
+            pathname: ROUTES.accountIcon,
+            params: { walletId, index: accountIndex },
+          })
+        }
         onReceive={() =>
           router.replace({ pathname: ROUTES.receive, params: { walletId, index: accountIndex } })
         }

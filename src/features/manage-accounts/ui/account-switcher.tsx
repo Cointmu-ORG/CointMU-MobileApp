@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { useBalanceStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
 import {
+  AccountBadge,
   isWalletUsable,
   useAccountLabel,
   useActiveAccount,
@@ -27,6 +28,8 @@ type AccountSwitcherProps = {
   /** Opens the Wallets tab (rename, color, receive). */
   onManage: () => void;
 };
+
+const ROW_BADGE_SIZE = 36;
 
 /** Only the active account's balance is loaded here; other rows show none. */
 function useActiveBalanceText(): string | undefined {
@@ -61,6 +64,7 @@ export function AccountSwitcher({ onDone, onAdd, onManage }: AccountSwitcherProp
             return (
               <ListRow
                 key={account.index}
+                leading={<AccountBadge account={account} size={ROW_BADGE_SIZE} />}
                 title={accountLabel(account)}
                 description={shortenAddress(account.address)}
                 value={isActive ? activeBalance : undefined}

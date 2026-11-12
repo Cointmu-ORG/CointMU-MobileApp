@@ -12,11 +12,12 @@ import {
 } from '@/entities/wallet';
 import { ListRow, ListSection, Text } from '@/shared/ui';
 
+import type { AccountRef } from '../model/accounts';
 import { useAddAccount } from './use-add-account';
 
 type AddWalletMenuProps = {
-  /** Called after an account was added: the sheet closes. */
-  onDone: () => void;
+  /** Called with the account that was just added: its name, color and icon come next. */
+  onAccountAdded: (account: AccountRef) => void;
   onCreate: () => void;
   onImport: () => void;
 };
@@ -25,7 +26,7 @@ type AddWalletMenuProps = {
  * The "+" sheet of the Wallets tab: add an account to one of the recovery-phrase wallets, create
  * a new wallet, or import one. New wallets are refused at the limit (D-78).
  */
-export function AddWalletMenu({ onDone, onCreate, onImport }: AddWalletMenuProps) {
+export function AddWalletMenu({ onAccountAdded, onCreate, onImport }: AddWalletMenuProps) {
   const { t } = useTranslation();
   const walletLabel = useWalletLabel();
   const wallets = useWalletStore((state) => state.wallets);
@@ -34,7 +35,8 @@ export function AddWalletMenu({ onDone, onCreate, onImport }: AddWalletMenuProps
   const { add, isAdding, hasFailed } = useAddAccount();
 
   const addTo = async (walletId: string) => {
-    if (await add(walletId)) onDone();
+    const index = await add(walletId);
+    if (index !== null) onAccountAdded({ walletId, index });
   };
 
   return (

@@ -1,10 +1,12 @@
 import { cardColorAt } from '@/shared/ui';
 
 import { LEGACY_WALLET_ID } from '../config/wallet-config';
+import { defaultAccountIcon, resolveAccountIcon } from '../lib/account-icon';
 import type { WalletAccount, WalletRecord, WalletSource } from './types';
 
-export const WALLET_PERSIST_VERSION = 2;
+export const WALLET_PERSIST_VERSION = 3;
 const ACCOUNT_LIST_VERSION = 1;
+const WALLET_LIST_VERSION = 2;
 
 type Persisted = Record<string, unknown>;
 type V1Account = { index: number; address: string; name: string | null };
@@ -39,19 +41,21 @@ function toWalletList(v1: Persisted): Persisted {
   if (v1.status === 'none' || !isSource(v1.source) || accounts.length === 0) {
     return { ...rest, wallets: [], activeWalletId: null };
   }
+  const source = v1.source;
   const colored: WalletAccount[] = accounts.map((account, position) => ({
     index: account.index,
     address: account.address,
     name: typeof account.name === 'string' ? account.name : null,
     color: cardColorAt(position),
+    icon: defaultAccountIcon(source),
   }));
   const wallet: WalletRecord = {
     id: LEGACY_WALLET_ID,
     number: 1,
     name: null,
     color: cardColorAt(0),
-    source: v1.source,
-    origin: v1.source === 'private-key' ? 'imported' : null,
+    source,
+    origin: source === 'private-key' ? 'imported' : null,
     addedAt: null,
     isBackupPending: v1.status === 'pendingBackup',
     needsRecovery: false,
@@ -60,11 +64,34 @@ function toWalletList(v1: Persisted): Persisted {
   return { ...rest, wallets: [wallet], activeWalletId: LEGACY_WALLET_ID };
 }
 
+/**
+ * v2 accounts had no icon; v3 gives each one (D-84). An account keeps everything it had (name,
+ * color, address) and gets the icon its card already showed: the key for a private-key wallet,
+ * the wallet otherwise. Pure and repeatable like the step before it.
+ */
+function withAccountIcons(v2: Persisted): Persisted {
+  if (!Array.isArray(v2.wallets)) return v2;
+  const wallets = v2.wallets.map((wallet: unknown) => {
+    if (typeof wallet !== 'object' || wallet === null) return wallet;
+    const record = wallet as Persisted;
+    if (!Array.isArray(record.accounts)) return record;
+    const fallback = defaultAccountIcon(isSource(record.source) ? record.source : 'mnemonic');
+    const accounts = record.accounts.map((account: unknown) =>
+      typeof account === 'object' && account !== null
+        ? { ...account, icon: resolveAccountIcon((account as Persisted).icon, fallback) }
+        : account,
+    );
+    return { ...record, accounts };
+  });
+  return { ...v2, wallets };
+}
+
 /** Brings a persisted wallet store of any older version up to the current shape. */
 export function migrateWalletState(persisted: unknown, version: number): unknown {
   if (version >= WALLET_PERSIST_VERSION || typeof persisted !== 'object' || persisted === null) {
     return persisted;
   }
   const v1 = version < ACCOUNT_LIST_VERSION ? toAccountList(persisted as Persisted) : persisted;
-  return toWalletList(v1 as Persisted);
+  const v2 = version < WALLET_LIST_VERSION ? toWalletList(v1 as Persisted) : (v1 as Persisted);
+  return withAccountIcons(v2);
 }

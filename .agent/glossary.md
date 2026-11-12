@@ -8,7 +8,7 @@
 | Mnemonic / seed phrase | 12 (or 24) BIP-39 words that deterministically generate the wallet keys. |
 | Derivation path | BIP-44 path used to derive accounts: `m/44'/60'/0'/0/{index}`. |
 | Wallet | One secret (a recovery phrase or a private key) with its accounts, a local name and a color. The app holds up to 10; one is active. |
-| Account | One address of a wallet: derived from its mnemonic at a BIP-44 index (0, 1, 2, …), with an optional local name and a card color. A private-key wallet has one account. |
+| Account | One address of a wallet: derived from its mnemonic at a BIP-44 index (0, 1, 2, …), with an optional local name, a card color and a card icon. A private-key wallet has one account. |
 | Private key | Raw 32-byte key for one address. Imported keys have no mnemonic. |
 | RPC | JSON-RPC endpoint of a CointMU node (HTTP). |
 | Wei | Smallest unit. 1 CMU = 10^decimals wei. Amounts are `bigint` in wei. |

@@ -7,7 +7,14 @@ export {
   saveWalletSecret,
   type WalletSecret,
 } from './api/wallet-secret';
+export {
+  ACCOUNT_EMOJI_GROUPS,
+  ACCOUNT_LUCIDE_NAMES,
+  type AccountEmojiGroupId,
+  type AccountLucideName,
+} from './config/account-icons';
 export { LEGACY_WALLET_ID, MAX_WALLETS } from './config/wallet-config';
+export { DEFAULT_ACCOUNT_ICON, defaultAccountIcon, resolveAccountIcon } from './lib/account-icon';
 export { deriveAccount, type DerivedAccount } from './lib/derive';
 export { exportPrivateKey } from './lib/export-key';
 export { SignerMismatchError, signWithSecret } from './lib/signer';
@@ -27,6 +34,7 @@ export {
 } from './model/selectors';
 export {
   isWalletUsable,
+  type AccountIcon,
   type ActiveAccount,
   type NewWallet,
   type WalletAccount,
@@ -36,4 +44,11 @@ export {
   type WalletStatus,
 } from './model/types';
 export { useWalletStore } from './model/wallet-store';
+export {
+  accountIconTestId,
+  AccountBadge,
+  AccountIconGlyph,
+  AccountIconTile,
+  useAccountIconLabel,
+} from './ui/account-icon';
 export { useMnemonicWords, type MnemonicWordsState } from './model/use-mnemonic-words';
