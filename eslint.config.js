@@ -26,12 +26,12 @@ module.exports = defineConfig([
   },
   {
     // Node CLI scripts (CommonJS); Expo's config only declares browser/RN globals.
-    files: ['scripts/**/*.js'],
+    files: ['scripts/**/*.js', 'plugins/**/*.js'],
     languageOptions: { globals: { __dirname: 'readonly' } },
   },
   {
     // Jest globals for the scripts' tests (src tests are TypeScript and typed by @types/jest).
-    files: ['scripts/**/*.test.js'],
+    files: ['scripts/**/*.test.js', 'plugins/**/*.test.js'],
     languageOptions: {
       globals: {
         afterEach: 'readonly',
