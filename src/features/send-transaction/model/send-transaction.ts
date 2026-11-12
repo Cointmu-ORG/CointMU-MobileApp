@@ -21,9 +21,7 @@ import { logger } from '@/shared/lib';
 
 import { BROADCAST_TIMEOUT_MS } from '../config/send-config';
 import { buildTxRequest } from '../lib/send-math';
-import type { SendDraft, SendOutcome } from './send-flow-store';
-
-export type SendStage = 'checkingNetwork' | 'signing' | 'broadcasting';
+import type { SendDraft, SendOutcome, SendStage } from './send-flow-store';
 
 type SendInput = {
   readonly draft: SendDraft;

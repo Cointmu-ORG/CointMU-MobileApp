@@ -1,22 +1,22 @@
-import { router, Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BackHandler, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useBalanceStore } from '@/entities/account';
 import { PinPrompt } from '@/entities/auth';
 import { useActiveAccount } from '@/entities/wallet';
 import { ROUTES } from '@/shared/config';
-import { Button, Notice, Spinner, Text } from '@/shared/ui';
+import { Button, Notice } from '@/shared/ui';
 
 import { checkFunds } from '../lib/send-math';
 import { useSendFlowStore, type SendDraft } from '../model/send-flow-store';
-import { sendTransaction, type SendStage } from '../model/send-transaction';
+import { sendTransaction } from '../model/send-transaction';
 import { ReviewDetails } from './review-details';
 import { useAssetBalance } from './use-send-form';
 import { useFreshQuote } from './use-fresh-quote';
 
-type Step = { name: 'review' } | { name: 'auth' } | { name: 'sending'; stage: SendStage };
+type Step = 'review' | 'auth';
 
 function useFundsCheck(draft: SendDraft | null) {
   const nativeBalance = useBalanceStore((state) => state.wei);
@@ -37,64 +37,45 @@ function Warnings({ draft }: { draft: SendDraft }) {
   );
 }
 
-/** While a transfer is being signed and broadcast, the hardware back button does nothing. */
-function useBlockHardwareBack(isBlocked: boolean) {
-  useEffect(() => {
-    if (!isBlocked) return;
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true);
-    return () => subscription.remove();
-  }, [isBlocked]);
-}
-
 /** Step 2 of Send. Authentication comes right before signing, every time (D-15). */
 export function SendReview() {
   const { t } = useTranslation();
   const account = useActiveAccount();
   const { draft, isRefreshing, error, ensureFresh } = useFreshQuote(account?.address ?? '');
   const funds = useFundsCheck(draft);
-  const [step, setStep] = useState<Step>({ name: 'review' });
-  useBlockHardwareBack(step.name === 'sending');
+  const [step, setStep] = useState<Step>('review');
 
   if (draft === null || account === null) {
     return <Notice tone="danger">{t('send.review.missing')}</Notice>;
   }
 
   const confirm = async () => {
-    if ((await ensureFresh()) !== null) setStep({ name: 'auth' });
+    if ((await ensureFresh()) !== null) setStep('auth');
   };
 
-  const send = async () => {
-    const current = useSendFlowStore.getState().draft ?? draft;
-    setStep({ name: 'sending', stage: 'checkingNetwork' });
-    const outcome = await sendTransaction({
-      draft: current,
-      account,
-      onStage: (stage) => setStep({ name: 'sending', stage }),
-    });
-    useSendFlowStore.getState().setOutcome(outcome);
+  // The status screen takes over at once and follows the transfer from the flow store: signing,
+  // the broadcast, then the live status. It has no way back into this step.
+  const send = () => {
+    const flow = useSendFlowStore.getState();
+    // One transfer at a time: a second verification callback must never sign again.
+    if (flow.stage !== null) return;
+    flow.beginSending();
     router.replace(ROUTES.sendResult);
+    void sendTransaction({
+      draft: flow.draft ?? draft,
+      account,
+      onStage: (stage) => useSendFlowStore.getState().setStage(stage),
+    }).then((outcome) => useSendFlowStore.getState().finishSending(outcome));
   };
 
-  if (step.name === 'auth') {
+  if (step === 'auth') {
     return (
       <PinPrompt
         title={t('send.review.authTitle')}
         subtitle={t('send.review.authSubtitle')}
         biometrics={{ prompt: t('send.review.authTitle') }}
-        onVerified={() => void send()}
+        onVerified={send}
       />
-    );
-  }
-  if (step.name === 'sending') {
-    return (
-      <View className="flex-1 items-center justify-center gap-6">
-        {/* No way back while the transfer is signed and broadcast. */}
-        <Stack.Screen options={{ headerBackVisible: false, gestureEnabled: false }} />
-        <Spinner label={t(`send.stage.${step.stage}`)} />
-        <Text tone="secondary" accessibilityLiveRegion="polite">
-          {t(`send.stage.${step.stage}`)}
-        </Text>
-      </View>
     );
   }
 

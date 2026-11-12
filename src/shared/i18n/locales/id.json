@@ -501,8 +501,6 @@
       "broadcasting": "Mengirim ke jaringan…"
     },
     "result": {
-      "sentTitle": "Terkirim",
-      "sentBody": "Transaksimu sedang diproses. Statusnya tertunda sampai ditambang, lalu terkonfirmasi, lalu final setelah 12 blok.",
       "uncertainTitle": "Terkirim, menunggu jaringan",
       "uncertainBody": "Jaringan tidak menjawab tepat waktu, jadi transaksi ini mungkin sudah atau belum diterima. Muvo terus memeriksanya. Jangan kirim ulang sampai statusnya berubah.",
       "failedTitle": "Tidak terkirim",
@@ -521,6 +519,29 @@
       "wrongChain": "Node yang dipilih bukan jaringan CointMU. Pilih node lain di Pengaturan > Jaringan.",
       "reverted": "Jaringan akan menolak transfer ini (untuk token, kontraknya menolak). Tidak ada yang terkirim.",
       "unknown": "Terjadi kesalahan dan tidak ada yang terkirim. Coba lagi."
+    },
+    "status": {
+      "from": "Dari",
+      "to": "Ke",
+      "sendingBody": "Biarkan Muvo terbuka sampai ini selesai.",
+      "sentToNetwork": "Terkirim ke jaringan",
+      "broadcastBody": "Jaringan sudah menerima transaksi Anda. Transaksi belum masuk blok.",
+      "confirmedTitle": "Terkonfirmasi",
+      "confirmedBody": "Transaksi Anda sudah masuk blok. Transaksi menjadi final setelah {{total}} blok.",
+      "finalTitle": "Final",
+      "finalBody": "Selesai, sedalam {{total}} blok.",
+      "revertedTitle": "Gagal di jaringan",
+      "droppedTitle": "Dibatalkan jaringan",
+      "replacedTitle": "Digantikan",
+      "progress": "{{count}} dari {{total}} konfirmasi",
+      "steps": {
+        "sent": "Terkirim ke jaringan",
+        "confirmed": "Terkonfirmasi",
+        "final": "Final"
+      },
+      "stepDone": "{{step}}: selesai",
+      "stepCurrent": "{{step}}: sedang berjalan",
+      "stepWaiting": "{{step}}: belum"
     }
   },
   "receive": {

@@ -24,13 +24,22 @@ export type SendOutcome =
   | { readonly ok: true; readonly hash: string; readonly isUncertain: boolean }
   | { readonly ok: false; readonly error: SendErrorCode };
 
+/** What the send call is doing right now. */
+export type SendStage = 'checkingNetwork' | 'signing' | 'broadcasting';
+
 type SendFlowState = {
   draft: SendDraft | null;
   prefill: SendPrefill | null;
+  /** Set while a transfer is being signed and broadcast; null before and after. */
+  stage: SendStage | null;
   outcome: SendOutcome | null;
   setDraft: (draft: SendDraft | null) => void;
   setPrefill: (prefill: SendPrefill | null) => void;
-  setOutcome: (outcome: SendOutcome | null) => void;
+  /** A transfer starts: any earlier outcome is cleared. */
+  beginSending: () => void;
+  setStage: (stage: SendStage) => void;
+  /** The transfer ended, sent or not. */
+  finishSending: (outcome: SendOutcome) => void;
   reset: () => void;
 };
 
@@ -38,9 +47,12 @@ type SendFlowState = {
 export const useSendFlowStore = create<SendFlowState>()((set) => ({
   draft: null,
   prefill: null,
+  stage: null,
   outcome: null,
   setDraft: (draft) => set({ draft }),
   setPrefill: (prefill) => set({ prefill }),
-  setOutcome: (outcome) => set({ outcome }),
-  reset: () => set({ draft: null, prefill: null, outcome: null }),
+  beginSending: () => set({ stage: 'checkingNetwork', outcome: null }),
+  setStage: (stage) => set({ stage }),
+  finishSending: (outcome) => set({ stage: null, outcome }),
+  reset: () => set({ draft: null, prefill: null, stage: null, outcome: null }),
 }));

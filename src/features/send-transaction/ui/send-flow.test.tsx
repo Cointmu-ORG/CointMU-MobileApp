@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction } from 'ethers';
-import { fireEvent, renderRouter, screen } from 'expo-router/testing-library';
+import { act, fireEvent, renderRouter, screen } from 'expo-router/testing-library';
 import * as SecureStore from 'expo-secure-store';
 
 import { storeNewPin, useSessionStore } from '@/entities/auth';
@@ -99,7 +99,7 @@ describe('send flow', () => {
     expect(await screen.findByText('Confirm with your PIN')).toBeOnTheScreen();
     await enterPin(PIN);
 
-    expect(await screen.findByText('Sent')).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
     expect(mockBroadcast).toHaveBeenCalledTimes(1);
     const tx = Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '');
     expect(tx).toMatchObject({ chainId: CHAIN_ID, type: 2, to: TO, value: ONE_AND_A_HALF_CMU });
@@ -113,12 +113,43 @@ describe('send flow', () => {
     });
   });
 
+  it('shows success only once the transaction is confirmed, then final', async () => {
+    await fillFormAndReview();
+    await press('Confirm and send');
+    await enterPin(PIN);
+
+    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+    expect(screen.queryByTestId('send-success-mark')).toBeNull();
+    const hash = useTxStore.getState().records[0]?.hash ?? '';
+
+    // What the status poller writes when the receipt arrives.
+    await act(() =>
+      useTxStore.getState().update(hash, {
+        status: 'confirmed',
+        confirmations: 3,
+        blockNumber: 10,
+        unknownSince: null,
+      }),
+    );
+    expect(await screen.findByRole('header', { name: 'Confirmed' })).toBeOnTheScreen();
+    expect(screen.getByTestId('send-success-mark')).toBeOnTheScreen();
+    expect(screen.getByText('3/12')).toBeOnTheScreen();
+
+    await act(() =>
+      useTxStore
+        .getState()
+        .update(hash, { status: 'final', confirmations: 12, blockNumber: 10, unknownSince: null }),
+    );
+    expect(await screen.findByRole('header', { name: 'Final' })).toBeOnTheScreen();
+    expect(screen.getByText('12/12')).toBeOnTheScreen();
+  });
+
   it('signs with the secret of the wallet that holds the sending account', async () => {
     await fillFormAndReview();
     jest.mocked(SecureStore.getItemAsync).mockClear();
     await press('Confirm and send');
     await enterPin(PIN);
-    expect(await screen.findByText('Sent')).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
 
     const read = secretReads().map(([key]) => key);
     expect(read).toEqual([`${SECRET_KEY}.${walletId}`]);
@@ -131,7 +162,7 @@ describe('send flow', () => {
     jest.mocked(SecureStore.getItemAsync).mockClear();
     await press('Confirm and send');
     await enterPin(PIN);
-    expect(await screen.findByText('Sent')).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
 
     expect(secretReads().map(([key]) => key)).toEqual([`${SECRET_KEY}.${otherWalletId}`]);
     expect(Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '').from).toBe(OTHER);

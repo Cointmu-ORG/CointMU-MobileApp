@@ -501,8 +501,6 @@
       "broadcasting": "Sending to the network…"
     },
     "result": {
-      "sentTitle": "Sent",
-      "sentBody": "Your transaction is on its way. It shows as pending until it is mined, then confirmed, then final after 12 blocks.",
       "uncertainTitle": "Sent, waiting for the network",
       "uncertainBody": "The network didn't answer in time, so it may or may not have the transaction. Muvo keeps checking. Don't send again until its status updates.",
       "failedTitle": "Not sent",
@@ -521,6 +519,29 @@
       "wrongChain": "The selected node is not on the CointMU network. Pick another node in Settings > Network.",
       "reverted": "The network would reject this transfer (for a token, the contract refused it). Nothing was sent.",
       "unknown": "Something went wrong and nothing was sent. Try again."
+    },
+    "status": {
+      "from": "From",
+      "to": "To",
+      "sendingBody": "Keep Muvo open until this finishes.",
+      "sentToNetwork": "Sent to the network",
+      "broadcastBody": "The network has your transaction. It isn't in a block yet.",
+      "confirmedTitle": "Confirmed",
+      "confirmedBody": "Your transaction is in a block. It becomes final after {{total}} blocks.",
+      "finalTitle": "Final",
+      "finalBody": "Settled, {{total}} blocks deep.",
+      "revertedTitle": "Failed on the network",
+      "droppedTitle": "Dropped by the network",
+      "replacedTitle": "Replaced",
+      "progress": "{{count}} of {{total}} confirmations",
+      "steps": {
+        "sent": "Sent to the network",
+        "confirmed": "Confirmed",
+        "final": "Final"
+      },
+      "stepDone": "{{step}}: done",
+      "stepCurrent": "{{step}}: in progress",
+      "stepWaiting": "{{step}}: not yet"
     }
   },
   "receive": {
