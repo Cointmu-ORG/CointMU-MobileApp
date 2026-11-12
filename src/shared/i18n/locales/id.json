@@ -188,6 +188,7 @@
       "addHint": "Gunakan https://. http:// biasa diblokir di build rilis.",
       "add": "Tambah dan pakai",
       "invalidUrl": "Masukkan URL http:// atau https://.",
+      "cleartextBlocked": "Versi Muvo ini memblokir http:// biasa ke alamat ini. Gunakan node https://.",
       "alreadyListed": "Node tersebut sudah ada di daftar.",
       "pingAll": "Ping semua",
       "pinging": "Sedang ping…",
@@ -307,8 +308,8 @@
       "channels": {
         "dev": "Pengembangan",
         "ci": "CI",
-        "release": "Rilis"
         "preview": "Pratinjau",
+        "release": "Rilis"
       },
       "unknown": "tidak diketahui",
       "copyBuildInfo": "Salin info build",
