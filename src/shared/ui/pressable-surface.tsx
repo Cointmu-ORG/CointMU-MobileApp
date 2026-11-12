@@ -37,6 +37,12 @@ export const SURFACE_PALETTE = {
   /** Keys and chips that sit on the screen background. */
   key: { idle: 'bg-surface-card', hovered: 'bg-primary-50', pressed: 'bg-primary-100' },
   quiet: { idle: 'bg-surface-muted', hovered: 'bg-primary-50', pressed: 'bg-primary-100' },
+  /**
+   * A surface whose fill is chosen at runtime (an account card in the user's color, passed as
+   * `surfaceStyle`). The states dim it instead of swapping a color class; idle has no class so
+   * the disabled dimming still applies.
+   */
+  tinted: { idle: '', hovered: 'opacity-95', pressed: 'opacity-80' },
 } as const satisfies Record<string, SurfacePalette>;
 
 export type PressableSurfaceProps = Omit<PressableProps, 'children' | 'style' | 'disabled'> & {
@@ -44,7 +50,7 @@ export type PressableSurfaceProps = Omit<PressableProps, 'children' | 'style' | 
   palette: SurfacePalette;
   /** Shape and layout of the visible surface (size, radius, padding). No colors. */
   className?: string;
-  /** Runtime-computed size of the surface (e.g. keys scaled to the screen). No colors. */
+  /** Runtime-computed size of the surface (e.g. keys scaled to the screen), or a `tinted` fill. */
   surfaceStyle?: StyleProp<ViewStyle>;
   /** Layout of the touch area itself, e.g. `flex-1`. */
   containerClassName?: string;
