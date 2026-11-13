@@ -32,6 +32,19 @@ export function useActiveAccount(): ActiveAccount | null {
   }, [wallet, accountIndex]);
 }
 
+/** The default account for transfers (D-92), with its wallet id. */
+export function useDefaultAccount(): ActiveAccount | null {
+  return useAccount(useWalletStore((state) => state.defaultAccount));
+}
+
+/** Same as `useDefaultAccount`, outside React. */
+export function getDefaultAccount(): ActiveAccount | null {
+  const { wallets, defaultAccount } = useWalletStore.getState();
+  const wallet = wallets.find((candidate) => candidate.id === defaultAccount?.walletId);
+  const account = wallet?.accounts.find((candidate) => candidate.index === defaultAccount?.index);
+  return wallet && account ? { ...account, walletId: wallet.id } : null;
+}
+
 /** Every account that can be used right now, in wallet order, each with its wallet id. */
 export function selectUsableAccounts(wallets: readonly WalletRecord[]): ActiveAccount[] {
   return wallets

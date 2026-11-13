@@ -8,28 +8,20 @@ import { cardColorAt, type CardColorId } from '@/shared/ui';
 import { defaultAccountIcon } from '../lib/account-icon';
 import { migrateWalletState, WALLET_PERSIST_VERSION } from './migrate';
 import {
+  activeFields,
+  activeFromDefault,
+  findUsableAccount,
+  INITIAL,
+  reconcile,
+  type WalletData,
+} from './wallet-data';
+import {
   isWalletUsable,
   type AccountIcon,
   type NewWallet,
   type WalletAccount,
   type WalletRecord,
-  type WalletSource,
-  type WalletStatus,
 } from './types';
-
-type WalletData = {
-  status: WalletStatus;
-  wallets: readonly WalletRecord[];
-  activeWalletId: string | null;
-  /** Index of the active account in the active wallet. */
-  accountIndex: number;
-  /** Address of the active account; kept next to `wallets` for the many readers. */
-  address: string | null;
-  /** Source of the active wallet. */
-  source: WalletSource | null;
-  /** D-39: all local data was unreadable and wiped; show the recovery screen, not welcome. */
-  isRecoveryRequired: boolean;
-};
 
 type WalletState = WalletData & {
   hasHydrated: boolean;
@@ -42,11 +34,14 @@ type WalletState = WalletData & {
   addAccount: (walletId: string, account: Pick<WalletAccount, 'index' | 'address'>) => void;
   /** Makes an account active. Ignored for an unknown account or a wallet that is not usable. */
   selectAccount: (walletId: string, index: number) => void;
+  /** Makes an account the default. Ignored for an unknown account or a wallet that is not usable. */
+  setDefaultAccount: (walletId: string, index: number) => void;
+  dismissDefaultMovedNotice: () => void;
   renameAccount: (walletId: string, index: number, name: string | null) => void;
   setAccountColor: (walletId: string, index: number, color: CardColorId) => void;
   setAccountIcon: (walletId: string, index: number, icon: AccountIcon) => void;
   updateWallet: (walletId: string, change: Partial<Pick<WalletRecord, 'name' | 'color'>>) => void;
-  /** Flags exactly these wallets as unreadable; the active account moves off a flagged wallet. */
+  /** Flags exactly these wallets as unreadable; the default and the active account move off a flagged wallet. */
   setUnreadableWallets: (walletIds: readonly string[]) => void;
   /** Removes one wallet. Removing the last one returns the app to onboarding. */
   removeWallet: (walletId: string) => void;
@@ -54,50 +49,6 @@ type WalletState = WalletData & {
   requireRecovery: () => void;
   dismissRecovery: () => void;
 };
-
-const INITIAL: WalletData = {
-  status: 'none',
-  wallets: [],
-  activeWalletId: null,
-  accountIndex: 0,
-  address: null,
-  source: null,
-  isRecoveryRequired: false,
-};
-
-type ActiveFields = Pick<WalletData, 'activeWalletId' | 'accountIndex' | 'address' | 'source'>;
-
-const NO_ACTIVE: ActiveFields = {
-  activeWalletId: null,
-  accountIndex: 0,
-  address: null,
-  source: null,
-};
-
-function activeFields(wallet: WalletRecord, account: WalletAccount): ActiveFields {
-  return {
-    activeWalletId: wallet.id,
-    accountIndex: account.index,
-    address: account.address,
-    source: wallet.source,
-  };
-}
-
-/** The first account of the first usable wallet, or nothing active. */
-function firstUsable(wallets: readonly WalletRecord[]): ActiveFields {
-  const wallet = wallets.find(isWalletUsable);
-  const account = wallet?.accounts[0];
-  return wallet && account ? activeFields(wallet, account) : NO_ACTIVE;
-}
-
-/** Keeps the active account when it is still usable; otherwise moves to the first usable one. */
-function keepOrMoveActive(state: WalletData, wallets: readonly WalletRecord[]): ActiveFields {
-  const wallet = wallets.find((candidate) => candidate.id === state.activeWalletId);
-  const account = wallet?.accounts.find((candidate) => candidate.index === state.accountIndex);
-  return wallet && account && isWalletUsable(wallet)
-    ? activeFields(wallet, account)
-    : firstUsable(wallets);
-}
 
 function buildWallet(input: NewWallet, existing: readonly WalletRecord[]): WalletRecord {
   const number = Math.max(0, ...existing.map((wallet) => wallet.number)) + 1;
@@ -162,6 +113,8 @@ export const useWalletStore = create<WalletState>()(
           if (first === undefined) return;
           set({
             ...activeFields(wallet, first),
+            defaultAccount: { walletId: wallet.id, index: first.index },
+            hasDefaultMovedNotice: false,
             wallets: [wallet],
             status: wallet.isBackupPending ? 'pendingBackup' : 'pendingPin',
             isRecoveryRequired: false,
@@ -173,11 +126,10 @@ export const useWalletStore = create<WalletState>()(
         const first = wallet.accounts[0];
         const wallets = [...state.wallets, wallet];
         // An imported wallet is ready at once; a created one waits for its backup quiz.
-        set(
-          isWalletUsable(wallet) && first
-            ? { wallets, ...activeFields(wallet, first) }
-            : { wallets },
-        );
+        set({
+          ...reconcile(state, wallets),
+          ...(isWalletUsable(wallet) && first ? activeFields(wallet, first) : {}),
+        });
       },
       completeBackup: (walletId) => {
         const state = get();
@@ -186,9 +138,8 @@ export const useWalletStore = create<WalletState>()(
           isBackupPending: false,
         }));
         set({
-          wallets,
+          ...reconcile(state, wallets),
           status: state.status === 'pendingBackup' ? 'pendingPin' : state.status,
-          ...keepOrMoveActive(state, wallets),
         });
       },
       activate: () => {
@@ -219,6 +170,11 @@ export const useWalletStore = create<WalletState>()(
         const account = wallet?.accounts.find((candidate) => candidate.index === index);
         if (wallet && account && isWalletUsable(wallet)) set(activeFields(wallet, account));
       },
+      setDefaultAccount: (walletId, index) => {
+        if (findUsableAccount(get().wallets, { walletId, index }) === null) return;
+        set({ defaultAccount: { walletId, index }, hasDefaultMovedNotice: false });
+      },
+      dismissDefaultMovedNotice: () => set({ hasDefaultMovedNotice: false }),
       renameAccount: (walletId, index, name) =>
         set({
           wallets: mapAccount(get().wallets, { walletId, index }, (account) => ({
@@ -250,13 +206,13 @@ export const useWalletStore = create<WalletState>()(
           const needsRecovery = walletIds.includes(wallet.id);
           return wallet.needsRecovery === needsRecovery ? wallet : { ...wallet, needsRecovery };
         });
-        set({ wallets, ...keepOrMoveActive(state, wallets) });
+        set(reconcile(state, wallets));
       },
       removeWallet: (walletId) => {
         const state = get();
         const wallets = state.wallets.filter((wallet) => wallet.id !== walletId);
         if (wallets.length === state.wallets.length) return;
-        set(wallets.length === 0 ? INITIAL : { wallets, ...keepOrMoveActive(state, wallets) });
+        set(wallets.length === 0 ? INITIAL : reconcile(state, wallets));
       },
       reset: () => set(INITIAL),
       requireRecovery: () => set({ ...INITIAL, isRecoveryRequired: true }),
@@ -267,23 +223,24 @@ export const useWalletStore = create<WalletState>()(
       version: WALLET_PERSIST_VERSION,
       migrate: migrateWalletState,
       storage: createJSONStorage(() => AsyncStorage),
+      // The account in use is session state: it is rebuilt from the default on load.
       partialize: ({
         status,
         wallets,
-        activeWalletId,
-        accountIndex,
-        address,
-        source,
+        defaultAccount,
+        hasDefaultMovedNotice,
         isRecoveryRequired,
       }) => ({
         status,
         wallets,
-        activeWalletId,
-        accountIndex,
-        address,
-        source,
+        defaultAccount,
+        hasDefaultMovedNotice,
         isRecoveryRequired,
       }),
+      merge: (persisted, current) => {
+        const data = typeof persisted === 'object' && persisted !== null ? persisted : {};
+        return { ...current, ...data, ...activeFromDefault(data) };
+      },
       onRehydrateStorage: () => (_state, error) => {
         if (error) logger.error('Wallet store rehydration failed', { error });
         useWalletStore.setState({ hasHydrated: true, hasHydrationFailed: Boolean(error) });
