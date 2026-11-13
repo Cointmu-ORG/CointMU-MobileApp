@@ -1,3 +1,4 @@
+import KeySquare from 'lucide-react-native/icons/key-square';
 import Palette from 'lucide-react-native/icons/palette';
 import QrCode from 'lucide-react-native/icons/qr-code';
 import Star from 'lucide-react-native/icons/star';
@@ -17,6 +18,8 @@ type AccountMenuProps = {
   onPersonalize: () => void;
   /** Opens the receive screen for this account. */
   onReceive: () => void;
+  /** Opens the private key of this account, behind the PIN (D-95). */
+  onShowPrivateKey: () => void;
   /** Called after "Set as default": the sheet closes. */
   onDefaultSet: () => void;
   /** Starts removing the account's wallet. Offered when the card is all the wallet has. */
@@ -25,7 +28,8 @@ type AccountMenuProps = {
 
 /**
  * The "…" menu of an account card: a short list of actions and nothing else, so it fits the
- * sheet without dragging. "Set as default" is offered on every account but the default (D-92).
+ * sheet without dragging. "Set as default" is offered on every account but the default (D-92),
+ * and "Show private key" on every account of a wallet that can be used (D-95).
  * A wallet with several accounts is removed from its own page, where it
  * is clear that all of them go.
  */
@@ -73,6 +77,13 @@ export function AccountMenu({ account: ref, ...actions }: AccountMenuProps) {
           />
         )}
         <ListRow icon={QrCode} title={t('wallets.menu.receive')} onPress={actions.onReceive} />
+        {isWalletUsable(wallet) ? (
+          <ListRow
+            icon={KeySquare}
+            title={t('wallets.menu.privateKey')}
+            onPress={actions.onShowPrivateKey}
+          />
+        ) : null}
         {wallet.accounts.length === 1 ? (
           <ListRow
             icon={Trash2}

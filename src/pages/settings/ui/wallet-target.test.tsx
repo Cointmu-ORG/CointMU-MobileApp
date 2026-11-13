@@ -187,6 +187,33 @@ describe('one-wallet actions opened from Settings', () => {
       await expect(readWalletSecret(phraseWalletId)).resolves.not.toBeNull();
     });
 
+    it('opens the key of the card whose menu it came from: no picker, PIN first', async () => {
+      const keyWalletId = state().wallets[1]?.id ?? '';
+      // The other wallet is in use, so nothing but the route can name this one.
+      state().selectAccount(phraseWalletId, 0);
+      const app = await renderRouter('./app', {
+        initialUrl: `/account-menu?walletId=${keyWalletId}&index=0`,
+      });
+      await press('Show private key');
+
+      await waitFor(() => expect(app.getPathname()).toBe('/private-key'));
+      expect(
+        await screen.findByRole('header', { name: 'Account 1 in Wallet 2' }, TIMEOUT),
+      ).toBeOnTheScreen();
+      expect(screen.queryByTestId('wallet-picker')).toBeNull();
+      expect(screen.queryByText(KEY)).toBeNull();
+
+      await press('Show private key');
+      expect(
+        await screen.findByText('to show the private key of Account 1 in Wallet 2 (0x3C44…93BC)'),
+      ).toBeOnTheScreen();
+      await typePin();
+      // Masked until the eye; for a private-key wallet it is the wallet's own key.
+      expect(screen.queryByText(KEY)).toBeNull();
+      await press('Show key');
+      expect(await screen.findByText(KEY)).toBeOnTheScreen();
+    });
+
     it('skips the picker when the route names the wallet (its own page, a card menu)', async () => {
       await renderRouter('./app', {
         initialUrl: `/remove-wallet?walletId=${phraseWalletId}`,
