@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen, within } from '@testing-library/react-native';
 
-import { useBalanceStore } from '@/entities/account';
+import { useAccountBalancesStore, useBalanceStore } from '@/entities/account';
 import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
@@ -23,9 +23,17 @@ async function setUp() {
   const secondId = addWalletRecord({ source: 'private-key', address: B0 });
   state().selectAccount(firstId, 0);
   useBalanceStore.setState({ wei: TWO_CMU, status: 'success' });
-  const handlers = { onDone: jest.fn(), onAdd: jest.fn(), onManage: jest.fn() };
-  await render(<AccountSwitcher {...handlers} />);
-  return { ...handlers, firstId, secondId };
+  useAccountBalancesStore.setState({
+    balances: {
+      [A0.toLowerCase()]: { wei: TWO_CMU, status: 'success' },
+      [B0.toLowerCase()]: { wei: 5n * TWO_CMU, status: 'success' },
+    },
+    // Nothing here reaches an RPC: the balances above are what the sheet shows.
+    refresh: jest.fn(async () => undefined),
+  });
+  const onDone = jest.fn();
+  await render(<AccountSwitcher onDone={onDone} />);
+  return { onDone, firstId, secondId };
 }
 
 beforeEach(async () => {
@@ -40,12 +48,23 @@ describe('AccountSwitcher', () => {
     expect(screen.getByRole('header', { name: 'Wallet 2' })).toBeOnTheScreen();
     expect(screen.getAllByRole('radio')).toHaveLength(3);
     expect(screen.getByRole('radio', { name: 'Account 1, 2 CMU' })).toBeChecked();
+    // Every account shows its own balance, not only the one in use.
+    expect(screen.getByRole('radio', { name: 'Account 1, 10 CMU' })).not.toBeChecked();
+  });
+
+  it('keeps the account in use above the list, outside the part that scrolls', async () => {
+    await setUp();
+    const current = screen.getByRole('header', { name: 'Selected' });
+    const list = screen.getByTestId('account-switcher-list');
+    expect(current).toBeOnTheScreen();
+    expect(within(list).queryByRole('header', { name: 'Selected' })).toBeNull();
+    expect(within(list).getAllByRole('radio')).toHaveLength(3);
   });
 
   it('switches to an account of another wallet on tap, clears the balance and closes', async () => {
     const { onDone, secondId } = await setUp();
 
-    await fireEvent.press(screen.getByText('0x3C44…93BC'));
+    await fireEvent.press(screen.getByRole('radio', { name: 'Account 1, 10 CMU' }));
 
     expect(state()).toMatchObject({ activeWalletId: secondId, accountIndex: 0, address: B0 });
     // The old account's balance never shows under the new one.
@@ -59,14 +78,5 @@ describe('AccountSwitcher', () => {
     await screen.findAllByRole('radio');
     expect(screen.queryByRole('header', { name: 'Wallet 2' })).toBeNull();
     expect(screen.getAllByRole('radio')).toHaveLength(2);
-  });
-
-  it('opens the add sheet and the Wallets tab', async () => {
-    const { onAdd, onManage, onDone } = await setUp();
-    await fireEvent.press(screen.getByRole('button', { name: 'Add an account or a wallet' }));
-    await fireEvent.press(screen.getByRole('button', { name: 'Open Wallets' }));
-    expect(onAdd).toHaveBeenCalledTimes(1);
-    expect(onManage).toHaveBeenCalledTimes(1);
-    expect(onDone).not.toHaveBeenCalled();
   });
 });

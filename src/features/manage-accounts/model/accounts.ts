@@ -54,12 +54,23 @@ function cleanName(input: string): string | null {
   return name === '' ? null : name;
 }
 
-export function renameAccount({ walletId, index }: AccountRef, input: string): void {
-  useWalletStore.getState().renameAccount(walletId, index, cleanName(input));
+/** A name is fine when it is empty (the default name is used) or has something in it. */
+export function isValidName(input: string): boolean {
+  return input === '' || input.trim() !== '';
 }
 
-export function setAccountColor({ walletId, index }: AccountRef, color: CardColorId): void {
-  useWalletStore.getState().setAccountColor(walletId, index, color);
+export type CardLook = {
+  readonly name: string;
+  readonly color: CardColorId;
+  readonly icon: AccountIcon;
+};
+
+/** Saves the name, color and icon of one account card together. */
+export function personalizeAccount({ walletId, index }: AccountRef, look: CardLook): void {
+  const store = useWalletStore.getState();
+  store.renameAccount(walletId, index, cleanName(look.name));
+  store.setAccountColor(walletId, index, look.color);
+  store.setAccountIcon(walletId, index, look.icon);
 }
 
 export function setAccountIcon({ walletId, index }: AccountRef, icon: AccountIcon): void {

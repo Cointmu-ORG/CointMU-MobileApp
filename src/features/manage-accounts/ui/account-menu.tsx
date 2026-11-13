@@ -1,66 +1,42 @@
-import CircleCheck from 'lucide-react-native/icons/circle-check';
+import Palette from 'lucide-react-native/icons/palette';
 import QrCode from 'lucide-react-native/icons/qr-code';
-import Shapes from 'lucide-react-native/icons/shapes';
-import { useState } from 'react';
+import Trash2 from 'lucide-react-native/icons/trash-2';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import {
-  isWalletUsable,
-  useAccountIconLabel,
-  useAccountLabel,
-  useActiveAccount,
-  useWalletLabel,
-  useWalletStore,
-} from '@/entities/wallet';
+import { useAccountLabel, useWalletLabel, useWalletStore } from '@/entities/wallet';
 import { shortenAddress } from '@/shared/lib';
-import { Button, Input, ListRow, ListSection, Text } from '@/shared/ui';
+import { ListRow, ListSection, Text } from '@/shared/ui';
 
-import {
-  MAX_NAME_LENGTH,
-  renameAccount,
-  setAccountColor,
-  switchToAccount,
-  type AccountRef,
-} from '../model/accounts';
-import { ColorSwatches } from './color-swatches';
+import type { AccountRef } from '../model/accounts';
 
 type AccountMenuProps = {
   account: AccountRef;
-  /** Called after "Set as active": the sheet closes. */
-  onDone: () => void;
-  /** Opens the icon picker for this account. */
-  onChangeIcon: () => void;
+  /** Opens the page for this card's name, color and icon. */
+  onPersonalize: () => void;
   /** Opens the receive screen for this account. */
   onReceive: () => void;
+  /** Starts removing the account's wallet. Offered when the card is all the wallet has. */
+  onRemoveWallet: () => void;
 };
 
 /**
- * The "…" menu of an account card: rename, change color and icon, set active, show the receive QR. Name
- * and color are local and public; nothing here reads a secret.
+ * The "…" menu of an account card: a short list of actions and nothing else, so it fits the
+ * sheet without dragging. A wallet with several accounts is removed from its own page, where it
+ * is clear that all of them go.
  */
-export function AccountMenu({ account: ref, onDone, onChangeIcon, onReceive }: AccountMenuProps) {
+export function AccountMenu({ account: ref, ...actions }: AccountMenuProps) {
   const { t } = useTranslation();
   const accountLabel = useAccountLabel();
   const walletLabel = useWalletLabel();
-  const iconLabel = useAccountIconLabel();
   const wallet = useWalletStore(
     (state) => state.wallets.find((candidate) => candidate.id === ref.walletId) ?? null,
   );
   const account = wallet?.accounts.find((candidate) => candidate.index === ref.index);
-  const active = useActiveAccount();
-  const [name, setName] = useState(account?.name ?? '');
-  const [isSaved, setIsSaved] = useState(false);
   if (wallet === null || account === undefined) return null;
 
-  const isActive = active?.walletId === wallet.id && active.index === account.index;
-  const save = () => {
-    renameAccount(ref, name);
-    setIsSaved(true);
-  };
-
   return (
-    <View className="gap-5">
+    <View className="gap-4">
       <View className="gap-1">
         <Text variant="heading" accessibilityRole="header">
           {accountLabel(account)}
@@ -72,52 +48,21 @@ export function AccountMenu({ account: ref, onDone, onChangeIcon, onReceive }: A
           })}
         </Text>
       </View>
-      <View className="gap-3">
-        <Input
-          label={t('wallets.menu.name')}
-          placeholder={t('accounts.defaultName', { number: account.index + 1 })}
-          value={name}
-          onChangeText={(text) => {
-            setName(text);
-            setIsSaved(false);
-          }}
-          maxLength={MAX_NAME_LENGTH}
-          returnKeyType="done"
-          onSubmitEditing={save}
-          status={isSaved ? 'success' : 'default'}
-          message={isSaved ? t('wallets.menu.nameSaved') : t('wallets.menu.nameHint')}
-        />
-        <Button
-          label={t('wallets.menu.saveName')}
-          variant="secondary"
-          onPress={save}
-          isDisabled={name.trim() === (account.name ?? '')}
-        />
-      </View>
-      <ColorSwatches
-        label={t('wallets.menu.color')}
-        value={account.color}
-        onChange={(color) => setAccountColor(ref, color)}
-      />
       <ListSection>
         <ListRow
-          icon={Shapes}
-          title={t('wallets.menu.icon')}
-          value={iconLabel(account.icon)}
-          onPress={onChangeIcon}
+          icon={Palette}
+          title={t('wallets.menu.personalize')}
+          onPress={actions.onPersonalize}
         />
-      </ListSection>
-      <ListSection>
-        <ListRow
-          icon={CircleCheck}
-          title={t(isActive ? 'wallets.menu.isActive' : 'wallets.menu.setActive')}
-          onPress={() => {
-            switchToAccount(ref);
-            onDone();
-          }}
-          isDisabled={isActive || !isWalletUsable(wallet)}
-        />
-        <ListRow icon={QrCode} title={t('wallets.menu.receive')} onPress={onReceive} />
+        <ListRow icon={QrCode} title={t('wallets.menu.receive')} onPress={actions.onReceive} />
+        {wallet.accounts.length === 1 ? (
+          <ListRow
+            icon={Trash2}
+            title={t('settings.logout.remove')}
+            onPress={actions.onRemoveWallet}
+            isDestructive
+          />
+        ) : null}
       </ListSection>
     </View>
   );

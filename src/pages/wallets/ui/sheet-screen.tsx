@@ -1,19 +1,12 @@
 import type { ReactNode } from 'react';
-import { ScrollView } from 'react-native';
+import { View } from 'react-native';
 
 /**
- * Content of a form sheet. The ScrollView is the root so the sheet can grow to its larger detent
- * while the content scrolls; Android renders no native header inside a form sheet, so each sheet
- * starts with its own title.
+ * Content of a short action sheet. The sheet is as tall as this view (`fitToContents`), so
+ * everything in it is on screen without dragging: there is no scroll view and nothing may be
+ * added here that could outgrow a small phone. Anything longer is a page. Android renders no
+ * native header inside a form sheet, so each sheet starts with its own title.
  */
 export function SheetScreen({ children }: { children: ReactNode }) {
-  return (
-    <ScrollView
-      className="flex-1 bg-surface-card"
-      contentContainerClassName="gap-4 px-6 pb-10 pt-8"
-      keyboardShouldPersistTaps="handled"
-    >
-      {children}
-    </ScrollView>
-  );
+  return <View className="gap-4 bg-surface-card px-6 pb-10 pt-8">{children}</View>;
 }

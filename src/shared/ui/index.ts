@@ -24,6 +24,7 @@ export { SegmentedControl, type SegmentOption } from './segmented-control';
 export { SettingsChoiceRow, SettingsRow, SettingsSection, SettingsSwitchRow } from './settings-row';
 export { Skeleton } from './skeleton';
 export { Spinner } from './spinner';
+export { StickyFormScreen } from './sticky-form-screen';
 export { Text, type TextTone, type TextVariant } from './text';
 export { ThemedSwitch } from './themed-switch';
 export {

@@ -55,6 +55,11 @@ export type PressableSurfaceProps = Omit<PressableProps, 'children' | 'style' | 
   /** Layout of the touch area itself, e.g. `flex-1`. */
   containerClassName?: string;
   isDisabled?: boolean;
+  /**
+   * Color classes of the disabled surface. Without it a disabled surface is dimmed, which also
+   * dims its label; a control whose label must stay readable (AA) while disabled sets this.
+   */
+  disabledClassName?: string;
   /** Blocks presses without dimming, e.g. while a button shows its spinner. */
   isBusy?: boolean;
 };
@@ -72,6 +77,7 @@ export function PressableSurface({
   surfaceStyle,
   containerClassName = '',
   isDisabled = false,
+  disabledClassName,
   isBusy = false,
   accessibilityState,
   onPressIn,
@@ -123,8 +129,14 @@ export function PressableSurface({
         <Animated.View style={press.style}>
           <View
             className={`${className} ${
-              pressed ? palette.pressed : isHovered ? palette.hovered : palette.idle
-            } ${isDisabled ? 'opacity-50' : ''}`}
+              isDisabled && disabledClassName !== undefined
+                ? disabledClassName
+                : pressed
+                  ? palette.pressed
+                  : isHovered
+                    ? palette.hovered
+                    : palette.idle
+            } ${isDisabled && disabledClassName === undefined ? 'opacity-50' : ''}`}
             // Outline does not take part in layout, so focus never shifts content.
             style={
               isFocused

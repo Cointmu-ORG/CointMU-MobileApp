@@ -10,20 +10,16 @@ export function AccountMenuPage() {
   const { walletId, index } = useLocalSearchParams<{ walletId?: string; index?: string }>();
   const accountIndex = Number(index);
   if (walletId === undefined || !Number.isInteger(accountIndex)) return null;
+  const params = { walletId, index: accountIndex };
 
   return (
     <SheetScreen>
       <AccountMenu
-        account={{ walletId, index: accountIndex }}
-        onDone={() => router.back()}
-        onChangeIcon={() =>
-          router.replace({
-            pathname: ROUTES.accountIcon,
-            params: { walletId, index: accountIndex },
-          })
-        }
-        onReceive={() =>
-          router.replace({ pathname: ROUTES.receive, params: { walletId, index: accountIndex } })
+        account={params}
+        onPersonalize={() => router.replace({ pathname: ROUTES.personalize, params })}
+        onReceive={() => router.replace({ pathname: ROUTES.receive, params })}
+        onRemoveWallet={() =>
+          router.replace({ pathname: ROUTES.removeWallet, params: { walletId } })
         }
       />
     </SheetScreen>
