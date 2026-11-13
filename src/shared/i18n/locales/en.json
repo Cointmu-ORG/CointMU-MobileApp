@@ -228,7 +228,7 @@
       "backupFooter": "Both ask for your PIN or biometrics first and block screenshots.",
       "recoveryPhraseNone": "This wallet has no recovery phrase",
       "privateKeyTitle": "Show private key",
-      "privateKeyDesc": "The key of a wallet's first account",
+      "privateKeyDesc": "The key of a wallet's first account. Other accounts: the card's menu.",
       "privateKeyOnlyBackup": "The only backup of this wallet",
       "lockout": "PIN attempts",
       "attemptsTitle": "Wrong PIN attempts",
@@ -728,7 +728,8 @@
       "subtitle": "{{wallet}}, {{address}}",
       "receive": "Show receive QR code",
       "personalize": "Personalize",
-      "setDefault": "Set as default"
+      "setDefault": "Set as default",
+      "privateKey": "Show private key"
     },
     "details": {
       "backupHint": "Each wallet's recovery phrase and private key are in Settings, under Security."

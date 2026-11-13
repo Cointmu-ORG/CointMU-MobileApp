@@ -1,9 +1,11 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { computeAddress } from 'ethers';
 import * as ScreenCapture from 'expo-screen-capture';
 import * as SecureStore from 'expo-secure-store';
 import { AppState, type AppStateStatus } from 'react-native';
 
 import { storeNewPin } from '@/entities/auth';
+import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
 import { RevealPrivateKey } from './reveal-private-key';
@@ -149,6 +151,54 @@ describe('RevealPrivateKey', () => {
     expect(screen.queryByText(PRIVATE_KEY)).toBeNull();
     await fireEvent.press(screen.getByRole('button', { name: 'Show private key' }));
     expect(await screen.findByText('Enter your PIN')).toBeOnTheScreen();
+  });
+
+  describe('one account of a recovery-phrase wallet', () => {
+    // Hardhat's public test phrase and its accounts 0 and 1; never real funds.
+    const PHRASE = 'test test test test test test test test test test test junk';
+    const SECOND_ADDRESS = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+
+    beforeEach(async () => {
+      walletId = await seedWallet({
+        secret: { kind: 'mnemonic', phrase: PHRASE },
+        address: ADDRESS,
+      });
+      useWalletStore.getState().addAccount(walletId, { index: 1, address: SECOND_ADDRESS });
+      jest.mocked(SecureStore.getItemAsync).mockClear();
+    });
+
+    it('names the account and its short address on the screen and in the PIN step', async () => {
+      await render(<RevealPrivateKey walletId={walletId} index={1} />);
+      expect(screen.getByRole('header', { name: 'Account 2 in Wallet 1' })).toBeOnTheScreen();
+      expect(screen.getByText('0x7099…79C8')).toBeOnTheScreen();
+
+      await fireEvent.press(screen.getByRole('button', { name: 'Show private key' }));
+      expect(
+        await screen.findByText('to show the private key of Account 2 in Wallet 1 (0x7099…79C8)'),
+      ).toBeOnTheScreen();
+    });
+
+    it('shows the key of that account index, and only after the PIN', async () => {
+      await render(<RevealPrivateKey walletId={walletId} index={1} />);
+      await fireEvent.press(screen.getByRole('button', { name: 'Show private key' }));
+      await typePin('000000');
+      expect(await screen.findByText('Wrong PIN')).toBeOnTheScreen();
+      expect(secretReads()).toBe(0);
+
+      await typePin(PIN);
+      await fireEvent.press(await screen.findByRole('button', { name: 'Show key' }));
+
+      // Whatever is on the screen as the key must be the key of account 1's address.
+      const shown = screen.getByText(/^0x[0-9a-f]{64}$/).props.children as string;
+      expect(computeAddress(shown)).toBe(SECOND_ADDRESS);
+      expect(shown).not.toBe(PRIVATE_KEY);
+      expect(screen.getByText(SECOND_ADDRESS)).toBeOnTheScreen();
+    });
+
+    it('shows nothing for an account index the wallet does not have', async () => {
+      await render(<RevealPrivateKey walletId={walletId} index={7} />);
+      expect(screen.queryByRole('button', { name: 'Show private key' })).toBeNull();
+    });
   });
 
   it('explains that the key is the only backup of an imported-key wallet', async () => {

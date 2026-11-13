@@ -228,7 +228,7 @@
       "backupFooter": "Keduanya meminta PIN atau biometrik lebih dulu dan memblokir tangkapan layar.",
       "recoveryPhraseNone": "Dompet ini tidak punya frasa pemulihan",
       "privateKeyTitle": "Tampilkan kunci privat",
-      "privateKeyDesc": "Kunci akun pertama sebuah dompet",
+      "privateKeyDesc": "Kunci akun pertama sebuah dompet. Akun lain: lewat menu kartunya.",
       "privateKeyOnlyBackup": "Satu-satunya cadangan dompet ini",
       "lockout": "Percobaan PIN",
       "attemptsTitle": "Percobaan PIN yang salah",
@@ -728,7 +728,8 @@
       "subtitle": "{{wallet}}, {{address}}",
       "receive": "Tampilkan kode QR terima",
       "personalize": "Personalisasi",
-      "setDefault": "Jadikan akun utama"
+      "setDefault": "Jadikan akun utama",
+      "privateKey": "Tampilkan kunci privat"
     },
     "details": {
       "backupHint": "Frasa pemulihan dan kunci privat tiap dompet ada di Pengaturan, di bagian Keamanan."

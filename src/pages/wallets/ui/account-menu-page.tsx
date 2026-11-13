@@ -19,6 +19,7 @@ export function AccountMenuPage() {
         onPersonalize={() => router.replace({ pathname: ROUTES.personalize, params })}
         onDefaultSet={() => router.back()}
         onReceive={() => router.replace({ pathname: ROUTES.receive, params })}
+        onShowPrivateKey={() => router.replace({ pathname: ROUTES.privateKey, params })}
         onRemoveWallet={() =>
           router.replace({ pathname: ROUTES.removeWallet, params: { walletId } })
         }

@@ -22,6 +22,7 @@ async function openMenu(target: 'phrase' | 'key') {
   const callbacks = {
     onPersonalize: jest.fn(),
     onDefaultSet: jest.fn(),
+    onShowPrivateKey: jest.fn(),
     onReceive: jest.fn(),
     onRemoveWallet: jest.fn(),
   };
@@ -48,6 +49,7 @@ describe('AccountMenu', () => {
       'Personalize',
       'Set as default',
       'Show receive QR code',
+      'Show private key',
       'Remove wallet from this device',
     ]);
     // No scroll container: the sheet is as tall as these rows.
@@ -78,6 +80,12 @@ describe('AccountMenu', () => {
     expect(screen.queryByRole('button', { name: 'Set as default' })).toBeNull();
   });
 
+  it('opens the private key of that account', async () => {
+    const callbacks = await openMenu('phrase');
+    await fireEvent.press(screen.getByRole('button', { name: 'Show private key' }));
+    expect(callbacks.onShowPrivateKey).toHaveBeenCalledTimes(1);
+  });
+
   it('does not offer "Set as default" on the account that already is the default', async () => {
     await openMenu('phrase');
     expect(screen.queryByRole('button', { name: 'Set as default' })).toBeNull();
@@ -85,8 +93,9 @@ describe('AccountMenu', () => {
 
   it('does not offer to remove a wallet from one of its several accounts', async () => {
     await openMenu('phrase');
-    // The default account of a wallet with two accounts: Personalize and the receive code.
-    expect(screen.getAllByRole('button')).toHaveLength(2);
+    // The default account of a wallet with two accounts: Personalize, the receive code and
+    // the private key.
+    expect(screen.getAllByRole('button')).toHaveLength(3);
     expect(screen.queryByRole('button', { name: 'Remove wallet from this device' })).toBeNull();
   });
 });
