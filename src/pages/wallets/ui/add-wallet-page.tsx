@@ -11,8 +11,9 @@ export function AddWalletPage() {
     <SheetScreen>
       <AddWalletMenu
         onAccountAdded={({ walletId, index }) =>
-          router.replace({ pathname: ROUTES.accountIcon, params: { walletId, index, setup: 1 } })
+          router.replace({ pathname: ROUTES.personalize, params: { walletId, index, setup: 1 } })
         }
+        onChooseWallet={() => router.replace(ROUTES.addAccount)}
         onCreate={() => router.replace(ROUTES.walletCreate)}
         onImport={() => router.replace(ROUTES.walletImport)}
       />

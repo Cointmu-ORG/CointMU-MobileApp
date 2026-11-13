@@ -55,7 +55,7 @@ beforeEach(async () => {
 
 describe('creating another wallet', () => {
   it(
-    'generates a phrase under a new wallet id, then backup → quiz → name and color → active',
+    'generates a phrase under a new wallet id, then backup → quiz → personalize → active',
     async () => {
       await renderRouter('./app', { initialUrl: '/wallet-create' });
 
@@ -76,13 +76,13 @@ describe('creating another wallet', () => {
 
       await answerQuiz(words);
 
-      expect(await screen.findByText('Name your wallet')).toBeOnTheScreen();
+      expect(await screen.findByLabelText('Wallet name')).toBeOnTheScreen();
       expect(state().wallets[1]?.isBackupPending).toBe(false);
       // The phrase is gone from the screen once the quiz is passed.
       expect(screen.queryByText(words[0] as string)).toBeNull();
       await fireEvent.changeText(screen.getByLabelText('Wallet name'), '  Trading ');
       await fireEvent.press(screen.getByRole('radio', { name: 'Rose' }));
-      await fireEvent.press(screen.getByRole('button', { name: 'Finish' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Save' }));
 
       await waitFor(() => expect(state().activeWalletId).toBe(created.id));
       expect(state().wallets[1]).toMatchObject({ name: 'Trading', color: 'rose' });
@@ -117,7 +117,7 @@ describe('creating another wallet', () => {
     });
     await renderRouter('./app', { initialUrl: `/wallet-create?walletId=${doneId}` });
 
-    expect(await screen.findByText('Name your wallet')).toBeOnTheScreen();
+    expect(await screen.findByLabelText('Wallet name')).toBeOnTheScreen();
     expect(screen.queryByText('abandon')).toBeNull();
     expect(screen.queryByText('Your new recovery phrase')).toBeNull();
   });

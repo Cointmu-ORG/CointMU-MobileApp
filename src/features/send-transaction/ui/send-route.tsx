@@ -9,7 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
+import { useAccount, useAccountLabel } from '@/entities/wallet';
 import { formatAmount, shortenAddress } from '@/shared/lib';
 import { ICON_SIZE, Text, useCardFill, useThemeColors } from '@/shared/ui';
 
@@ -48,7 +48,7 @@ function Party({ label, children }: { label: string; children: ReactNode }) {
 export function SendRoute({ draft, coinAt }: SendRouteProps) {
   const { t, i18n } = useTranslation();
   const colors = useThemeColors();
-  const account = useActiveAccount();
+  const account = useAccount(draft.from);
   const accountLabel = useAccountLabel();
   const fillOf = useCardFill();
   const position = useSharedValue(coinAt);

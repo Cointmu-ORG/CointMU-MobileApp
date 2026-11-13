@@ -24,13 +24,8 @@ import { buildTxRequest } from '../lib/send-math';
 import type { SendDraft, SendOutcome, SendStage } from './send-flow-store';
 
 type SendInput = {
+  /** Holds the sending account (`draft.from`): the one the user saw in "From" and on the review. */
   readonly draft: SendDraft;
-  /** The sending account and the wallet whose secret signs for it. */
-  readonly account: {
-    readonly walletId: string;
-    readonly index: number;
-    readonly address: string;
-  };
   readonly onStage: (stage: SendStage) => void;
 };
 
@@ -55,11 +50,12 @@ async function ensureCointMuNode(url: string): Promise<SendOutcome | null> {
 }
 
 /**
- * Signs with the secret of the account's own wallet, read only now, after the caller verified
- * the user. `signWithSecret` refuses a secret that does not produce the account's address.
+ * Signs for the draft's source account with the secret of that account's own wallet, read only
+ * now, after the caller verified the user. `signWithSecret` refuses a secret that does not produce the account's address.
  */
 async function sign(input: SendInput, nonce: number): Promise<string> {
-  const { draft, account } = input;
+  const { draft } = input;
+  const account = draft.from;
   const secret = await readWalletSecret(account.walletId);
   if (secret === null) throw new Error('No wallet secret stored');
   return signWithSecret(secret, account, {
@@ -72,7 +68,8 @@ async function sign(input: SendInput, nonce: number): Promise<string> {
 }
 
 function saveRecord(input: SendInput, tx: { hash: string; nonce: number; node: string }): void {
-  const { draft, account } = input;
+  const { draft } = input;
+  const account = draft.from;
   useTxStore.getState().add({
     hash: tx.hash,
     from: account.address,
@@ -105,7 +102,7 @@ export async function sendTransaction(input: SendInput): Promise<SendOutcome> {
     if (refused) return refused;
     const provider = getProvider();
     const nonce = await callRpc(() =>
-      provider.getTransactionCount(input.account.address, 'pending'),
+      provider.getTransactionCount(input.draft.from.address, 'pending'),
     );
 
     input.onStage('signing');

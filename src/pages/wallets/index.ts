@@ -1,8 +1,9 @@
-export { AccountIconPage } from './ui/account-icon-page';
 export { AccountMenuPage } from './ui/account-menu-page';
 export { AccountSwitcherPage } from './ui/account-switcher-page';
+export { AddAccountPage } from './ui/add-account-page';
 export { AddWalletPage } from './ui/add-wallet-page';
+export { PersonalizePage } from './ui/personalize-page';
 export { WalletCreatePage } from './ui/wallet-create-page';
-export { WalletEditPage } from './ui/wallet-edit-page';
+export { WalletDetailPage } from './ui/wallet-detail-page';
 export { WalletImportPage } from './ui/wallet-import-page';
 export { WalletsPage } from './ui/wallets-page';

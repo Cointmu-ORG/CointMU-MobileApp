@@ -1,19 +1,16 @@
 import { router } from 'expo-router';
+import { View } from 'react-native';
 
 import { AccountSwitcher } from '@/features/manage-accounts';
-import { ROUTES } from '@/shared/config';
 
-import { SheetScreen } from './sheet-screen';
-
-/** Account switcher, presented as a form sheet from the home account chip. */
+/**
+ * The account picker of the send form, on a sheet of one fixed height: the account in use and
+ * the first rows show at once, and a long list scrolls inside the sheet.
+ */
 export function AccountSwitcherPage() {
   return (
-    <SheetScreen>
-      <AccountSwitcher
-        onDone={() => router.back()}
-        onAdd={() => router.replace(ROUTES.walletAdd)}
-        onManage={() => router.dismissTo(ROUTES.wallets)}
-      />
-    </SheetScreen>
+    <View className="flex-1 bg-surface-card px-6 pt-8">
+      <AccountSwitcher onDone={() => router.back()} />
+    </View>
   );
 }

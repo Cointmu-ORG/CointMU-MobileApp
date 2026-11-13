@@ -66,13 +66,14 @@ export function WalletSection({ wallet, actions }: WalletSectionProps) {
           {wallet.accounts.map((account) => {
             const ref = { walletId: wallet.id, index: account.index };
             return (
-              <AccountCard
-                key={account.index}
-                account={account}
-                isActive={active?.walletId === wallet.id && active.index === account.index}
-                onPress={() => actions.onSelectAccount(ref)}
-                onMenu={() => actions.onAccountMenu(ref)}
-              />
+              <View key={account.index} className="w-[48%]">
+                <AccountCard
+                  account={account}
+                  isActive={active?.walletId === wallet.id && active.index === account.index}
+                  onPress={() => actions.onSelectAccount(ref)}
+                  onMenu={() => actions.onAccountMenu(ref)}
+                />
+              </View>
             );
           })}
         </View>

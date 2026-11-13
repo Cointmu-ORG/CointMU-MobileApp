@@ -27,7 +27,7 @@ export {
   type FeeQuote,
 } from './lib/fee';
 export { chunkRange, fetchInChunks, mergeHistory, type BlockRange } from './lib/history';
-export { directionOf, recordToHistoryItem } from './lib/history-item';
+export { directionOf, ownerViews, recordToHistoryItem } from './lib/history-item';
 export { nextPollDelayMs } from './lib/poll-schedule';
 export { classifySendError, type SendErrorCode } from './lib/send-error';
 export {
@@ -42,6 +42,7 @@ export {
   hasMoreHistory,
   useHistoryStore,
   type HistoryEntry,
+  type HistorySession,
   type HistoryStatus,
 } from './model/history-store';
 export { pollUnsettledTxs, selectUnsettled } from './model/poll-txs';

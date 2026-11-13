@@ -6,6 +6,7 @@ const NODE_LIMIT_BLOCKS = 300;
 function item(hash: string, patch: Partial<HistoryItem> = {}): HistoryItem {
   return {
     hash,
+    owner: '0x02',
     from: '0x01',
     to: '0x02',
     value: '1',
@@ -75,6 +76,16 @@ describe('fetchInChunks', () => {
 });
 
 describe('mergeHistory', () => {
+  it('keeps both sides of a transfer between two own accounts, and one row per side', () => {
+    const sent = item('0xab', { owner: '0x01', direction: 'out' });
+    const received = item('0xab', { owner: '0x02', direction: 'in' });
+    const merged = mergeHistory([sent, received], [item('0xAB', { owner: '0x02' })]);
+    expect(merged.map(({ owner, direction }) => [owner, direction])).toEqual([
+      ['0x01', 'out'],
+      ['0x02', 'in'],
+    ]);
+  });
+
   it('dedupes by hash, keeping the live local status and the chain block time', () => {
     const local = item('0xAA', {
       source: 'local',

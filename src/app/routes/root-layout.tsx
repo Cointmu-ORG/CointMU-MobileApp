@@ -40,6 +40,9 @@ const SUB_SCREENS = [
   { name: 'network', titleKey: 'settings.network.title' },
   { name: 'security', titleKey: 'settings.security.title' },
   { name: 'enable-biometrics', titleKey: 'settings.biometrics.title' },
+  { name: 'wallet-detail', titleKey: 'wallets.detail.title' },
+  { name: 'personalize', titleKey: 'wallets.personalize.title' },
+  { name: 'add-account', titleKey: 'wallets.add.account' },
   { name: 'wallet-create', titleKey: 'wallets.create.header' },
   { name: 'wallet-import', titleKey: 'onboarding.import.title' },
   { name: 'change-pin', titleKey: 'settings.changePin.title' },
@@ -52,16 +55,16 @@ const SUB_SCREENS = [
   { name: 'tx/[hash]', titleKey: 'history.detail.title' },
 ] as const;
 
-/** Bottom sheets: the account switcher, the "+" sheet, an account's menu and a wallet's details. */
+/**
+ * Bottom sheets. A sheet never hides content behind a drag: the action menus are exactly as
+ * tall as their content, and the account picker has one fixed height with its list scrolling
+ * inside. Anything longer than a short menu is a page (SUB_SCREENS).
+ */
 const SHEET_SCREENS = [
-  'account-switcher',
-  'wallet-add',
-  'account-menu',
-  'account-icon',
-  'wallet-edit',
+  { name: 'wallet-add', detents: 'fitToContents' },
+  { name: 'account-menu', detents: 'fitToContents' },
+  { name: 'account-switcher', detents: [0.75] },
 ] as const;
-// Half height first; drag up to full height for a long list.
-const SHEET_DETENTS = [0.5, 1];
 const SHEET_CORNER_RADIUS = 24;
 
 /** React Navigation paints the container, headers and tab bar it owns with these. */
@@ -129,15 +132,16 @@ function RootNavigator() {
             />
           ))}
           {/* Bottom sheets; Android renders no native header inside a form sheet. */}
-          {SHEET_SCREENS.map((name) => (
+          {SHEET_SCREENS.map(({ name, detents }) => (
             <Stack.Screen
               key={name}
               name={name}
               options={{
                 presentation: 'formSheet',
                 animation: 'slide_from_bottom',
-                sheetAllowedDetents: SHEET_DETENTS,
-                sheetGrabberVisible: true,
+                sheetAllowedDetents: detents === 'fitToContents' ? detents : [...detents],
+                // No grabber: there is no second height to drag to.
+                sheetGrabberVisible: false,
                 sheetCornerRadius: SHEET_CORNER_RADIUS,
                 contentStyle: { backgroundColor: colors.surface.card },
               }}

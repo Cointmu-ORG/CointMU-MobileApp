@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next';
 import { useWalletStore } from '@/entities/wallet';
 import { MnemonicBackup } from '@/features/backup-mnemonic';
 import { CreateWalletProgress } from '@/features/create-wallet';
-import { switchToAccount, WalletDetailsForm } from '@/features/manage-accounts';
+import { PersonalizeWallet, switchToAccount } from '@/features/manage-accounts';
 import { MnemonicQuiz } from '@/features/verify-mnemonic';
 import { ROUTES } from '@/shared/config';
 import { Button, FormScreen, Text } from '@/shared/ui';
 
 type Step = 'phrase' | 'quiz';
 
-function StepHeading({ step }: { step: 'creating' | Step | 'details' }) {
+function StepHeading({ step }: { step: 'creating' | Step }) {
   const { t } = useTranslation();
   return (
     <>
@@ -26,10 +26,10 @@ function StepHeading({ step }: { step: 'creating' | Step | 'details' }) {
 
 /**
  * Creating another wallet (D-78): generate, show the phrase once with screenshots blocked, the
- * 3-word quiz, then name, color and icon. The route may carry the id of a wallet whose backup was left
- * unfinished, to resume it. The phrase is only ever shown while the wallet's backup is pending:
- * a link to this screen for a finished wallet goes straight to its name and color, so it can
- * never reveal a phrase without the PIN.
+ * 3-word quiz, then the same personalize screen every card uses (name, color, icon). The route
+ * may carry the id of a wallet whose backup was left unfinished, to resume it. The phrase is only
+ * ever shown while the wallet's backup is pending: a link to this screen for a finished wallet
+ * goes straight to its name and color, so it can never reveal a phrase without the PIN.
  */
 export function WalletCreatePage() {
   const { t } = useTranslation();
@@ -56,17 +56,7 @@ export function WalletCreatePage() {
       switchToAccount({ walletId: wallet.id, index: 0 });
       router.dismissTo(ROUTES.wallets);
     };
-    return (
-      <FormScreen>
-        <StepHeading step="details" />
-        <WalletDetailsForm
-          wallet={wallet}
-          firstAccount={wallet.accounts[0]}
-          submitLabel={t('wallets.create.details.finish')}
-          onSaved={finish}
-        />
-      </FormScreen>
-    );
+    return <PersonalizeWallet wallet={wallet} isSetupStep onDone={finish} />;
   }
   if (step === 'quiz') {
     return (

@@ -15,6 +15,9 @@ jest.mock('@/shared/api', () => ({
   ...jest.requireActual('@/shared/api'),
   createRpcProvider: () => ({
     getBalance: jest.fn(async () => 0n),
+    getBlockNumber: jest.fn(async () => 10),
+    getBlock: jest.fn(async () => ({ timestamp: 0, prefetchedTransactions: [] })),
+    getLogs: jest.fn(async () => []),
     send: jest.fn(async () => '0x778'),
     destroy: jest.fn(),
   }),
@@ -39,8 +42,8 @@ beforeEach(async () => {
 });
 
 describe('Wallets tab', () => {
-  // A card tapped while a sheet is still opening used to push a second (tabs) screen above it.
-  it('opens Home on the existing tabs screen when a card is tapped under an open sheet', async () => {
+  // A card tapped while a sheet is still opening: the sheet goes, and no second tabs screen appears.
+  it('opens the account on its own screen and makes it the remembered one', async () => {
     const app = await renderRouter('./app', { initialUrl: ROUTES.wallets });
     const rootStackRoutes = () =>
       (app.getRouterState()?.routes[0]?.state?.routes ?? []).map((route) => route.name);
@@ -51,8 +54,11 @@ describe('Wallets tab', () => {
     await fireEvent.press(card);
     await act(async () => jest.runOnlyPendingTimers());
 
-    expect(rootStackRoutes()).toEqual(['(tabs)']);
-    expect(app.getPathname()).toBe(ROUTES.home);
+    expect(rootStackRoutes()).toEqual(['(tabs)', 'wallet-detail']);
+    expect(app.getPathname()).toBe(ROUTES.walletDetail);
+    expect(await screen.findByRole('button', { name: 'Send' })).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Receive' })).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: 'Assets' })).toBeOnTheScreen();
   });
 
   describe('card icons', () => {
@@ -64,11 +70,11 @@ describe('Wallets tab', () => {
     async function pickIcon(tab: string | null, icon: string) {
       const { activeWalletId: walletId } = useWalletStore.getState();
       await act(async () =>
-        router.push({ pathname: ROUTES.accountIcon, params: { walletId, index: 0 } }),
+        router.push({ pathname: ROUTES.personalize, params: { walletId, index: 0 } }),
       );
       if (tab !== null) await fireEvent.press(await screen.findByRole('radio', { name: tab }));
       await fireEvent.press(await screen.findByRole('radio', { name: icon }));
-      await fireEvent.press(screen.getByRole('button', { name: 'Done' }));
+      await fireEvent.press(screen.getByRole('button', { name: 'Save' }));
       await act(async () => jest.runOnlyPendingTimers());
     }
 

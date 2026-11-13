@@ -22,6 +22,12 @@ const IS_FILLED: Record<ButtonVariant, boolean> = {
   danger: true,
 };
 
+/**
+ * A disabled filled button turns into a muted, outlined surface with the normal text color:
+ * plainly not the action color, and its label still meets AA (dimming it would not).
+ */
+const DISABLED_FILLED_CLASS = 'border border-border-strong bg-surface-muted';
+
 type ButtonProps = {
   label: string;
   onPress: () => void;
@@ -43,12 +49,14 @@ export function Button({
   accessibilityHint,
 }: ButtonProps) {
   const colors = useThemeColors();
+  const isMuted = isDisabled && IS_FILLED[variant];
   return (
     <PressableSurface
       palette={SURFACE_PALETTE[variant]}
       className="h-14 flex-row items-center justify-center gap-2 rounded-control px-6"
       onPress={onPress}
       isDisabled={isDisabled}
+      disabledClassName={IS_FILLED[variant] ? DISABLED_FILLED_CLASS : undefined}
       isBusy={isLoading}
       accessibilityRole="button"
       accessibilityLabel={label}
@@ -61,7 +69,7 @@ export function Button({
       ) : (
         <>
           {icon}
-          <Text variant="button" tone={LABEL_TONE[variant]}>
+          <Text variant="button" tone={isMuted ? 'default' : LABEL_TONE[variant]}>
             {label}
           </Text>
         </>

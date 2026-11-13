@@ -10,7 +10,12 @@ const state = () => useWalletStore.getState();
 const address = (seed: number) => `0x${seed.toString(16).padStart(40, '0')}`;
 
 function handlers() {
-  return { onAccountAdded: jest.fn(), onCreate: jest.fn(), onImport: jest.fn() };
+  return {
+    onAccountAdded: jest.fn(),
+    onChooseWallet: jest.fn(),
+    onCreate: jest.fn(),
+    onImport: jest.fn(),
+  };
 }
 
 beforeEach(async () => {
@@ -20,14 +25,28 @@ beforeEach(async () => {
 });
 
 describe('AddWalletMenu', () => {
-  it('offers a new account for each recovery-phrase wallet only', async () => {
-    addWalletRecord({ source: 'private-key', address: address(2) });
-    addWalletRecord({ source: 'mnemonic', address: address(3) });
-    await render(<AddWalletMenu {...handlers()} />);
+  it('is three actions that show without scrolling, however many wallets there are', async () => {
+    for (let seed = 2; seed <= MAX_WALLETS; seed += 1) {
+      addWalletRecord({ source: 'mnemonic', address: address(seed) });
+    }
+    const view = await render(<AddWalletMenu {...handlers()} />);
+    expect(screen.getAllByRole('button')).toHaveLength(3);
+    expect(JSON.stringify(view.toJSON())).not.toContain('ScrollView');
+  });
 
-    expect(screen.getByRole('button', { name: 'Add an account to Wallet 1' })).toBeOnTheScreen();
-    expect(screen.getByRole('button', { name: 'Add an account to Wallet 3' })).toBeOnTheScreen();
-    expect(screen.queryByRole('button', { name: 'Add an account to Wallet 2' })).toBeNull();
+  it('opens the wallet list when several wallets can take a new account', async () => {
+    addWalletRecord({ source: 'mnemonic', address: address(3) });
+    const callbacks = handlers();
+    await render(<AddWalletMenu {...callbacks} />);
+    await fireEvent.press(screen.getByRole('button', { name: 'Add an account' }));
+    expect(callbacks.onChooseWallet).toHaveBeenCalledTimes(1);
+    expect(callbacks.onAccountAdded).not.toHaveBeenCalled();
+  });
+
+  it('says where the account goes when only one wallet can take it', async () => {
+    addWalletRecord({ source: 'private-key', address: address(2) });
+    await render(<AddWalletMenu {...handlers()} />);
+    expect(screen.getByText('In Wallet 1')).toBeOnTheScreen();
   });
 
   it('says why no account can be added when there is no recovery-phrase wallet', async () => {
@@ -37,6 +56,7 @@ describe('AddWalletMenu', () => {
     expect(
       screen.getByText(/only be added to a wallet that has a recovery phrase/),
     ).toBeOnTheScreen();
+    expect(screen.getByRole('button', { name: 'Add an account' })).toBeDisabled();
   });
 
   it('opens create and import', async () => {

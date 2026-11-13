@@ -3,8 +3,20 @@ import { create } from 'zustand';
 import type { Asset } from '@/entities/asset';
 import type { FeeQuote, SendErrorCode } from '@/entities/transaction';
 
+/** The account a transfer is sent from, with the wallet whose secret signs for it. */
+export type SendSource = {
+  readonly walletId: string;
+  readonly index: number;
+  readonly address: string;
+};
+
 /** What the form hands to the review screen. Public data only, never a key. */
 export type SendDraft = {
+  /**
+   * The account shown in "From" when the form was submitted. The review shows it and the
+   * signature is made for it, whatever the remembered default account is by then.
+   */
+  readonly from: SendSource;
   readonly asset: Asset;
   readonly to: string;
   readonly amount: bigint;

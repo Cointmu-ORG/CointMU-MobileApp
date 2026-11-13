@@ -1,32 +1,37 @@
-import { router } from 'expo-router';
-import ChevronDown from 'lucide-react-native/icons/chevron-down';
+import Ellipsis from 'lucide-react-native/icons/ellipsis';
 import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
 
 import { AccountBadge, useAccountLabel, useActiveAccount } from '@/entities/wallet';
-import { ROUTES } from '@/shared/config';
 import { ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
-const BADGE_SIZE = 24;
+const BADGE_SIZE = 28;
 
-/** Active account icon and name; opens the account switcher. */
-export function AccountChip() {
+/** The account the card is about: its icon and name, and the "…" that opens its menu. */
+export function AccountChip({ onMenu }: { onMenu?: () => void }) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const label = useAccountLabel();
   const account = useActiveAccount();
   if (account === null) return null;
+  const name = label(account);
   return (
-    <PressableSurface
-      palette={SURFACE_PALETTE.ghost}
-      className="-ml-2 min-h-11 flex-row items-center gap-2 self-start rounded-full px-2"
-      onPress={() => router.push(ROUTES.accountSwitcher)}
-      accessibilityRole="button"
-      accessibilityLabel={label(account)}
-      accessibilityHint={t('home.balance.switchAccount')}
-    >
+    <View className="min-h-11 flex-row items-center gap-2">
       <AccountBadge account={account} size={BADGE_SIZE} />
-      <Text variant="label">{label(account)}</Text>
-      <ChevronDown size={ICON_SIZE.sm} color={colors.content.secondary} />
-    </PressableSurface>
+      <Text variant="label" className="flex-1" numberOfLines={1}>
+        {name}
+      </Text>
+      {onMenu ? (
+        <PressableSurface
+          palette={SURFACE_PALETTE.ghost}
+          className="-mr-2 h-11 w-11 items-center justify-center rounded-full"
+          onPress={onMenu}
+          accessibilityRole="button"
+          accessibilityLabel={t('wallets.card.menu', { name })}
+        >
+          <Ellipsis size={ICON_SIZE.md} color={colors.content.DEFAULT} />
+        </PressableSurface>
+      ) : null}
+    </View>
   );
 }

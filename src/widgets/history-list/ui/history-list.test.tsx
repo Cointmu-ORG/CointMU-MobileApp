@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { useHistoryStore, useTxStore } from '@/entities/transaction';
 import { useWalletStore } from '@/entities/wallet';
@@ -7,10 +7,11 @@ import { i18n } from '@/shared/i18n';
 
 import { HistoryList } from './history-list';
 
-import { seedWalletRecord } from '../../../../jest.seed-wallet';
+import { addWalletRecord, seedWalletRecord } from '../../../../jest.seed-wallet';
 
 const OWNER = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const OTHER = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+const SECOND = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
 const HEAD = 5_000;
 const ONE_CMU = 10n ** 18n;
 // callRpc waits base, 2×base, … between its retries.
@@ -35,6 +36,13 @@ jest.mock('@/shared/api', () => ({
                 from: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
                 to: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
                 value: 10n ** 18n,
+                blockNumber: 5_000,
+              },
+              {
+                hash: '0xsecond',
+                from: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8',
+                to: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC',
+                value: 3n * 10n ** 18n,
                 blockNumber: 5_000,
               },
             ]
@@ -76,7 +84,7 @@ describe('HistoryList', () => {
       blockNumber: null,
       unknownSince: null,
     });
-    await render(<HistoryList />);
+    await render(<HistoryList filter={null} onFilterChange={jest.fn()} />);
 
     expect(await screen.findByText('+1 CMU')).toBeOnTheScreen();
     expect(screen.queryByLabelText('Loading history…')).toBeNull();
@@ -84,15 +92,42 @@ describe('HistoryList', () => {
     expect(screen.getByText('Today')).toBeOnTheScreen();
     expect(screen.getByLabelText('Pending')).toBeOnTheScreen();
     expect(screen.getByLabelText('Confirmed 1/12')).toBeOnTheScreen();
-    expect(useHistoryStore.getState().entries[`1912:${OWNER.toLowerCase()}`]?.context.head).toBe(
-      HEAD,
-    );
+    expect(useHistoryStore.getState().session?.head).toBe(HEAD);
+    // Not one of the user's addresses: the other transfer in that block stays out.
+    expect(screen.queryByText('+3 CMU')).toBeNull();
+    // One account: nothing to filter by.
+    expect(screen.queryByRole('radio', { name: 'All' })).toBeNull();
+  });
+
+  it('shows every account by default, names the account on each row, and filters by chip', async () => {
+    addWalletRecord({ source: 'private-key', address: SECOND });
+    const onFilterChange = jest.fn();
+    const view = await render(<HistoryList filter={null} onFilterChange={onFilterChange} />);
+
+    expect(await screen.findByText('+1 CMU')).toBeOnTheScreen();
+    expect(screen.getByText('+3 CMU')).toBeOnTheScreen();
+    expect(
+      screen.getByRole('button', { name: /^Account 1: Received \+1 CMU, 0x7099…79C8/ }),
+    ).toBeOnTheScreen();
+    expect(screen.getByRole('radio', { name: 'All' })).toBeChecked();
+    // Two wallets, each with its "Account 1": the second chip is the second wallet's.
+    const chips = screen.getAllByRole('radio', { name: 'Account 1' });
+    expect(chips).toHaveLength(2);
+
+    await fireEvent.press(chips[1]);
+    expect(onFilterChange).toHaveBeenCalledWith(SECOND);
+
+    await view.rerender(<HistoryList filter={SECOND} onFilterChange={onFilterChange} />);
+    expect(screen.getByText('+3 CMU')).toBeOnTheScreen();
+    expect(screen.queryByText('+1 CMU')).toBeNull();
+    expect(screen.getAllByRole('radio', { name: 'Account 1' })[1]).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'All' })).not.toBeChecked();
   });
 
   it('shows skeleton rows in the list area while the first page loads', async () => {
     jest.useFakeTimers();
     mockChain.isDown = true;
-    await render(<HistoryList />);
+    await render(<HistoryList filter={null} onFilterChange={jest.fn()} />);
     expect(screen.getByLabelText('Loading history…')).toBeOnTheScreen();
     expect(screen.queryByText('No transactions in the last 7 days.')).toBeNull();
     await act(() => jest.advanceTimersByTimeAsync(RETRY_BACKOFF_TOTAL_MS));
@@ -104,7 +139,7 @@ describe('HistoryList', () => {
     // Fake timers skip callRpc's retry backoff instead of waiting for it in real time.
     jest.useFakeTimers();
     mockChain.isDown = true;
-    await render(<HistoryList />);
+    await render(<HistoryList filter={null} onFilterChange={jest.fn()} />);
     await act(() => jest.advanceTimersByTimeAsync(RETRY_BACKOFF_TOTAL_MS));
     expect(
       await screen.findByText("Couldn't load your history from the CointMU network."),

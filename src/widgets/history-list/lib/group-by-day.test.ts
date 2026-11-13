@@ -9,6 +9,7 @@ const OLD_DAYS = 10;
 function at(timestamp: number, hash: string): HistoryItem {
   return {
     hash,
+    owner: '0x02',
     from: '0x01',
     to: '0x02',
     value: '1',

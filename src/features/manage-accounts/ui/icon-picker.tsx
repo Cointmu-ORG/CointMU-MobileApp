@@ -9,7 +9,6 @@ import {
   accountIconTestId,
   resolveAccountIcon,
   useAccountIconLabel,
-  type AccountEmojiGroupId,
   type AccountIcon,
 } from '@/entities/wallet';
 import {
@@ -42,32 +41,15 @@ const CELL_PALETTE = {
   },
 } as const satisfies Record<string, SurfacePalette>;
 
-const CHIP_PALETTE = {
-  selected: CELL_PALETTE.selected,
-  unselected: {
-    idle: 'border-2 border-border bg-surface-card',
-    hovered: 'border-2 border-border bg-surface',
-    pressed: 'border-2 border-border bg-surface-muted',
-  },
-} as const satisfies Record<string, SurfacePalette>;
-
 const LUCIDE_ICONS: readonly AccountIcon[] = ACCOUNT_LUCIDE_NAMES.map((name) => ({
   kind: 'lucide',
   name,
 }));
 const GLYPH_SIZE = 24;
 
-function isSameIcon(a: AccountIcon, b: AccountIcon): boolean {
+export function isSameIcon(a: AccountIcon, b: AccountIcon): boolean {
   if (a.kind === 'lucide') return b.kind === 'lucide' && a.name === b.name;
   return b.kind === 'emoji' && a.value === b.value;
-}
-
-/** The group that holds an emoji, so the picker opens where the current choice is. */
-function groupOf(icon: AccountIcon): AccountEmojiGroupId {
-  const group = ACCOUNT_EMOJI_GROUPS.find(
-    ({ emoji }) => icon.kind === 'emoji' && (emoji as readonly string[]).includes(icon.value),
-  );
-  return (group ?? ACCOUNT_EMOJI_GROUPS[0]).id;
 }
 
 type IconGridProps = IconPickerProps & { icons: readonly AccountIcon[]; label: string };
@@ -106,45 +88,16 @@ function IconGrid({ icons, value, onChange, label }: IconGridProps) {
   );
 }
 
-type GroupChipsProps = { value: AccountEmojiGroupId; onChange: (id: AccountEmojiGroupId) => void };
-
-/** The emoji groups as chips that wrap, so no label is cut off at a large text size. */
-function GroupChips({ value, onChange }: GroupChipsProps) {
-  const { t } = useTranslation();
-  return (
-    <View className="flex-row flex-wrap gap-2">
-      {ACCOUNT_EMOJI_GROUPS.map(({ id }) => {
-        const isSelected = id === value;
-        return (
-          <PressableSurface
-            key={id}
-            palette={isSelected ? CHIP_PALETTE.selected : CHIP_PALETTE.unselected}
-            className="min-h-11 items-center justify-center rounded-full px-3"
-            onPress={() => onChange(id)}
-            accessibilityRole="button"
-            accessibilityLabel={t(`wallets.icons.groups.${id}`)}
-            accessibilityState={{ selected: isSelected }}
-          >
-            <Text variant="label" tone={isSelected ? 'primary' : 'secondary'}>
-              {t(`wallets.icons.groups.${id}`)}
-            </Text>
-          </PressableSurface>
-        );
-      })}
-    </View>
-  );
-}
-
 /**
- * Picks an account card's icon (D-84): a tab of line icons and a tab of emoji by group. Both
- * lists are fixed; there is no text input. It opens on the tab and group of the current icon.
+ * Picks an account card's icon (D-84): a tab of line icons and a tab of emoji, every group in
+ * full under its name. Both lists are fixed; there is no text input. The grid has no scroll of
+ * its own: it is as tall as its content and scrolls with the page. It opens on the tab of the
+ * current icon.
  */
 export function IconPicker({ value, onChange }: IconPickerProps) {
   const { t } = useTranslation();
   const current = resolveAccountIcon(value);
   const [tab, setTab] = useState<Tab>(current.kind);
-  const [groupId, setGroupId] = useState<AccountEmojiGroupId>(() => groupOf(current));
-  const group = ACCOUNT_EMOJI_GROUPS.find(({ id }) => id === groupId) ?? ACCOUNT_EMOJI_GROUPS[0];
 
   return (
     <View className="gap-3">
@@ -165,15 +118,19 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
           label={t('wallets.icons.tabs.lucide')}
         />
       ) : (
-        <>
-          <GroupChips value={groupId} onChange={setGroupId} />
-          <IconGrid
-            icons={group.emoji.map((emoji) => ({ kind: 'emoji', value: emoji }))}
-            value={current}
-            onChange={onChange}
-            label={t(`wallets.icons.groups.${group.id}`)}
-          />
-        </>
+        ACCOUNT_EMOJI_GROUPS.map((group) => (
+          <View key={group.id} className="gap-1">
+            <Text variant="caption" tone="secondary" accessibilityRole="header">
+              {t(`wallets.icons.groups.${group.id}`)}
+            </Text>
+            <IconGrid
+              icons={group.emoji.map((emoji) => ({ kind: 'emoji', value: emoji }))}
+              value={current}
+              onChange={onChange}
+              label={t(`wallets.icons.groups.${group.id}`)}
+            />
+          </View>
+        ))
       )}
     </View>
   );

@@ -15,14 +15,20 @@ type TokenBalanceState = {
 };
 
 // In memory only, like the native balance: public data, re-fetched on launch and on poll.
+// As with the native balance: `clear` (an account switch) starts a new epoch, and an answer for
+// the previous account is dropped.
+let epoch = 0;
+
 export const useTokenBalanceStore = create<TokenBalanceState>()((set, get) => ({
   balances: {},
   isLoading: false,
   refresh: async (provider, owner, tokens) => {
     if (get().isLoading || tokens.length === 0) return;
+    const startedIn = epoch;
     set({ isLoading: true });
     try {
       const values = await fetchTokenBalances(provider, owner, tokens);
+      if (startedIn !== epoch) return;
       const balances: Record<string, bigint> = {};
       tokens.forEach((token, index) => {
         const value = values[index];
@@ -32,8 +38,11 @@ export const useTokenBalanceStore = create<TokenBalanceState>()((set, get) => ({
     } catch (error) {
       logger.warn('Token balance refresh failed', { error });
     } finally {
-      set({ isLoading: false });
+      if (startedIn === epoch) set({ isLoading: false });
     }
   },
-  clear: () => set({ balances: {}, isLoading: false }),
+  clear: () => {
+    epoch += 1;
+    set({ balances: {}, isLoading: false });
+  },
 }));

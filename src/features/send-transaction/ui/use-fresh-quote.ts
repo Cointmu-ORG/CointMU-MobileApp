@@ -14,11 +14,12 @@ import { useSendFlowStore, type SendDraft } from '../model/send-flow-store';
 type Requote = { readonly draft: SendDraft | null; readonly error: SendErrorCode | null };
 
 /** Fetches a new quote for the stored draft and saves it. Never throws. */
-async function requote(from: string): Promise<Requote> {
+async function requote(): Promise<Requote> {
   const current = useSendFlowStore.getState().draft;
   if (current === null) return { draft: null, error: null };
   try {
-    const next = { ...current, quote: await quoteSend({ ...current, from }) };
+    const quote = await quoteSend({ ...current, from: current.from.address });
+    const next = { ...current, quote };
     useSendFlowStore.getState().setDraft(next);
     return { draft: next, error: null };
   } catch (caught) {
@@ -27,7 +28,7 @@ async function requote(from: string): Promise<Requote> {
   }
 }
 
-export function useFreshQuote(from: string) {
+export function useFreshQuote() {
   const draft = useSendFlowStore((state) => state.draft);
   // Starts true: the screen refetches the fee as soon as it opens.
   const [isRefreshing, setIsRefreshing] = useState(true);
@@ -40,16 +41,16 @@ export function useFreshQuote(from: string) {
   }, []);
 
   useEffect(() => {
-    void requote(from).then(apply);
-  }, [from, apply]);
+    void requote().then(apply);
+  }, [apply]);
 
   const ensureFresh = useCallback(async () => {
     const current = useSendFlowStore.getState().draft;
     if (current === null) return null;
     if (!isQuoteStale(current.quote, Date.now(), FEE_QUOTE_MAX_AGE_MS)) return current;
     setIsRefreshing(true);
-    return apply(await requote(from));
-  }, [from, apply]);
+    return apply(await requote());
+  }, [apply]);
 
   return { draft, isRefreshing, error, ensureFresh };
 }

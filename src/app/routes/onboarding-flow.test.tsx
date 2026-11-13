@@ -64,12 +64,12 @@ describe('onboarding flow', () => {
       expect(await screen.findByText('Enter the PIN again')).toBeOnTheScreen();
       await enterPin();
 
-      // PIN saved, no biometrics in tests → active + unlocked → home tab with the mocked balance.
+      // PIN saved, no biometrics in tests → active + unlocked → home tab with the new wallet's card.
       expect(
-        await screen.findByText('Total balance', {}, { timeout: SLOW_STEP_TIMEOUT_MS }),
+        await screen.findByRole('button', { name: 'Transfer' }, { timeout: SLOW_STEP_TIMEOUT_MS }),
       ).toBeOnTheScreen();
-      // The mocked 1 CMU shows in the balance card and the asset list.
-      expect(await screen.findAllByText('1')).toHaveLength(2);
+      // The mocked 1 CMU shows on the account card.
+      expect(await screen.findByText('1 CMU')).toBeOnTheScreen();
       expect(useWalletStore.getState().status).toBe('active');
     },
     FLOW_TIMEOUT_MS,

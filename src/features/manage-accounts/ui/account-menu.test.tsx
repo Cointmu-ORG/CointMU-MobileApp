@@ -8,23 +8,22 @@ import { AccountMenu } from './account-menu';
 
 // Public Hardhat test accounts; never hold real funds.
 const A0 = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+const A1 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 const B0 = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
 
 const state = () => useWalletStore.getState();
 
-/** Wallet 1 is active; the menu is opened for the account of wallet 2. */
-async function openMenu() {
+/** Wallet 1: a phrase wallet with two accounts. Wallet 2: a private key, one account. */
+async function openMenu(target: 'phrase' | 'key') {
   const firstId = seedWalletRecord({ source: 'mnemonic', address: A0 });
   state().activate();
+  state().addAccount(firstId, { index: 1, address: A1 });
   const secondId = addWalletRecord({ source: 'private-key', address: B0 });
-  state().selectAccount(firstId, 0);
-  const callbacks = { onDone: jest.fn(), onChangeIcon: jest.fn(), onReceive: jest.fn() };
-  await render(<AccountMenu account={{ walletId: secondId, index: 0 }} {...callbacks} />);
-  return { ...callbacks, firstId, secondId };
+  const callbacks = { onPersonalize: jest.fn(), onReceive: jest.fn(), onRemoveWallet: jest.fn() };
+  const walletId = target === 'key' ? secondId : firstId;
+  const view = await render(<AccountMenu account={{ walletId, index: 0 }} {...callbacks} />);
+  return { ...callbacks, view };
 }
-
-const account = (walletId: string) =>
-  state().wallets.find((wallet) => wallet.id === walletId)?.accounts[0];
 
 beforeEach(async () => {
   await i18n.changeLanguage('en');
@@ -32,39 +31,38 @@ beforeEach(async () => {
 
 describe('AccountMenu', () => {
   it('names the account, its wallet and its address', async () => {
-    await openMenu();
+    await openMenu('key');
     expect(screen.getByRole('header', { name: 'Account 1' })).toBeOnTheScreen();
     expect(screen.getByText('Wallet 2, 0x3C44…93BC')).toBeOnTheScreen();
   });
 
-  it('renames and recolors only that account', async () => {
-    const { firstId, secondId } = await openMenu();
-    await fireEvent.changeText(screen.getByLabelText('Account name'), '  Rent  ');
-    await fireEvent.press(screen.getByRole('button', { name: 'Save name' }));
-    await fireEvent.press(screen.getByRole('radio', { name: 'Violet' }));
-
-    expect(account(secondId)).toMatchObject({ name: 'Rent', color: 'violet' });
-    expect(account(firstId)).toMatchObject({ name: null });
-    expect(account(firstId)?.color).not.toBe('violet');
-    expect(await screen.findByText('Name saved')).toBeOnTheScreen();
+  it('is a short list of actions: every item shows without scrolling, and nothing is edited inline', async () => {
+    const { view } = await openMenu('key');
+    const names = screen.getAllByRole('button').map((row) => row.props.accessibilityLabel);
+    expect(names).toEqual([
+      'Personalize',
+      'Show receive QR code',
+      'Remove wallet from this device',
+    ]);
+    // No scroll container: the sheet is as tall as these rows.
+    expect(JSON.stringify(view.toJSON())).not.toContain('ScrollView');
+    expect(screen.queryByLabelText('Account name')).toBeNull();
+    expect(screen.queryByRole('radio')).toBeNull();
   });
 
-  it('makes the account active and closes', async () => {
-    const { onDone, secondId } = await openMenu();
-    await fireEvent.press(screen.getByRole('button', { name: 'Set as active account' }));
-    expect(state()).toMatchObject({ activeWalletId: secondId, address: B0 });
-    expect(onDone).toHaveBeenCalledTimes(1);
-  });
-
-  it('names the current icon and opens the icon picker', async () => {
-    const { onChangeIcon } = await openMenu();
-    await fireEvent.press(screen.getByRole('button', { name: 'Change icon, Key' }));
-    expect(onChangeIcon).toHaveBeenCalledTimes(1);
-  });
-
-  it('opens the receive code of that account', async () => {
-    const { onReceive } = await openMenu();
+  it('opens personalize, the receive code and remove wallet', async () => {
+    const callbacks = await openMenu('key');
+    await fireEvent.press(screen.getByRole('button', { name: 'Personalize' }));
     await fireEvent.press(screen.getByRole('button', { name: 'Show receive QR code' }));
-    expect(onReceive).toHaveBeenCalledTimes(1);
+    await fireEvent.press(screen.getByRole('button', { name: 'Remove wallet from this device' }));
+    expect(callbacks.onPersonalize).toHaveBeenCalledTimes(1);
+    expect(callbacks.onReceive).toHaveBeenCalledTimes(1);
+    expect(callbacks.onRemoveWallet).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not offer to remove a wallet from one of its several accounts', async () => {
+    await openMenu('phrase');
+    expect(screen.getAllByRole('button')).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: 'Remove wallet from this device' })).toBeNull();
   });
 });

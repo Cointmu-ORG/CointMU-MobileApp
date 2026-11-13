@@ -96,8 +96,8 @@ function Details({ item }: { item: HistoryItem }) {
 
 export function TxDetailPage() {
   const { t } = useTranslation();
-  const { hash } = useLocalSearchParams<{ hash: string }>();
-  const item = useHistoryItem(hash ?? '');
+  const { hash, owner } = useLocalSearchParams<{ hash: string; owner?: string }>();
+  const item = useHistoryItem(hash ?? '', owner);
   if (item === null) {
     return (
       <FormScreen>

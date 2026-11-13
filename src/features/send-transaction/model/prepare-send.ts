@@ -5,6 +5,7 @@ import { callRpc } from '@/shared/api';
 import { isSameAddress } from '@/shared/lib';
 
 import { buildTxRequest, maxSendable } from '../lib/send-math';
+import type { SendDraft, SendSource } from './send-flow-store';
 
 type QuoteInput = {
   readonly asset: Asset;
@@ -36,12 +37,15 @@ export async function checkRecipient(from: string, to: string) {
 }
 
 /** Quote and recipient checks together: everything the review screen needs. */
-export async function prepareDraft(input: QuoteInput) {
+export async function prepareDraft(
+  input: Omit<QuoteInput, 'from'> & { readonly from: SendSource },
+): Promise<SendDraft> {
+  const { asset, from, to, amount } = input;
   const [quote, recipient] = await Promise.all([
-    quoteSend(input),
-    checkRecipient(input.from, input.to),
+    quoteSend({ asset, from: from.address, to, amount }),
+    checkRecipient(from.address, to),
   ]);
-  return { asset: input.asset, to: input.to, amount: input.amount, quote, ...recipient };
+  return { from, asset, to, amount, quote, ...recipient };
 }
 
 /** "Max" for the form. Native CMU needs a fee quote first; a token does not. */

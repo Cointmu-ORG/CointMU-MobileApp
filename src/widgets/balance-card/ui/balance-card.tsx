@@ -31,7 +31,14 @@ function BalanceValue({ wei }: { wei: bigint }) {
   );
 }
 
-export function BalanceCard({ enterIndex = 0 }: { enterIndex?: number }) {
+type BalanceCardProps = {
+  enterIndex?: number;
+  /** Opens the account's "…" menu. */
+  onMenu?: () => void;
+};
+
+/** The remembered account in full: name, CMU balance, address. Its balances poll while shown. */
+export function BalanceCard({ enterIndex = 0, onMenu }: BalanceCardProps) {
   const { t } = useTranslation();
   const address = useWalletStore((state) => state.address);
   const wei = useBalanceStore((state) => state.wei);
@@ -42,7 +49,7 @@ export function BalanceCard({ enterIndex = 0 }: { enterIndex?: number }) {
   return (
     <Card enterIndex={enterIndex} className="gap-4">
       <View className="gap-1">
-        <AccountChip />
+        <AccountChip onMenu={onMenu} />
         <View className="flex-row items-center justify-between">
           <Text variant="label" tone="secondary">
             {t('home.balance.label')}

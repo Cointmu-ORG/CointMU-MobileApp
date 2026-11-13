@@ -6,12 +6,14 @@ import { useBalanceStore } from '@/entities/account';
 import {
   findAsset,
   getAssetKey,
+  getVisibleTokens,
   NATIVE_ASSET,
   useTokenBalanceStore,
   type Asset,
 } from '@/entities/asset';
+import { getProvider } from '@/entities/network';
 import { classifySendError } from '@/entities/transaction';
-import { useWalletStore } from '@/entities/wallet';
+import { useActiveAccount } from '@/entities/wallet';
 import { ROUTES } from '@/shared/config';
 import { checkAddress, formatAmountInput, logger } from '@/shared/lib';
 
@@ -104,7 +106,10 @@ function useNetworkStep(setErrors: (update: (current: FieldErrors) => FieldError
 
 export function useSendForm() {
   const { i18n } = useTranslation();
-  const from = useWalletStore((state) => state.address) ?? '';
+  // "From" is the remembered account: the one Send was opened from, else the last one used.
+  // Picking another one in the selector makes that the remembered account.
+  const source = useActiveAccount();
+  const from = source?.address ?? '';
   const fields = useFields();
   const [errors, setErrors] = useState<FieldErrors>(NO_ERRORS);
   const toErrorText = useErrorText();
@@ -112,8 +117,17 @@ export function useSendForm() {
   const balance = useAssetBalance(fields.asset);
   const nativeBalance = useBalanceStore((state) => state.wei);
 
+  // A new source: whatever was checked against the old one (not enough funds, a fee quote) no
+  // longer holds, and its balances are loaded. The fee is quoted again on Max and on Review.
+  const [checkedFrom, setCheckedFrom] = useState(from);
+  if (checkedFrom !== from) {
+    setCheckedFrom(from);
+    setErrors(NO_ERRORS);
+  }
   useEffect(() => {
-    if (from !== '') void useBalanceStore.getState().refresh(from);
+    if (from === '') return;
+    void useBalanceStore.getState().refresh(from);
+    void useTokenBalanceStore.getState().refresh(getProvider(), from, getVisibleTokens());
   }, [from]);
 
   const fillMax = () =>
@@ -137,10 +151,12 @@ export function useSendForm() {
     const check = validateSendForm({ ...fields, locale: i18n.language });
     if (!check.ok) return setErrors(toErrorText(check.errors, fields.asset));
     setErrors(NO_ERRORS);
+    if (source === null) return undefined;
+    const { walletId, index, address } = source;
     return run('submit', async () => {
       const draft = await prepareDraft({
         asset: fields.asset,
-        from,
+        from: { walletId, index, address },
         to: check.to,
         amount: check.amount,
       });
@@ -157,6 +173,7 @@ export function useSendForm() {
 
   return {
     ...fields,
+    source,
     selectAsset: (next: Asset) => {
       fields.setAsset(next);
       setErrors(NO_ERRORS);

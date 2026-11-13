@@ -1,18 +1,19 @@
 import Check from 'lucide-react-native/icons/check';
-import LayoutGrid from 'lucide-react-native/icons/layout-grid';
-import Plus from 'lucide-react-native/icons/plus';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
-import { useBalanceStore } from '@/entities/account';
+import { balanceOf, useAccountBalancesStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
 import {
   AccountBadge,
   isWalletUsable,
+  selectUsableAccounts,
   useAccountLabel,
   useActiveAccount,
   useWalletLabel,
   useWalletStore,
+  type WalletAccount,
 } from '@/entities/wallet';
 import { shortenAddress } from '@/shared/lib';
 import { useAmountDisplay } from '@/shared/model';
@@ -21,80 +22,93 @@ import { ICON_SIZE, ListRow, ListSection, Text, useThemeColors } from '@/shared/
 import { switchToAccount } from '../model/accounts';
 
 type AccountSwitcherProps = {
-  /** Called after a switch: the sheet closes. */
+  /** Called after a pick: the sheet closes. */
   onDone: () => void;
-  /** Opens the "add" sheet (account, new wallet, import). */
-  onAdd: () => void;
-  /** Opens the Wallets tab (rename, color, receive). */
-  onManage: () => void;
 };
 
 const ROW_BADGE_SIZE = 36;
 
-/** Only the active account's balance is loaded here; other rows show none. */
-function useActiveBalanceText(): string | undefined {
+function useBalanceText(): (account: WalletAccount) => string | undefined {
   const { formatBalance } = useAmountDisplay();
-  const wei = useBalanceStore((state) => state.wei);
-  if (wei === null) return undefined;
-  return `${formatBalance(wei, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`;
+  const balances = useAccountBalancesStore((state) => state.balances);
+  return (account) => {
+    const { wei } = balanceOf(balances, account.address);
+    if (wei === null) return undefined;
+    return `${formatBalance(wei, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`;
+  };
 }
 
 /**
- * Quick account switcher for the home sheet: the accounts of every usable wallet, grouped by
- * wallet (D-78). Pick one, or open the add sheet or the Wallets tab.
+ * Picks the account to send from: the accounts of every usable wallet, grouped by wallet (D-78),
+ * each with its balance. The account in use stays at the top, outside the list, so it and the
+ * first rows are visible however long the list is; only the list scrolls.
  */
-export function AccountSwitcher({ onDone, onAdd, onManage }: AccountSwitcherProps) {
+export function AccountSwitcher({ onDone }: AccountSwitcherProps) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const accountLabel = useAccountLabel();
   const walletLabel = useWalletLabel();
+  const balanceText = useBalanceText();
   const wallets = useWalletStore((state) => state.wallets);
   const active = useActiveAccount();
-  const activeBalance = useActiveBalanceText();
+
+  useEffect(() => {
+    const addresses = selectUsableAccounts(useWalletStore.getState().wallets).map(
+      (account) => account.address,
+    );
+    void useAccountBalancesStore.getState().refresh(addresses);
+  }, []);
 
   return (
-    <View className="gap-4">
+    <View className="flex-1 gap-4">
       <Text variant="heading" accessibilityRole="header">
         {t('accounts.switcher.title')}
       </Text>
-      {wallets.filter(isWalletUsable).map((wallet) => (
-        <ListSection key={wallet.id} title={walletLabel(wallet)}>
-          {wallet.accounts.map((account) => {
-            const isActive = active?.walletId === wallet.id && active.index === account.index;
-            return (
-              <ListRow
-                key={account.index}
-                leading={<AccountBadge account={account} size={ROW_BADGE_SIZE} />}
-                title={accountLabel(account)}
-                description={shortenAddress(account.address)}
-                value={isActive ? activeBalance : undefined}
-                trailing={
-                  isActive ? (
-                    <Check size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
-                  ) : (
-                    <View className="w-5" />
-                  )
-                }
-                onPress={() => {
-                  switchToAccount({ walletId: wallet.id, index: account.index });
-                  onDone();
-                }}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: isActive }}
-              />
-            );
-          })}
+      {active ? (
+        <ListSection title={t('accounts.switcher.current')}>
+          <ListRow
+            leading={<AccountBadge account={active} size={ROW_BADGE_SIZE} />}
+            title={accountLabel(active)}
+            description={shortenAddress(active.address)}
+            value={balanceText(active)}
+          />
         </ListSection>
-      ))}
-      <ListSection>
-        <ListRow title={t('accounts.switcher.add')} icon={Plus} onPress={onAdd} />
-        <ListRow
-          title={t('accounts.switcher.manage')}
-          description={t('accounts.switcher.manageHint')}
-          icon={LayoutGrid}
-          onPress={onManage}
-        />
-      </ListSection>
+      ) : null}
+      <ScrollView
+        testID="account-switcher-list"
+        className="flex-1"
+        contentContainerClassName="gap-4 pb-6"
+      >
+        {wallets.filter(isWalletUsable).map((wallet) => (
+          <ListSection key={wallet.id} title={walletLabel(wallet)}>
+            {wallet.accounts.map((account) => {
+              const isActive = active?.walletId === wallet.id && active.index === account.index;
+              return (
+                <ListRow
+                  key={account.index}
+                  leading={<AccountBadge account={account} size={ROW_BADGE_SIZE} />}
+                  title={accountLabel(account)}
+                  description={shortenAddress(account.address)}
+                  value={balanceText(account)}
+                  trailing={
+                    isActive ? (
+                      <Check size={ICON_SIZE.md} color={colors.accent.DEFAULT} />
+                    ) : (
+                      <View className="w-5" />
+                    )
+                  }
+                  onPress={() => {
+                    switchToAccount({ walletId: wallet.id, index: account.index });
+                    onDone();
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: isActive }}
+                />
+              );
+            })}
+          </ListSection>
+        ))}
+      </ScrollView>
     </View>
   );
 }

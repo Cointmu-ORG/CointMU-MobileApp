@@ -18,23 +18,32 @@ import {
   useThemeColors,
 } from '@/shared/ui';
 
+/** `grid`: two per row in the Wallets tab. `wide`: one per page in the home carousel. */
+export type AccountCardSize = 'grid' | 'wide';
+
+const SIZE = {
+  grid: { card: 'min-h-40 p-3', balance: 'heading' },
+  wide: { card: 'min-h-44 p-4', balance: 'title' },
+} as const;
+
 type AccountCardProps = {
   account: WalletAccount;
   isActive: boolean;
+  size?: AccountCardSize;
   onPress: () => void;
   /** The "…" button and a long press both open the account's menu. */
   onMenu: () => void;
 };
 
 /** The balance line: the amount, a placeholder while it loads, or a short failure note. */
-function CardBalance({ address }: { address: string }) {
+function CardBalance({ address, size }: { address: string; size: AccountCardSize }) {
   const { t } = useTranslation();
   const { formatBalance } = useAmountDisplay();
   const { wei, status } = useAccountBalancesStore((state) => balanceOf(state.balances, address));
 
   if (wei !== null) {
     return (
-      <Text variant="heading" tone="inverse" numberOfLines={1} adjustsFontSizeToFit>
+      <Text variant={SIZE[size].balance} tone="inverse" numberOfLines={1} adjustsFontSizeToFit>
         {formatBalance(wei, NATIVE_ASSET.decimals)} {NATIVE_ASSET.symbol}
       </Text>
     );
@@ -79,10 +88,12 @@ function ActiveBadge({ fill }: { fill: string }) {
 
 /**
  * One account as a card in the user's color (D-80) with the user's icon (D-84): name, native balance, short address
- * and an "Active" badge. A tap makes it the active account; the menu holds the rest. Text and
- * icons are white on the fill, which the palette test keeps at AA in both themes.
+ * and an "Active" badge. A tap opens the account; the menu holds the rest. It fills the width it
+ * is given. Text and icons are white on the fill, which the palette test keeps at AA in both
+ * themes.
  */
-export function AccountCard({ account, isActive, onPress, onMenu }: AccountCardProps) {
+export function AccountCard(props: AccountCardProps) {
+  const { account, isActive, size = 'grid', onPress, onMenu } = props;
   const { t } = useTranslation();
   const colors = useThemeColors();
   const label = useAccountLabel();
@@ -90,48 +101,46 @@ export function AccountCard({ account, isActive, onPress, onMenu }: AccountCardP
   const name = label(account);
 
   return (
-    <View className="w-[48%]">
-      <PressableSurface
-        palette={SURFACE_PALETTE.tinted}
-        className="min-h-40 justify-between overflow-hidden rounded-card p-3"
-        surfaceStyle={{ backgroundColor: fill }}
-        onPress={onPress}
-        onLongPress={onMenu}
-        accessibilityRole="button"
-        accessibilityLabel={t(isActive ? 'wallets.card.labelActive' : 'wallets.card.label', {
-          name,
-          address: shortenAddress(account.address),
-        })}
-        accessibilityHint={t('wallets.card.hint')}
-        accessibilityState={{ selected: isActive }}
-      >
-        <CardRings />
-        <View className="flex-row items-start justify-between">
-          <AccountIconTile icon={account.icon} />
-          <PressableSurface
-            palette={SURFACE_PALETTE.tinted}
-            className="-mr-2 -mt-2 h-11 w-11 items-center justify-center rounded-full"
-            onPress={onMenu}
-            accessibilityRole="button"
-            accessibilityLabel={t('wallets.card.menu', { name })}
-          >
-            <Ellipsis size={ICON_SIZE.md} color={colors.content.inverse} />
-          </PressableSurface>
-        </View>
-        <View className="gap-1">
-          <Text variant="label" tone="inverse" numberOfLines={1}>
-            {name}
+    <PressableSurface
+      palette={SURFACE_PALETTE.tinted}
+      className={`justify-between overflow-hidden rounded-card ${SIZE[size].card}`}
+      surfaceStyle={{ backgroundColor: fill }}
+      onPress={onPress}
+      onLongPress={onMenu}
+      accessibilityRole="button"
+      accessibilityLabel={t(isActive ? 'wallets.card.labelActive' : 'wallets.card.label', {
+        name,
+        address: shortenAddress(account.address),
+      })}
+      accessibilityHint={t('wallets.card.hint')}
+      accessibilityState={{ selected: isActive }}
+    >
+      <CardRings />
+      <View className="flex-row items-start justify-between">
+        <AccountIconTile icon={account.icon} />
+        <PressableSurface
+          palette={SURFACE_PALETTE.tinted}
+          className="-mr-2 -mt-2 h-11 w-11 items-center justify-center rounded-full"
+          onPress={onMenu}
+          accessibilityRole="button"
+          accessibilityLabel={t('wallets.card.menu', { name })}
+        >
+          <Ellipsis size={ICON_SIZE.md} color={colors.content.inverse} />
+        </PressableSurface>
+      </View>
+      <View className="gap-1">
+        <Text variant="label" tone="inverse" numberOfLines={1}>
+          {name}
+        </Text>
+        <CardBalance address={account.address} size={size} />
+        <View className="min-h-6 flex-row flex-wrap items-center justify-between gap-1">
+          <Text variant="caption" tone="inverse" className="font-mono">
+            {shortenAddress(account.address)}
           </Text>
-          <CardBalance address={account.address} />
-          <View className="min-h-6 flex-row flex-wrap items-center justify-between gap-1">
-            <Text variant="caption" tone="inverse" className="font-mono">
-              {shortenAddress(account.address)}
-            </Text>
-            {isActive ? <ActiveBadge fill={fill} /> : null}
-          </View>
+          {isActive ? <ActiveBadge fill={fill} /> : null}
         </View>
-      </PressableSurface>
-    </View>
+      </View>
+    </PressableSurface>
   );
 }
 
