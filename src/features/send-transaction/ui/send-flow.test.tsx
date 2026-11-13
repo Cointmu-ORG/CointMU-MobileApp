@@ -173,7 +173,7 @@ describe('send flow', () => {
   describe('the source account', () => {
     const fromField = (name: RegExp) => screen.findByRole('button', { name });
 
-    it('starts on the remembered account and shows its balance', async () => {
+    it('starts on the account in use and shows its balance', async () => {
       await renderRouter('./app', { initialUrl: '/send' });
       expect(await fromField(/^From Account 1, 10 CMU$/)).toBeOnTheScreen();
       expect(screen.getByText('0xf39F…2266')).toBeOnTheScreen();
@@ -219,7 +219,7 @@ describe('send flow', () => {
       expect(screen.getByText('0x3C44…93BC')).toBeOnTheScreen();
     });
 
-    it('blocks the review when the remembered account is no longer the one in From', async () => {
+    it('blocks the review when the account in use is no longer the one in From', async () => {
       await fillFormAndReview();
       await act(async () => useWalletStore.getState().selectAccount(otherWalletId, 0));
 
@@ -230,7 +230,7 @@ describe('send flow', () => {
       expect(mockBroadcast).not.toHaveBeenCalled();
     });
 
-    it('signs for the account in the draft, whatever the remembered account is', async () => {
+    it('signs for the account in the draft, whatever the account in use is', async () => {
       await fillFormAndReview();
       const draft = useSendFlowStore.getState().draft;
       if (draft === null) throw new Error('expected a draft');

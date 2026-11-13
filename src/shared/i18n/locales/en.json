@@ -269,7 +269,7 @@
       "lockNow": "Lock now",
       "lockNowDesc": "Lock Muvo until you enter your PIN. Nothing is deleted.",
       "remove": "Remove wallet from this device",
-      "removeDesc": "Deletes the active wallet's key from this phone. You need its recovery phrase or private key to get it back."
+      "removeDesc": "Deletes the key of the default account's wallet from this phone. You need its recovery phrase or private key to get it back."
     },
     "removeWallet": {
       "title": "Remove wallet",
@@ -472,6 +472,10 @@
         "howToDisable": "You can change this at any time in Settings > Privacy.",
         "acknowledge": "Got it"
       }
+    },
+    "defaultAccount": {
+      "title": "Default account for transfers",
+      "description": "Transfer and Scan QR on Home start from this account. You can still pick another account for a single transfer."
     }
   },
   "send": {
@@ -628,6 +632,11 @@
     "switcher": {
       "title": "Send from",
       "current": "Selected"
+    },
+    "defaultMoved": {
+      "title": "Default account changed",
+      "body": "The previous default account is no longer available. {{name}} is now your default account for transfers. You can change it in Settings.",
+      "dismiss": "Got it"
     }
   },
   "tokens": {
@@ -703,9 +712,9 @@
       "slate": "Slate"
     },
     "card": {
-      "active": "Active",
+      "default": "Default",
       "label": "{{name}}, {{address}}",
-      "labelActive": "{{name}}, {{address}}, active account",
+      "labelDefault": "{{name}}, {{address}}, default account",
       "hint": "Opens this account",
       "menu": "More options for {{name}}",
       "balanceError": "Balance unavailable",
@@ -714,10 +723,11 @@
     "menu": {
       "subtitle": "{{wallet}}, {{address}}",
       "receive": "Show receive QR code",
-      "personalize": "Personalize"
+      "personalize": "Personalize",
+      "setDefault": "Set as default"
     },
     "details": {
-      "backupHint": "The active wallet's recovery phrase and private key are in Settings, under Security."
+      "backupHint": "The recovery phrase and private key of the default account's wallet are in Settings, under Security."
     },
     "add": {
       "title": "Add",

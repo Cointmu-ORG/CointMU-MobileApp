@@ -19,7 +19,12 @@ async function openMenu(target: 'phrase' | 'key') {
   state().activate();
   state().addAccount(firstId, { index: 1, address: A1 });
   const secondId = addWalletRecord({ source: 'private-key', address: B0 });
-  const callbacks = { onPersonalize: jest.fn(), onReceive: jest.fn(), onRemoveWallet: jest.fn() };
+  const callbacks = {
+    onPersonalize: jest.fn(),
+    onDefaultSet: jest.fn(),
+    onReceive: jest.fn(),
+    onRemoveWallet: jest.fn(),
+  };
   const walletId = target === 'key' ? secondId : firstId;
   const view = await render(<AccountMenu account={{ walletId, index: 0 }} {...callbacks} />);
   return { ...callbacks, view };
@@ -41,6 +46,7 @@ describe('AccountMenu', () => {
     const names = screen.getAllByRole('button').map((row) => row.props.accessibilityLabel);
     expect(names).toEqual([
       'Personalize',
+      'Set as default',
       'Show receive QR code',
       'Remove wallet from this device',
     ]);
@@ -60,8 +66,26 @@ describe('AccountMenu', () => {
     expect(callbacks.onRemoveWallet).toHaveBeenCalledTimes(1);
   });
 
+  it('makes the account the default for transfers and closes', async () => {
+    const callbacks = await openMenu('key');
+    const before = state().activeWalletId;
+    await fireEvent.press(screen.getByRole('button', { name: 'Set as default' }));
+
+    const secondId = state().wallets[1]?.id;
+    expect(state().defaultAccount).toEqual({ walletId: secondId, index: 0 });
+    expect(state().activeWalletId).toBe(before);
+    expect(callbacks.onDefaultSet).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: 'Set as default' })).toBeNull();
+  });
+
+  it('does not offer "Set as default" on the account that already is the default', async () => {
+    await openMenu('phrase');
+    expect(screen.queryByRole('button', { name: 'Set as default' })).toBeNull();
+  });
+
   it('does not offer to remove a wallet from one of its several accounts', async () => {
     await openMenu('phrase');
+    // The default account of a wallet with two accounts: Personalize and the receive code.
     expect(screen.getAllByRole('button')).toHaveLength(2);
     expect(screen.queryByRole('button', { name: 'Remove wallet from this device' })).toBeNull();
   });

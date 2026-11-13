@@ -17,6 +17,7 @@ preloadRoutes();
 
 const PHRASE = 'test test test test test test test test test test test junk';
 const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+const SECOND_ADDRESS = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 
 jest.mock('expo-clipboard', () => ({ setStringAsync: jest.fn(async () => true) }));
 jest.mock('@/shared/api', () => ({
@@ -59,7 +60,7 @@ describe('Settings tab', () => {
     for (const name of [
       'Appearance, System',
       'Language, English',
-      'Wallets and accounts, Account 1',
+      'Default account for transfers, Account 1',
       'Network, rpc.test.invalid',
       'Security, Auto-lock: 1 min',
       'Privacy, Reports not set up',
@@ -70,6 +71,33 @@ describe('Settings tab', () => {
     expect(
       screen.getByRole('button', { name: 'Remove wallet from this device' }),
     ).toBeOnTheScreen();
+  });
+
+  it('sets the default account for transfers from its own screen', async () => {
+    const state = () => useWalletStore.getState();
+    const firstId = state().wallets[0]?.id ?? '';
+    state().addAccount(firstId, { index: 1, address: SECOND_ADDRESS });
+    state().renameAccount(firstId, 1, 'Savings');
+    useAppearanceStore.setState({ hidesBalances: true });
+    await openSettings();
+    expect(screen.getByRole('button', { name: 'Wallets and accounts' })).toBeOnTheScreen();
+
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Default account for transfers, Account 1' }),
+    );
+    // Every account under its wallet, the default checked, balances hidden like everywhere.
+    expect(await screen.findByRole('header', { name: 'Wallet 1' })).toBeOnTheScreen();
+    expect(await screen.findByRole('radio', { name: 'Account 1, •••• CMU' })).toBeChecked();
+    const savings = screen.getByRole('radio', { name: 'Savings, •••• CMU' });
+    expect(savings).not.toBeChecked();
+    expect(screen.getByText('0x7099…79C8')).toBeOnTheScreen();
+
+    await fireEvent.press(savings);
+
+    expect(screen.getByRole('radio', { name: 'Savings, •••• CMU' })).toBeChecked();
+    expect(state().defaultAccount).toEqual({ walletId: firstId, index: 1 });
+    // Choosing a default is not looking at an account: the one in use stays.
+    expect(state().accountIndex).toBe(0);
   });
 
   it('opens each group on its own screen', async () => {

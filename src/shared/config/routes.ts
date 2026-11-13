@@ -18,6 +18,7 @@ export const ROUTES = {
   language: '/language',
   network: '/network',
   security: '/security',
+  defaultAccount: '/default-account',
   enableBiometrics: '/enable-biometrics',
   privateKey: '/private-key',
   privacy: '/privacy',

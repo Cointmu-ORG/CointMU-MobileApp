@@ -4,8 +4,8 @@ import { StyleSheet, View } from 'react-native';
 
 import {
   isWalletUsable,
-  useActiveAccount,
   useWalletLabel,
+  useWalletStore,
   type WalletRecord,
 } from '@/entities/wallet';
 import {
@@ -56,7 +56,7 @@ function SectionHeader({ wallet, onEdit }: { wallet: WalletRecord; onEdit: () =>
 
 /** One wallet: its name as the section header, then its account cards two per row. */
 export function WalletSection({ wallet, actions }: WalletSectionProps) {
-  const active = useActiveAccount();
+  const defaultAccount = useWalletStore((state) => state.defaultAccount);
 
   return (
     <View className="gap-3">
@@ -69,7 +69,9 @@ export function WalletSection({ wallet, actions }: WalletSectionProps) {
               <View key={account.index} className="w-[48%]">
                 <AccountCard
                   account={account}
-                  isActive={active?.walletId === wallet.id && active.index === account.index}
+                  isDefault={
+                    defaultAccount?.walletId === wallet.id && defaultAccount.index === account.index
+                  }
                   onPress={() => actions.onSelectAccount(ref)}
                   onMenu={() => actions.onAccountMenu(ref)}
                 />

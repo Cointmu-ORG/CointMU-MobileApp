@@ -1,5 +1,5 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { RefreshControl } from 'react-native';
 
 import { useAccountBalancesStore, useBalanceStore } from '@/entities/account';
@@ -16,9 +16,10 @@ import { DetailActions } from './detail-actions';
 
 /**
  * One account in full: balance, Send / Receive / Scan, its tokens and its activity, and the
- * "…" menu. Opening it makes the account the remembered one, which is what the balance card,
- * the token list and the send form read; nothing is drawn until that is so, so another
- * account's numbers never show here. A wallet that cannot be used shows nothing.
+ * "…" menu. While it is in front its account is the one in use, which is what the balance card,
+ * the token list and a send started here read; nothing is drawn until that is so, so another
+ * account's numbers never show here. The default account is never changed by looking (D-92).
+ * A wallet that cannot be used shows nothing.
  */
 export function WalletDetailPage() {
   const colors = useThemeColors();
@@ -28,11 +29,14 @@ export function WalletDetailPage() {
   const active = useActiveAccount();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (walletId !== undefined && Number.isInteger(accountIndex)) {
-      switchToAccount({ walletId, index: accountIndex });
-    }
-  }, [walletId, accountIndex]);
+  // On every return too: a send started here may have used another source for that send.
+  useFocusEffect(
+    useCallback(() => {
+      if (walletId !== undefined && Number.isInteger(accountIndex)) {
+        switchToAccount({ walletId, index: accountIndex });
+      }
+    }, [walletId, accountIndex]),
+  );
 
   if (active === null || active.walletId !== walletId || active.index !== accountIndex) return null;
   const account = { walletId: active.walletId, index: active.index };

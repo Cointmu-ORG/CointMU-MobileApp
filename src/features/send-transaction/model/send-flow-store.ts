@@ -14,7 +14,7 @@ export type SendSource = {
 export type SendDraft = {
   /**
    * The account shown in "From" when the form was submitted. The review shows it and the
-   * signature is made for it, whatever the remembered default account is by then.
+   * signature is made for it, whatever the account in use is by then.
    */
   readonly from: SendSource;
   readonly asset: Asset;

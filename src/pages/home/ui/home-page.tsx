@@ -6,7 +6,7 @@ import { RefreshControl } from 'react-native';
 import { useAccountBalancesStore } from '@/entities/account';
 import { useHistoryStore } from '@/entities/transaction';
 import { isWalletUsable, selectUsableAccounts, useWalletStore } from '@/entities/wallet';
-import { switchToAccount } from '@/features/manage-accounts';
+import { DefaultMovedNotice, switchToAccount } from '@/features/manage-accounts';
 import { ROUTES } from '@/shared/config';
 import { Notice, ScrollScreen, useThemeColors } from '@/shared/ui';
 import { RecentActivity } from '@/widgets/history-list';
@@ -16,7 +16,7 @@ import { HomeHeader } from './home-header';
 import { QuickActions } from './quick-actions';
 
 function openAccount(account: AccountRef) {
-  // The account becomes the remembered one; its screen then shows it.
+  // Its screen shows the account in use; the default account stays what it is.
   switchToAccount(account);
   router.push({ pathname: ROUTES.walletDetail, params: account });
 }
@@ -54,6 +54,7 @@ export function HomePage() {
     >
       <HomeHeader />
       {wallets.every(isWalletUsable) ? null : <Notice tone="warning">{t('home.attention')}</Notice>}
+      <DefaultMovedNotice />
       <AccountCarousel
         isFocused={isFocused}
         onOpenAccount={openAccount}

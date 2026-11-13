@@ -1,4 +1,4 @@
-import Check from 'lucide-react-native/icons/check';
+import Star from 'lucide-react-native/icons/star';
 import Ellipsis from 'lucide-react-native/icons/ellipsis';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -28,7 +28,8 @@ const SIZE = {
 
 type AccountCardProps = {
   account: WalletAccount;
-  isActive: boolean;
+  /** The default account for transfers (D-92) carries a badge. */
+  isDefault: boolean;
   size?: AccountCardSize;
   onPress: () => void;
   /** The "…" button and a long press both open the account's menu. */
@@ -74,13 +75,13 @@ function CardRings() {
   );
 }
 
-function ActiveBadge({ fill }: { fill: string }) {
+function DefaultBadge({ fill }: { fill: string }) {
   const { t } = useTranslation();
   return (
     <View className="flex-row items-center gap-1 rounded-full bg-content-inverse px-2 py-0.5">
-      <Check size={ICON_SIZE.sm} color={fill} accessibilityElementsHidden />
+      <Star size={ICON_SIZE.sm} color={fill} accessibilityElementsHidden />
       <Text variant="caption" className="font-semibold" style={{ color: fill }}>
-        {t('wallets.card.active')}
+        {t('wallets.card.default')}
       </Text>
     </View>
   );
@@ -88,12 +89,12 @@ function ActiveBadge({ fill }: { fill: string }) {
 
 /**
  * One account as a card in the user's color (D-80) with the user's icon (D-84): name, native balance, short address
- * and an "Active" badge. A tap opens the account; the menu holds the rest. It fills the width it
+ * and a "Default" badge on the default account. A tap opens the account; the menu holds the rest. It fills the width it
  * is given. Text and icons are white on the fill, which the palette test keeps at AA in both
  * themes.
  */
 export function AccountCard(props: AccountCardProps) {
-  const { account, isActive, size = 'grid', onPress, onMenu } = props;
+  const { account, isDefault, size = 'grid', onPress, onMenu } = props;
   const { t } = useTranslation();
   const colors = useThemeColors();
   const label = useAccountLabel();
@@ -108,12 +109,11 @@ export function AccountCard(props: AccountCardProps) {
       onPress={onPress}
       onLongPress={onMenu}
       accessibilityRole="button"
-      accessibilityLabel={t(isActive ? 'wallets.card.labelActive' : 'wallets.card.label', {
+      accessibilityLabel={t(isDefault ? 'wallets.card.labelDefault' : 'wallets.card.label', {
         name,
         address: shortenAddress(account.address),
       })}
       accessibilityHint={t('wallets.card.hint')}
-      accessibilityState={{ selected: isActive }}
     >
       <CardRings />
       <View className="flex-row items-start justify-between">
@@ -137,7 +137,7 @@ export function AccountCard(props: AccountCardProps) {
           <Text variant="caption" tone="inverse" className="font-mono">
             {shortenAddress(account.address)}
           </Text>
-          {isActive ? <ActiveBadge fill={fill} /> : null}
+          {isDefault ? <DefaultBadge fill={fill} /> : null}
         </View>
       </View>
     </PressableSurface>

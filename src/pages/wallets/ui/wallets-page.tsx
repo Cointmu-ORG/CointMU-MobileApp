@@ -16,7 +16,7 @@ const openAdd = () => router.push(ROUTES.walletAdd);
 /** What each card, section and attention card does. Ids in routes are public data. */
 const ACTIONS: WalletGridActions = {
   onSelectAccount: (account) => {
-    // The account becomes the remembered one; its screen then shows it.
+    // Its screen shows the account in use; the default account stays what it is (D-92).
     switchToAccount(account);
     // A sheet that is still opening goes first, so the detail is never stacked on a sheet.
     if (router.canDismiss()) router.dismissAll();

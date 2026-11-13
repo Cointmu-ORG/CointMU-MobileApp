@@ -6,16 +6,18 @@ import Lock from 'lucide-react-native/icons/lock';
 import Palette from 'lucide-react-native/icons/palette';
 import Server from 'lucide-react-native/icons/server';
 import ShieldCheck from 'lucide-react-native/icons/shield-check';
+import Star from 'lucide-react-native/icons/star';
 import Trash2 from 'lucide-react-native/icons/trash-2';
 import WalletCards from 'lucide-react-native/icons/wallet-cards';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthPrefsStore } from '@/entities/auth';
 import { useActiveRpcUrl } from '@/entities/network';
-import { useAccountLabel, useActiveAccount } from '@/entities/wallet';
+import { useAccountLabel, useDefaultAccount } from '@/entities/wallet';
 import { LANGUAGE_NAMES, useCurrentLanguage } from '@/features/change-language';
 import { lockNow } from '@/features/lock-settings';
-import { getAppInfo, ROUTES } from '@/shared/config';
+import { switchToDefaultAccount } from '@/features/manage-accounts';
+import { getAppInfo, ROUTES, type AppRoute } from '@/shared/config';
 import { formatUrlHost, isErrorReportingAvailable } from '@/shared/lib';
 import { useAppearanceStore, useErrorReportingStore } from '@/shared/model';
 import { ScrollScreen, SettingsRow, SettingsSection, Text } from '@/shared/ui';
@@ -38,6 +40,15 @@ function usePrivacyLabel(): string {
 }
 
 /**
+ * Security and "Remove wallet" act on one wallet. From Settings that is the default account's,
+ * not the one last looked at (D-92); both screens name it.
+ */
+function openForDefaultAccount(route: AppRoute) {
+  switchToDefaultAccount();
+  router.push(route);
+}
+
+/**
  * The Settings tab: one row per group, each showing its current value and opening its own
  * screen. Same groups as the desktop settings, minus the desktop-only ones (D-46, D-71).
  */
@@ -46,7 +57,7 @@ export function SettingsPage() {
   const theme = useAppearanceStore((state) => state.theme);
   const language = useCurrentLanguage();
   const label = useAccountLabel();
-  const account = useActiveAccount();
+  const defaultAccount = useDefaultAccount();
   const rpcUrl = useActiveRpcUrl();
   const autoLock = useAutoLockLabel();
   const privacy = usePrivacyLabel();
@@ -75,8 +86,13 @@ export function SettingsPage() {
         <SettingsRow
           icon={WalletCards}
           title={t('settings.accounts.title')}
-          value={account ? label(account) : undefined}
           onPress={() => router.navigate(ROUTES.wallets)}
+        />
+        <SettingsRow
+          icon={Star}
+          title={t('settings.defaultAccount.title')}
+          value={defaultAccount ? label(defaultAccount) : undefined}
+          onPress={() => router.push(ROUTES.defaultAccount)}
         />
         <SettingsRow
           icon={Server}
@@ -88,7 +104,7 @@ export function SettingsPage() {
           icon={ShieldCheck}
           title={t('settings.security.title')}
           value={t('settings.security.autoLockValue', { time: autoLock })}
-          onPress={() => router.push(ROUTES.security)}
+          onPress={() => openForDefaultAccount(ROUTES.security)}
         />
       </SettingsSection>
       <SettingsSection title={t('settings.logout.title')}>
@@ -102,7 +118,7 @@ export function SettingsPage() {
           icon={Trash2}
           title={t('settings.logout.remove')}
           description={t('settings.logout.removeDesc')}
-          onPress={() => router.push(ROUTES.removeWallet)}
+          onPress={() => openForDefaultAccount(ROUTES.removeWallet)}
           isDestructive
         />
       </SettingsSection>

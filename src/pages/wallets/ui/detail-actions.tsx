@@ -32,8 +32,8 @@ function DetailAction({ label, Icon, onPress }: Action) {
 type DetailActionsProps = { account: { readonly walletId: string; readonly index: number } };
 
 /**
- * Send, Receive and Scan for the account on screen. It is the remembered account while its
- * screen is open, so Send and Scan open the send form with it as the source.
+ * Send, Receive and Scan for the account on screen. It is the account in use while its screen
+ * is in front, so Send and Scan open the send form with it as the source, for that send only.
  */
 export function DetailActions({ account }: DetailActionsProps) {
   const { t } = useTranslation();

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 
 import { useAccountBalancesStore } from '@/entities/account';
 import { useWalletStore } from '@/entities/wallet';
@@ -39,7 +39,7 @@ function setBalance(address: string, wei: bigint | null, status: 'success' | 'er
   });
 }
 
-/** Wallet 1: a phrase wallet with two accounts (the first active). Wallet 2: a private key. */
+/** Wallet 1: a phrase wallet with two accounts (the first is the default). Wallet 2: a private key. */
 function seedWallets() {
   const firstId = seedWalletRecord({ source: 'mnemonic', address: A0 });
   state().activate();
@@ -72,13 +72,29 @@ describe('WalletGrid', () => {
     expect(screen.getByText('Recovery phrase, 2 accounts')).toBeOnTheScreen();
     expect(screen.getByText('Private key, 1 account')).toBeOnTheScreen();
 
-    const first = card(/^Account 1, 0xf39F…2266, active account$/);
+    const first = card(/^Account 1, 0xf39F…2266, default account$/);
     expect(within(first).getByText('1.5 CMU')).toBeOnTheScreen();
-    expect(within(first).getByText('Active')).toBeOnTheScreen();
+    expect(within(first).getByText('Default')).toBeOnTheScreen();
     const savings = card(/^Savings, 0x7099…79C8$/);
     expect(within(savings).getByText('2 CMU')).toBeOnTheScreen();
-    expect(within(savings).queryByText('Active')).toBeNull();
+    expect(within(savings).queryByText('Default')).toBeNull();
     expect(within(card(/^Account 1, 0x3C44…93BC$/)).getByText('0 CMU')).toBeOnTheScreen();
+  });
+
+  it('puts the "Default" badge on the default account, not on the one being looked at', async () => {
+    const { firstId, secondId } = seedWallets();
+    await render(<WalletGrid actions={actions()} />);
+
+    await act(async () => state().selectAccount(secondId, 0));
+    expect(
+      within(card(/^Account 1, 0xf39F…2266, default account$/)).getByText('Default'),
+    ).toBeOnTheScreen();
+
+    await act(async () => state().setDefaultAccount(firstId, 1));
+    expect(
+      within(card(/^Savings, 0x7099…79C8, default account$/)).getByText('Default'),
+    ).toBeOnTheScreen();
+    expect(screen.getAllByText('Default')).toHaveLength(1);
   });
 
   it('masks every balance while "Hide balances" is on, and keeps the symbol', async () => {
