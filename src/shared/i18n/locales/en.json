@@ -228,7 +228,7 @@
       "backupFooter": "Both ask for your PIN or biometrics first and block screenshots.",
       "recoveryPhraseNone": "This wallet has no recovery phrase",
       "privateKeyTitle": "Show private key",
-      "privateKeyDesc": "The key of the active account",
+      "privateKeyDesc": "The key of a wallet's first account",
       "privateKeyOnlyBackup": "The only backup of this wallet",
       "lockout": "PIN attempts",
       "attemptsTitle": "Wrong PIN attempts",
@@ -253,7 +253,7 @@
       "warning": "Never share your recovery phrase. Anyone who has it can take full control of your wallet and steal all of your funds. Store it offline and never type it into a website.",
       "reveal": "Reveal recovery phrase",
       "authTitle": "Enter your PIN",
-      "authSubtitle": "to show your recovery phrase",
+      "authSubtitle": "to show the recovery phrase of {{wallet}} ({{address}})",
       "hide": "Hide",
       "autoHide": "The words hide again after 30 seconds, when you leave this screen and when Muvo goes to the background.",
       "failed": "Failed to reveal recovery phrase.",
@@ -262,14 +262,15 @@
       "revealed": "Shown for 30 seconds.",
       "showWords": "Show words",
       "hideWords": "Hide words",
-      "wallet": "Recovery phrase of {{wallet}}"
+      "wallet": "Recovery phrase of {{wallet}}",
+      "pick": "Which wallet's recovery phrase?"
     },
     "logout": {
       "title": "Log out",
       "lockNow": "Lock now",
       "lockNowDesc": "Lock Muvo until you enter your PIN. Nothing is deleted.",
       "remove": "Remove wallet from this device",
-      "removeDesc": "Deletes the key of the default account's wallet from this phone. You need its recovery phrase or private key to get it back."
+      "removeDesc": "Deletes one wallet's key from this phone. You need its recovery phrase or private key to get it back."
     },
     "removeWallet": {
       "title": "Remove wallet",
@@ -279,11 +280,13 @@
       "ack": "I have my recovery phrase or private key written down",
       "continue": "Remove wallet",
       "authTitle": "Enter your PIN",
-      "authSubtitle": "to remove the wallet from this phone",
-      "finalTitle": "Remove the wallet now?",
+      "authSubtitle": "to remove {{wallet}} ({{address}}) from this phone",
+      "finalTitle": "Remove {{wallet}} now?",
       "confirm": "Remove",
       "target": "Remove {{wallet}}",
-      "descriptionLast": "This is your only wallet, so removing it also removes your PIN and takes Muvo back to the start. The funds stay on the CointMU network; you can restore the wallet later with its recovery phrase or private key."
+      "descriptionLast": "This is your only wallet, so removing it also removes your PIN and takes Muvo back to the start. The funds stay on the CointMU network; you can restore the wallet later with its recovery phrase or private key.",
+      "pick": "Which wallet do you want to remove?",
+      "finalBody": "{{wallet}} ({{address}}) will be removed from this phone. This can't be undone."
     },
     "about": {
       "title": "About",
@@ -433,14 +436,15 @@
       "failed": "Failed to reveal private key.",
       "reveal": "Show private key",
       "authTitle": "Enter your PIN",
-      "authSubtitle": "to show your private key",
+      "authSubtitle": "to show the private key of {{owner}} ({{address}})",
       "authPrompt": "Show your private key",
       "keyLabel": "Private key",
       "hide": "Hide",
       "autoHide": "The key hides again after 30 seconds, when you leave this screen and when Muvo goes to the background. It can't be copied or captured in a screenshot.",
       "showKey": "Show key",
       "hideKey": "Hide key",
-      "owner": "{{account}} in {{wallet}}"
+      "owner": "{{account}} in {{wallet}}",
+      "pick": "Which wallet's private key?"
     },
     "privacy": {
       "title": "Privacy",
@@ -727,7 +731,7 @@
       "setDefault": "Set as default"
     },
     "details": {
-      "backupHint": "The recovery phrase and private key of the default account's wallet are in Settings, under Security."
+      "backupHint": "Each wallet's recovery phrase and private key are in Settings, under Security."
     },
     "add": {
       "title": "Add",

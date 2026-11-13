@@ -41,7 +41,7 @@ afterEach(() => jest.restoreAllMocks());
 describe('RemoveWalletFlow', () => {
   it('needs the acknowledgement, the PIN and a final confirmation before it wipes', async () => {
     const alert = jest.spyOn(Alert, 'alert');
-    await render(<RemoveWalletFlow onCancel={jest.fn()} />);
+    await render(<RemoveWalletFlow walletId={walletId} onCancel={jest.fn()} />);
 
     const remove = screen.getByRole('button', { name: 'Remove wallet' });
     expect(remove).toBeDisabled();
@@ -74,8 +74,14 @@ describe('RemoveWalletFlow', () => {
     expect(screen.getByText('Remove Wallet 2')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('checkbox'));
     await fireEvent.press(screen.getByRole('button', { name: 'Remove wallet' }));
+    // The PIN step and the final confirmation name the wallet being removed.
+    expect(
+      await screen.findByText('to remove Wallet 2 (0x0000…0002) from this phone'),
+    ).toBeOnTheScreen();
     await typePin(PIN);
     await waitFor(() => expect(alert).toHaveBeenCalledTimes(1));
+    expect(alert.mock.calls[0]?.[0]).toBe('Remove Wallet 2 now?');
+    expect(alert.mock.calls[0]?.[1]).toContain('Wallet 2 (0x0000…0002)');
     const buttons = alert.mock.calls[0]?.[2] as AlertButton[];
     buttons.find((button) => button.style === 'destructive')?.onPress?.();
 
@@ -89,7 +95,7 @@ describe('RemoveWalletFlow', () => {
 
   it('keeps the wallet when the PIN is wrong', async () => {
     const alert = jest.spyOn(Alert, 'alert');
-    await render(<RemoveWalletFlow onCancel={jest.fn()} />);
+    await render(<RemoveWalletFlow walletId={walletId} onCancel={jest.fn()} />);
     await fireEvent.press(screen.getByRole('checkbox'));
     await fireEvent.press(screen.getByRole('button', { name: 'Remove wallet' }));
     await typePin('000000');

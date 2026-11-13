@@ -20,12 +20,15 @@ import { FormScreen, SettingsRow, SettingsSection } from '@/shared/ui';
 /**
  * Settings > Security: everything that guards the wallet in one place. Access (PIN, biometrics,
  * auto-lock, lock now), backups (recovery phrase, private key), the wrong-PIN counter, and
- * removing the wallet.
+ * removing a wallet. The three that act on one wallet open without naming one: their screens go
+ * straight to the only wallet or ask which one first (D-94).
  */
 export function SecurityPage() {
   const { t } = useTranslation();
-  const source = useWalletStore((state) => state.source);
-  const isImportedKey = source === 'private-key';
+  // What a row says about "this wallet" only holds when there is exactly one.
+  const isImportedKey = useWalletStore(
+    (state) => state.wallets.length === 1 && state.wallets[0]?.source === 'private-key',
+  );
 
   return (
     <FormScreen>

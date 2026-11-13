@@ -4,20 +4,22 @@ import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, View } from 'react-native';
 
 import { PinPrompt } from '@/entities/auth';
-import { useActiveWallet, useWalletLabel, useWalletStore } from '@/entities/wallet';
-import { logger } from '@/shared/lib';
+import { useWalletLabel, useWalletStore } from '@/entities/wallet';
+import { logger, shortenAddress } from '@/shared/lib';
 import { Button, Checkbox, ICON_SIZE, Text, useThemeColors } from '@/shared/ui';
 
 import { removeWallet } from '../model/reset-wallet';
 
 type WarningProps = {
   walletName: string;
+  /** Short address of the wallet's first account, so two wallets cannot be mixed up. */
+  address: string;
   /** Removing the last wallet also removes the PIN and returns to onboarding. */
   isLastWallet: boolean;
   onContinue: () => void;
 };
 
-function Warning({ walletName, isLastWallet, onContinue }: WarningProps) {
+function Warning({ walletName, address, isLastWallet, onContinue }: WarningProps) {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const [hasBackup, setHasBackup] = useState(false);
@@ -32,9 +34,14 @@ function Warning({ walletName, isLastWallet, onContinue }: WarningProps) {
         </View>
         <Text variant="body">{t('settings.removeWallet.warning')}</Text>
       </View>
-      <Text variant="heading" accessibilityRole="header">
-        {t('settings.removeWallet.target', { wallet: walletName })}
-      </Text>
+      <View className="gap-1">
+        <Text variant="heading" accessibilityRole="header">
+          {t('settings.removeWallet.target', { wallet: walletName })}
+        </Text>
+        <Text variant="mono" tone="secondary">
+          {address}
+        </Text>
+      </View>
       <Text tone="secondary">
         {t(
           isLastWallet
@@ -58,56 +65,58 @@ function Warning({ walletName, isLastWallet, onContinue }: WarningProps) {
 }
 
 type RemoveWalletFlowProps = {
-  /** The wallet to remove; the active wallet when omitted. */
-  walletId?: string;
+  /** The wallet to remove. The caller names it; nothing here falls back to another one (D-94). */
+  walletId: string;
   onCancel: () => void;
   /** Called after one of several wallets was removed. Removing the last one needs none. */
   onRemoved?: () => void;
 };
 
 /**
- * "Remove wallet from this device", for one wallet (D-78): a warning that names the wallet with
- * a backup acknowledgement (first confirmation), the PIN, then a final confirmation. The other
- * wallets stay. Removing the last wallet is the full wipe of reset-wallet, and the router then
+ * "Remove wallet from this device", for one wallet (D-78): a warning with a backup
+ * acknowledgement (first confirmation), the PIN, then a final confirmation. All three name the
+ * wallet and show its first account's short address (D-94). The other wallets stay. Removing the last wallet is the full wipe of reset-wallet, and the router then
  * goes back to onboarding.
  */
 export function RemoveWalletFlow({ walletId, onCancel, onRemoved }: RemoveWalletFlowProps) {
   const { t } = useTranslation();
   const walletLabel = useWalletLabel();
-  const activeWallet = useActiveWallet();
-  const wallet = useWalletStore((state) =>
-    walletId === undefined
-      ? null
-      : (state.wallets.find((candidate) => candidate.id === walletId) ?? null),
+  const target = useWalletStore(
+    (state) => state.wallets.find((candidate) => candidate.id === walletId) ?? null,
   );
-  const target = walletId === undefined ? activeWallet : wallet;
   const isLastWallet = useWalletStore((state) => state.wallets.length) === 1;
-  const targetId = target?.id;
+  const walletName = target ? walletLabel(target) : '';
+  const address = shortenAddress(target?.accounts[0]?.address ?? '');
   const [isPinStep, setIsPinStep] = useState(false);
 
   const confirmRemoval = useCallback(() => {
-    if (targetId === undefined) return;
-    Alert.alert(t('settings.removeWallet.finalTitle'), t('reset.finalBody'), [
-      { text: t('common.cancel'), style: 'cancel', onPress: onCancel },
-      {
-        text: t('settings.removeWallet.confirm'),
-        style: 'destructive',
-        onPress: () => {
-          removeWallet(targetId)
-            .then(() => {
-              if (!isLastWallet) onRemoved?.();
-            })
-            .catch((error: unknown) => logger.error('Wallet removal failed', { error }));
+    const named = { wallet: walletName, address };
+    Alert.alert(
+      t('settings.removeWallet.finalTitle', named),
+      t('settings.removeWallet.finalBody', named),
+      [
+        { text: t('common.cancel'), style: 'cancel', onPress: onCancel },
+        {
+          text: t('settings.removeWallet.confirm'),
+          style: 'destructive',
+          onPress: () => {
+            removeWallet(walletId)
+              .then(() => {
+                if (!isLastWallet) onRemoved?.();
+              })
+              .catch((error: unknown) => logger.error('Wallet removal failed', { error }));
+          },
         },
-      },
-    ]);
-  }, [isLastWallet, onCancel, onRemoved, t, targetId]);
+      ],
+    );
+  }, [address, isLastWallet, onCancel, onRemoved, t, walletId, walletName]);
 
   if (target === null) return null;
   if (!isPinStep) {
     return (
       <Warning
-        walletName={walletLabel(target)}
+        walletName={walletName}
+        address={address}
         isLastWallet={isLastWallet}
         onContinue={() => setIsPinStep(true)}
       />
@@ -116,7 +125,7 @@ export function RemoveWalletFlow({ walletId, onCancel, onRemoved }: RemoveWallet
   return (
     <PinPrompt
       title={t('settings.removeWallet.authTitle')}
-      subtitle={t('settings.removeWallet.authSubtitle')}
+      subtitle={t('settings.removeWallet.authSubtitle', { wallet: walletName, address })}
       onVerified={confirmRemoval}
     />
   );

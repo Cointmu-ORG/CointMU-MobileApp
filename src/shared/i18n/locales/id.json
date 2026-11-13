@@ -228,7 +228,7 @@
       "backupFooter": "Keduanya meminta PIN atau biometrik lebih dulu dan memblokir tangkapan layar.",
       "recoveryPhraseNone": "Dompet ini tidak punya frasa pemulihan",
       "privateKeyTitle": "Tampilkan kunci privat",
-      "privateKeyDesc": "Kunci akun yang aktif",
+      "privateKeyDesc": "Kunci akun pertama sebuah dompet",
       "privateKeyOnlyBackup": "Satu-satunya cadangan dompet ini",
       "lockout": "Percobaan PIN",
       "attemptsTitle": "Percobaan PIN yang salah",
@@ -253,7 +253,7 @@
       "warning": "Jangan pernah membagikan frasa pemulihan Anda. Siapa pun yang memilikinya dapat mengambil alih dompet Anda dan mencuri seluruh dana. Simpan secara offline dan jangan pernah mengetiknya di situs web.",
       "reveal": "Tampilkan frasa pemulihan",
       "authTitle": "Masukkan PIN Anda",
-      "authSubtitle": "untuk menampilkan frasa pemulihan",
+      "authSubtitle": "untuk menampilkan frasa pemulihan {{wallet}} ({{address}})",
       "hide": "Sembunyikan",
       "autoHide": "Kata disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo masuk ke latar belakang.",
       "failed": "Gagal menampilkan frasa pemulihan.",
@@ -262,14 +262,15 @@
       "revealed": "Ditampilkan selama 30 detik.",
       "showWords": "Tampilkan kata",
       "hideWords": "Sembunyikan kata",
-      "wallet": "Frasa pemulihan {{wallet}}"
+      "wallet": "Frasa pemulihan {{wallet}}",
+      "pick": "Frasa pemulihan dompet yang mana?"
     },
     "logout": {
       "title": "Keluar",
       "lockNow": "Kunci sekarang",
       "lockNowDesc": "Kunci Muvo sampai Anda memasukkan PIN. Tidak ada yang dihapus.",
       "remove": "Hapus dompet dari perangkat ini",
-      "removeDesc": "Menghapus kunci dompet akun utama dari ponsel ini. Anda memerlukan frasa pemulihan atau kunci privatnya untuk mendapatkannya kembali."
+      "removeDesc": "Menghapus kunci satu dompet dari ponsel ini. Anda memerlukan frasa pemulihan atau kunci privatnya untuk mendapatkannya kembali."
     },
     "removeWallet": {
       "title": "Hapus dompet",
@@ -279,11 +280,13 @@
       "ack": "Saya sudah mencatat frasa pemulihan atau kunci privat saya",
       "continue": "Hapus dompet",
       "authTitle": "Masukkan PIN Anda",
-      "authSubtitle": "untuk menghapus dompet dari ponsel ini",
-      "finalTitle": "Hapus dompet sekarang?",
+      "authSubtitle": "untuk menghapus {{wallet}} ({{address}}) dari ponsel ini",
+      "finalTitle": "Hapus {{wallet}} sekarang?",
       "confirm": "Hapus",
       "target": "Hapus {{wallet}}",
-      "descriptionLast": "Ini satu-satunya dompet Anda, jadi menghapusnya juga menghapus PIN dan mengembalikan Muvo ke awal. Dana tetap ada di jaringan CointMU; Anda bisa memulihkan dompet nanti dengan frasa pemulihan atau kunci privatnya."
+      "descriptionLast": "Ini satu-satunya dompet Anda, jadi menghapusnya juga menghapus PIN dan mengembalikan Muvo ke awal. Dana tetap ada di jaringan CointMU; Anda bisa memulihkan dompet nanti dengan frasa pemulihan atau kunci privatnya.",
+      "pick": "Dompet mana yang ingin dihapus?",
+      "finalBody": "{{wallet}} ({{address}}) akan dihapus dari ponsel ini. Tindakan ini tidak bisa dibatalkan."
     },
     "about": {
       "title": "Tentang",
@@ -433,14 +436,15 @@
       "failed": "Gagal menampilkan kunci privat.",
       "reveal": "Tampilkan kunci privat",
       "authTitle": "Masukkan PIN Anda",
-      "authSubtitle": "untuk menampilkan kunci privat",
+      "authSubtitle": "untuk menampilkan kunci privat {{owner}} ({{address}})",
       "authPrompt": "Tampilkan kunci privat Anda",
       "keyLabel": "Kunci privat",
       "hide": "Sembunyikan",
       "autoHide": "Kunci disembunyikan lagi setelah 30 detik, saat Anda meninggalkan layar ini, dan saat Muvo berpindah ke latar belakang. Kunci tidak bisa disalin atau ditangkap layar.",
       "showKey": "Tampilkan kunci",
       "hideKey": "Sembunyikan kunci",
-      "owner": "{{account}} di {{wallet}}"
+      "owner": "{{account}} di {{wallet}}",
+      "pick": "Kunci privat dompet yang mana?"
     },
     "privacy": {
       "title": "Privasi",
@@ -727,7 +731,7 @@
       "setDefault": "Jadikan akun utama"
     },
     "details": {
-      "backupHint": "Frasa pemulihan dan kunci privat dompet akun utama ada di Pengaturan, di bagian Keamanan."
+      "backupHint": "Frasa pemulihan dan kunci privat tiap dompet ada di Pengaturan, di bagian Keamanan."
     },
     "add": {
       "title": "Tambah",
