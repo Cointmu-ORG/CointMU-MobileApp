@@ -5,6 +5,8 @@ import * as SecureStore from 'expo-secure-store';
 
 import { storeNewPin, useSessionStore } from '@/entities/auth';
 import { useTxStore } from '@/entities/transaction';
+import { useSendFlowStore } from '../model/send-flow-store';
+import { sendTransaction } from '../model/send-transaction';
 import { useWalletStore } from '@/entities/wallet';
 import { i18n } from '@/shared/i18n';
 
@@ -166,6 +168,96 @@ describe('send flow', () => {
 
     expect(secretReads().map(([key]) => key)).toEqual([`${SECRET_KEY}.${otherWalletId}`]);
     expect(Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '').from).toBe(OTHER);
+  });
+
+  describe('the source account', () => {
+    const fromField = (name: RegExp) => screen.findByRole('button', { name });
+
+    it('starts on the remembered account and shows its balance', async () => {
+      await renderRouter('./app', { initialUrl: '/send' });
+      expect(await fromField(/^From Account 1, 10 CMU$/)).toBeOnTheScreen();
+      expect(screen.getByText('0xf39F…2266')).toBeOnTheScreen();
+    });
+
+    it("signs from the account picked in From, with that wallet's key", async () => {
+      const app = await renderRouter('./app', { initialUrl: '/send' });
+      await fireEvent.press(await fromField(/^From Account 1/));
+      // The picker: both wallets, the one in use on top.
+      expect(await screen.findByRole('header', { name: 'Send from' })).toBeOnTheScreen();
+      await fireEvent.press(screen.getAllByRole('radio', { checked: false })[0]);
+      await act(async () => jest.runOnlyPendingTimers());
+      expect(app.getPathname()).toBe('/send');
+      expect(await screen.findByText('0x3C44…93BC')).toBeOnTheScreen();
+
+      await fireEvent.changeText(screen.getByLabelText('Recipient address'), TO.toLowerCase());
+      await fireEvent.changeText(screen.getByLabelText('Amount (CMU)'), '1.5');
+      await press('Review');
+      await screen.findByRole('button', { name: 'Confirm and send' });
+      // The review names the picked account in full.
+      expect(screen.getByText(OTHER)).toBeOnTheScreen();
+      expect(screen.queryByText(FROM)).toBeNull();
+
+      jest.mocked(SecureStore.getItemAsync).mockClear();
+      await press('Confirm and send');
+      await enterPin(PIN);
+      expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+
+      expect(secretReads().map(([key]) => key)).toEqual([`${SECRET_KEY}.${otherWalletId}`]);
+      expect(Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '').from).toBe(OTHER);
+      expect(useTxStore.getState().records[0]?.from).toBe(OTHER);
+    });
+
+    it('clears what was checked against the old account when the source changes', async () => {
+      await renderRouter('./app', { initialUrl: '/send' });
+      await fireEvent.changeText(await screen.findByLabelText('Amount (CMU)'), '0');
+      await press('Review');
+      expect(await screen.findByText('Enter an amount above zero.')).toBeOnTheScreen();
+
+      await act(async () => useWalletStore.getState().selectAccount(otherWalletId, 0));
+      expect(screen.queryByText('Enter an amount above zero.')).toBeNull();
+      expect(await fromField(/^From Account 1/)).toBeOnTheScreen();
+      expect(screen.getByText('0x3C44…93BC')).toBeOnTheScreen();
+    });
+
+    it('blocks the review when the remembered account is no longer the one in From', async () => {
+      await fillFormAndReview();
+      await act(async () => useWalletStore.getState().selectAccount(otherWalletId, 0));
+
+      // The review still shows the account the draft was made for, and cannot be confirmed
+      // against another account's balance.
+      expect(screen.getByText(FROM)).toBeOnTheScreen();
+      expect(screen.getByRole('button', { name: 'Confirm and send' })).toBeDisabled();
+      expect(mockBroadcast).not.toHaveBeenCalled();
+    });
+
+    it('signs for the account in the draft, whatever the remembered account is', async () => {
+      await fillFormAndReview();
+      const draft = useSendFlowStore.getState().draft;
+      if (draft === null) throw new Error('expected a draft');
+      expect(draft.from).toEqual({ walletId, index: 0, address: FROM });
+      await act(async () => useWalletStore.getState().selectAccount(otherWalletId, 0));
+      jest.mocked(SecureStore.getItemAsync).mockClear();
+
+      const outcome = await sendTransaction({ draft, onStage: jest.fn() });
+
+      expect(outcome).toMatchObject({ ok: true });
+      expect(secretReads().map(([key]) => key)).toEqual([`${SECRET_KEY}.${walletId}`]);
+      expect(Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '').from).toBe(FROM);
+    });
+
+    it('refuses to sign when the draft names a wallet whose key is another address', async () => {
+      await fillFormAndReview();
+      const draft = useSendFlowStore.getState().draft;
+      if (draft === null) throw new Error('expected a draft');
+
+      const outcome = await sendTransaction({
+        draft: { ...draft, from: { ...draft.from, walletId: otherWalletId } },
+        onStage: jest.fn(),
+      });
+
+      expect(outcome.ok).toBe(false);
+      expect(mockBroadcast).not.toHaveBeenCalled();
+    });
   });
 
   it('never reads the key or broadcasts before the PIN is verified', async () => {

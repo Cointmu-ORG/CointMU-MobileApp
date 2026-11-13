@@ -9,14 +9,18 @@ import { Button, Notice } from '@/shared/ui';
 import { AmountField } from './amount-field';
 import { AssetPicker } from './asset-picker';
 import { RecipientField } from './recipient-field';
+import { SourceField } from './source-field';
 import { useSendForm } from './use-send-form';
 
-/** Step 1 of Send: asset, recipient and amount. "Review" estimates the fee first. */
+/** Step 1 of Send: the source account, asset, recipient and amount. "Review" estimates the fee first. */
 export function SendForm() {
   const { t } = useTranslation();
   const form = useSendForm();
   return (
     <View className="gap-6">
+      {form.source ? (
+        <SourceField account={form.source} onPress={() => router.push(ROUTES.accountSwitcher)} />
+      ) : null}
       <AssetPicker selectedKey={getAssetKey(form.asset)} onSelect={form.selectAsset} />
       <RecipientField
         value={form.toInput}

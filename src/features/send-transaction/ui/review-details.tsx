@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { NATIVE_ASSET } from '@/entities/asset';
 import { useActiveRpcUrl } from '@/entities/network';
-import { AccountBadge, useAccountLabel, useActiveAccount } from '@/entities/wallet';
+import { AccountBadge, useAccount, useAccountLabel } from '@/entities/wallet';
 import { formatAmount, formatUrlHost } from '@/shared/lib';
 import { Card, Text } from '@/shared/ui';
 
@@ -26,7 +26,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 /** Everything the user is about to sign, in full: the recipient is never shortened here. */
 export function ReviewDetails({ draft }: { draft: SendDraft }) {
   const { t, i18n } = useTranslation();
-  const account = useActiveAccount();
+  const account = useAccount(draft.from);
   const labelOf = useAccountLabel();
   const node = useActiveRpcUrl();
   // Exact amounts on the review: every significant digit, nothing truncated.
@@ -49,7 +49,7 @@ export function ReviewDetails({ draft }: { draft: SendDraft }) {
           </Text>
         </View>
         <Text variant="mono" tone="secondary" selectable>
-          {account?.address ?? ''}
+          {draft.from.address}
         </Text>
       </Row>
       <Row label={t('send.review.to')}>

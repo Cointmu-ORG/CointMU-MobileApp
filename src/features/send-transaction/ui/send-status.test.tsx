@@ -16,7 +16,9 @@ const HASH = `0x${'ab'.repeat(32)}`;
 const SENT: SendOutcome = { ok: true, hash: HASH, isUncertain: false };
 const UNCERTAIN: SendOutcome = { ok: true, hash: HASH, isUncertain: true };
 
-const DRAFT: SendDraft = {
+// `from` gets the seeded wallet's id before each test.
+const DRAFT: { -readonly [K in keyof SendDraft]: SendDraft[K] } = {
+  from: { walletId: '', index: 0, address: FROM },
   asset: NATIVE_ASSET,
   to: TO,
   amount: 15n * 10n ** 17n,
@@ -62,8 +64,9 @@ const doneButton = () => screen.queryByRole('button', { name: 'Done' });
 
 beforeEach(async () => {
   await i18n.changeLanguage('en');
-  seedWalletRecord({ source: 'private-key', address: FROM });
+  const walletId = seedWalletRecord({ source: 'private-key', address: FROM });
   useWalletStore.getState().activate();
+  DRAFT.from = { walletId, index: 0, address: FROM };
   useSendFlowStore.getState().reset();
 });
 

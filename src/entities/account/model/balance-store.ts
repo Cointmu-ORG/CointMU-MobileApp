@@ -16,18 +16,28 @@ type BalanceState = {
 
 // In memory only: a public balance, re-fetched on launch. The home page triggers refresh()
 // for pull-to-refresh, and the balance-card widget polls it.
+// The balance belongs to one account at a time. `clear` (an account switch) starts a new epoch,
+// so an answer that was still on its way for the previous account is dropped, never shown as
+// the new account's balance.
+let epoch = 0;
+
 export const useBalanceStore = create<BalanceState>()((set, get) => ({
   wei: null,
   status: 'idle',
   refresh: async (address) => {
     if (get().status === 'loading') return;
+    const startedIn = epoch;
     set({ status: 'loading' });
     try {
-      set({ wei: await fetchNativeBalance(address), status: 'success' });
+      const wei = await fetchNativeBalance(address);
+      if (startedIn === epoch) set({ wei, status: 'success' });
     } catch (error) {
       logger.warn('Balance refresh failed', { error });
-      set({ status: 'error' });
+      if (startedIn === epoch) set({ status: 'error' });
     }
   },
-  clear: () => set({ wei: null, status: 'idle' }),
+  clear: () => {
+    epoch += 1;
+    set({ wei: null, status: 'idle' });
+  },
 }));

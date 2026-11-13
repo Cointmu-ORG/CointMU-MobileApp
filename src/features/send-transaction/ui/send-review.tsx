@@ -5,8 +5,9 @@ import { View } from 'react-native';
 
 import { useBalanceStore } from '@/entities/account';
 import { PinPrompt } from '@/entities/auth';
-import { useActiveAccount } from '@/entities/wallet';
+import { useAccount, useWalletStore } from '@/entities/wallet';
 import { ROUTES } from '@/shared/config';
+import { isSameAddress } from '@/shared/lib';
 import { Button, Notice } from '@/shared/ui';
 
 import { checkFunds } from '../lib/send-math';
@@ -21,7 +22,13 @@ type Step = 'review' | 'auth';
 function useFundsCheck(draft: SendDraft | null) {
   const nativeBalance = useBalanceStore((state) => state.wei);
   const tokenBalance = useAssetBalance(draft?.asset ?? { kind: 'native', symbol: '', decimals: 0 });
+  const balanceOwner = useWalletStore((state) => state.address);
   if (draft === null || nativeBalance === null) return 'unknown' as const;
+  // The loaded balances are the remembered account's. They only count for this transfer while
+  // that is still the account it is sent from.
+  if (balanceOwner === null || !isSameAddress(balanceOwner, draft.from.address)) {
+    return 'unknown' as const;
+  }
   return checkFunds({ ...draft, maxFee: draft.quote.maxFee, nativeBalance, tokenBalance });
 }
 
@@ -40,8 +47,9 @@ function Warnings({ draft }: { draft: SendDraft }) {
 /** Step 2 of Send. Authentication comes right before signing, every time (D-15). */
 export function SendReview() {
   const { t } = useTranslation();
-  const account = useActiveAccount();
-  const { draft, isRefreshing, error, ensureFresh } = useFreshQuote(account?.address ?? '');
+  const { draft, isRefreshing, error, ensureFresh } = useFreshQuote();
+  // The account the draft names, not the remembered default: what is shown is what signs.
+  const account = useAccount(draft?.from ?? null);
   const funds = useFundsCheck(draft);
   const [step, setStep] = useState<Step>('review');
 
@@ -63,7 +71,6 @@ export function SendReview() {
     router.replace(ROUTES.sendResult);
     void sendTransaction({
       draft: flow.draft ?? draft,
-      account,
       onStage: (stage) => useSendFlowStore.getState().setStage(stage),
     }).then((outcome) => useSendFlowStore.getState().finishSending(outcome));
   };
