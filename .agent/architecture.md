@@ -58,17 +58,19 @@ The router root is pinned in app.json: `["expo-router", { "root": "./app" }]` (D
 app/                         # Expo Router routes ONLY. No logic.
   _layout.tsx                # re-exports src/app root layout (auth guard)
   (onboarding)/...           # welcome, create, import, backup, verify, set-pin, recover (D-39)
-  (tabs)/                    # home (index, owns `/`), wallets, history, settings (D-80)
-  send/                      # index (form), review, result: screens of the root stack (D-60)
+  (tabs)/                    # home (index, owns `/`), wallets, history (?owner filters), settings (D-80, D-89, D-91)
+  wallet-detail.tsx          # one account: balance, Send / Receive / Scan, tokens, activity (D-89)
+  send/                      # index (form with the From selector), review, result (D-60, D-90)
   receive.tsx
   scan.tsx                   # ?from=send returns to the form; otherwise opens Send
   tokens.tsx                 # add, hide and remove ERC-20 tokens
   appearance.tsx, language.tsx, security.tsx, privacy.tsx, about.tsx   # settings groups (D-71, D-77)
   enable-biometrics.tsx, private-key.tsx                  # opened from Security (D-69, D-70)
-  account-switcher.tsx       # form sheet opened from the home account chip (D-62)
-  wallet-add.tsx, account-menu.tsx, wallet-edit.tsx       # form sheets of the Wallets tab (D-80)
-  account-icon.tsx           # card icon picker sheet; ?setup adds name and color after "Add account" (D-84)
-  wallet-create.tsx          # another wallet: phrase, quiz, name and color; ?walletId resumes (D-78)
+  account-switcher.tsx       # fixed-height sheet: the send form's account picker (D-88, D-90)
+  wallet-add.tsx, account-menu.tsx    # short action sheets, as tall as their content (D-88)
+  personalize.tsx            # name, color and icon of a card (?index), or a wallet's name and color (D-88)
+  add-account.tsx            # picks the wallet a new account goes to, when several can take one (D-88)
+  wallet-create.tsx          # another wallet: phrase, quiz, personalize; ?walletId resumes (D-78)
   wallet-import.tsx          # another wallet; ?recover=<id> restores one unreadable wallet (D-78)
   remove-wallet.tsx          # ?walletId picks the wallet; the active one otherwise (D-78)
   tx/[hash].tsx              # tx detail (local or scanned)
@@ -76,7 +78,7 @@ app/                         # Expo Router routes ONLY. No logic.
 src/
   app/        routes/ (navigator layouts + auth guard), model/ (bootstrap, auto-lock), styles/
   pages/      full-screen compositions, one slice per screen
-  widgets/    composite blocks (balance-card, tx-list, asset-list, history-list, wallet-grid)
+  widgets/    composite blocks (balance-card, asset-list, history-list, wallet-grid)
   features/   user actions (see below)
   entities/   business objects (wallet, account, asset, network, transaction)
   shared/
@@ -102,7 +104,7 @@ export { HomePage as default } from '@/pages/home';
 ### Features
 `create-wallet`, `import-wallet`, `backup-mnemonic`, `verify-mnemonic`, `setup-pin`, `unlock-app`, `send-transaction`, `receive-qr`, `scan-qr`, `manage-tokens`, `change-language`, `change-appearance`, `change-pin`, `lock-settings`, `reveal-mnemonic`, `reveal-private-key`, `reset-wallet`, `select-network`, `manage-accounts`, `error-reporting`.
 
-A page slice may hold the screens of one flow: `pages/send` (form, review, result), `pages/history` (list, tx detail), `pages/settings` (the tab, Appearance, Language, Security, enable biometrics, private key, Privacy, About) and `pages/wallets` (the tab, its sheets, the account switcher, create and import another wallet). The features layer is at the limit too: wallet management lives in `manage-accounts` and removing one wallet in `reset-wallet`. This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
+A page slice may hold the screens of one flow: `pages/send` (form, review, result), `pages/history` (list, tx detail), `pages/settings` (the tab, Appearance, Language, Security, enable biometrics, private key, Privacy, About) and `pages/wallets` (the tab, its sheets, the account picker, the wallet detail, personalize, create and import another wallet). The features layer is at the limit too: wallet management lives in `manage-accounts` and removing one wallet in `reset-wallet`. This keeps the pages layer under Steiger's 20-slice limit without slice groups, which the deep-import ESLint rule would refuse.
 
 ### Slice segments
 `ui/`, `model/` (Zustand store, selectors, types), `api/` (RPC calls), `lib/` (pure helpers), `config/`. Each slice exposes only `index.ts`.
@@ -139,11 +141,12 @@ A page slice may hold the screens of one flow: `pages/send` (form, review, resul
 
 ## 6. Transaction flow
 
+0. Source (D-90): the form's "From" row shows the remembered account (the one Send was opened from, else the last one used) with its balance and opens the account picker. Picking another account makes it the remembered one, loads its balances and clears what was checked against the old one. On "Review" the draft takes that account (`draft.from`: wallet id, index, address); the review shows it and the signature is made for it, whatever the remembered account is by then.
 1. Form: recipient (`checkAddress`: lowercase or a valid EIP-55 checksum; a bad mixed-case checksum is refused) and a locale-aware amount (`parseAmountInput`: bigint base units, never floats, D-51). Paste, scan (prefill only) and "Max" (CMU: balance minus the quoted fee; token: the whole balance).
 2. Quote: `estimateGas` (a revert fails early with a friendly message) and `getFeeData()`. Fee mode at runtime: `maxFeePerGas` → EIP-1559 (type 2), else legacy `gasPrice` (type 0) (D-22; the nodes support EIP-1559, D-47). Warnings (never blocking): sending to yourself, recipient is a contract (`getCode` ≠ `0x`).
 3. Review: from (account name + address), to (full), amount, fee (max), total, node. The fee is refetched when the screen opens and again before signing if older than 30 s. The balance check includes the fee; a token send needs CMU for gas separately.
 4. Authenticate (PIN or biometric) right before signing, every time.
-5. `eth_chainId` must be 1912 on the selected node. Nonce from `getTransactionCount(addr, 'pending')`. Read the secret of the sending account's wallet, sign with `chainId` set via `signWithSecret` (derivation wrapper; the signer is dropped before it returns), broadcast once (no retry). Persist the local `pending` record (hash, nonce, from, to, asset, amount, fee fields, node, createdAt) before navigating. A broadcast that times out is saved as uncertain so the poller settles it (D-53).
+5. `eth_chainId` must be 1912 on the selected node. Nonce from `getTransactionCount(addr, 'pending')`. Read the secret of the wallet named in `draft.from`, sign with `chainId` set via `signWithSecret` (derivation wrapper; the signer is dropped before it returns), broadcast once (no retry). Persist the local `pending` record (hash, nonce, from, to, asset, amount, fee fields, node, createdAt) before navigating. A broadcast that times out is saved as uncertain so the poller settles it (D-53).
 6. Poll (app-level, foreground only, backoff on errors): `pending` → `confirmed` (1 conf, shown as n/12) → `final` (`FINAL_CONFIRMATIONS`). Only `eth_getTransactionCount('latest')` (read first), `eth_getTransactionReceipt`, `eth_getTransactionByHash` and `eth_blockNumber` are used; txpool and debug are off on the nodes (D-48).
 7. Replaced: no receipt for our hash but the nonce is used. Dropped: the node no longer returns the tx, the nonce is unused, and both held for 3 minutes since it first went unknown; a tx still in the pool stays pending however long. Reverted (receipt status 0): failed. Each state has a badge and an explanation.
 
@@ -162,11 +165,12 @@ Native CMU is the default asset. ERC-20 uses a minimal ABI (`balanceOf`, `transf
 
 ## 8. History
 
-No indexer is assumed (Q-11). Three `TransactionSource`s (`entities/transaction/api/history-sources.ts`), merged and deduped by hash (D-54):
+No indexer is assumed (Q-11). History covers every usable account at once (D-91). Three `TransactionSource`s (`entities/transaction/api/history-sources.ts`), merged into one row per hash and own address (D-54); a transfer between two own accounts gives two rows, the sender's and the recipient's:
 - Local records for transactions sent from this app (instant, live status from the poller).
-- Native transfers: bounded block scan, `NATIVE_SCAN_PAGE_BLOCKS` (1,000) full blocks per page within `NATIVE_SCAN_WINDOW_BLOCKS` (50,000, about 7 days), fetched 50 at a time so ethers batches them. Only top-level txs with a value, to or from the owner.
-- ERC-20: `getLogs` on the `Transfer` topic for the listed tokens, owner as sender or recipient, in `LOGS_CHUNK_BLOCKS` (10,000) ranges that halve (down to 500) when a node refuses one.
-- Cursors are cached in memory per account and chain; pages load lazily (scroll or "load older"); pull to refresh starts from the new head. Values come from the node probe (D-47).
+- Native transfers: bounded block scan, `NATIVE_SCAN_PAGE_BLOCKS` (1,000) full blocks per page within `NATIVE_SCAN_WINDOW_BLOCKS` (50,000, about 7 days), fetched 50 at a time so ethers batches them. Each block is fetched once and checked against all own addresses. Only top-level txs with a value.
+- ERC-20: `getLogs` on the `Transfer` topic for the listed tokens with the own addresses as a topic OR-array (one "sent" and one "received" query for all of them), in `LOGS_CHUNK_BLOCKS` (10,000) ranges that halve (down to 500) when a node refuses one.
+- What was found is cached in memory per address, with one cursor per source; all addresses share one session head, so their pages line up. A page is loaded for the addresses least far back together. An account added later is scanned alone from the session head until it has caught up; the others are not rescanned. Pages load lazily (scroll or "load older"); pull to refresh forgets everything and starts from the new head. Values come from the node probe (D-47).
+- The History tab shows all accounts, with a chip row (All, one per account) that filters what is shown; rows name their account. Home and the wallet detail show the newest ten rows of the same data.
 - Known limitation: a block scan only sees top-level transactions. Native value moved by contract calls (internal transfers) is invisible without tracing or an indexer (Q-33); the History help text says so.
 
 ## 9. UI and i18n
@@ -176,7 +180,11 @@ No indexer is assumed (Q-11). Three `TransactionSource`s (`entities/transaction/
 - Languages: `id`, `en`. Files: `src/shared/i18n/locales/id.json` and `en.json`. Default = device language, fallback `en`; a language picked in Settings is stored (`muvo.language`, AsyncStorage) and restored during bootstrap, before the splash hides. No hardcoded user-facing strings.
 - Amounts: show coin units only (e.g. `12.5 CMU`). Locale-aware number formatting; amount input accepts the locale's decimal separator (D-51). Dates via date-fns with the `id`/`en` locale. No fiat.
 - Status and warnings never rely on color alone: badges and notices carry an icon and text.
-- Wallets tab (D-80): between Home and History. One card per account, two per row, grouped by wallet with the wallet name as the section header. A card has the color the user chose (eight `card-colors.json` tokens; white text on every fill is checked at AA in both themes), the icon the user chose (D-84: one of a fixed set of lucide icons or emoji; an unknown stored icon shows the default), the account name, the native balance (through `useAmountDisplay()`, so "hide balances" masks it), the short address and an "Active" badge. A tap makes the account active and opens Home; long-press or "…" opens its menu (rename, color, icon, set active, receive QR). The icon also shows in the home account chip and sheet and in the send review's "from" row. The header eye flips the global "hide balances" setting; "+" opens a sheet (add an account to a phrase wallet, create a wallet, import a wallet). The home account chip and its sheet list the accounts of every usable wallet, grouped. Card balances are fetched for all accounts, four at a time, while the tab is shown.
+- Home (D-89): an overview of all wallets. A carousel of account cards (the Wallets tab's card, one per page, snapping, with page dots and a last "Add" card), two actions (Transfer, Scan QR) and "Recent activity" of all accounts with "See all" to History. Pull to refresh reloads every balance and the activity. The header eye flips "hide balances".
+- Wallet detail (D-89): a card tap, on Home or in the Wallets tab, opens the account's own screen: balance card, Send / Receive / Scan, tokens, that account's activity and the "…" menu. Opening it makes the account the remembered ("active") one, which the balance card, the token list and the send form read; nothing is drawn before that holds.
+- Wallets tab (D-80): between Home and History. One card per account, two per row, grouped by wallet with the wallet name as the section header. A card has the color the user chose (eight `card-colors.json` tokens; white text on every fill is checked at AA in both themes), the icon the user chose (D-84: one of a fixed set of lucide icons or emoji; an unknown stored icon shows the default), the account name, the native balance (through `useAmountDisplay()`, so "hide balances" masks it), the short address and an "Active" badge on the remembered account. Long-press or "…" opens its menu. The icon also shows in history rows, the send form's "From" row and the send review. The header eye flips the global "hide balances" setting; "+" opens the add sheet. Card balances are fetched for all accounts, four at a time, while Home or the tab is shown and the app is in the foreground.
+- Sheets (D-88): a sheet is a short action menu that is exactly as tall as its content (`fitToContents`, no grabber), so nothing is behind a drag: the card menu (Personalize, Show receive QR, Remove wallet when the card is all the wallet has) and the add sheet (add an account, create a wallet, import a wallet). The account picker is the one sheet with a fixed height: the account in use sits above a list that scrolls inside it. Anything longer is a page.
+- Personalize (D-88): one page for every card's look, also the last step of adding an account and of creating or importing a wallet. The preview stays at the top and Save at the bottom, above the keyboard; name, color and the full icon grid scroll between them. Nothing is saved before Save; Save is on only when something changed and the name is valid; leaving with changes asks first. A wallet's name and color use the same page, with the way to remove the wallet.
 - Camera (D-76): the scanner shows Muvo's own explanation (what the camera is for, nothing is captured, Continue / Not now) before the OS prompt, and "Open settings" after a permanent denial.
 
 ## 10. Error reporting (D-77)
