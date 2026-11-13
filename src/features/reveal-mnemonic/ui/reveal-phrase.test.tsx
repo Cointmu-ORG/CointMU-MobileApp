@@ -14,6 +14,7 @@ const PHRASE =
   'abandon ability able about above absent absorb abstract absurd abuse access accident';
 const ADDRESS = '0x0000000000000000000000000000000000000001';
 const SECRET_KEY = 'muvo.wallet.secret';
+let walletId = '';
 
 const secretReads = () =>
   jest.mocked(SecureStore.getItemAsync).mock.calls.filter(([key]) => key.startsWith(SECRET_KEY))
@@ -28,7 +29,7 @@ async function typePin(pin: string) {
 beforeEach(async () => {
   await i18n.changeLanguage('en');
   await storeNewPin(PIN);
-  await seedWallet({ secret: { kind: 'mnemonic', phrase: PHRASE }, address: ADDRESS });
+  walletId = await seedWallet({ secret: { kind: 'mnemonic', phrase: PHRASE }, address: ADDRESS });
   jest.mocked(SecureStore.getItemAsync).mockClear();
 });
 
@@ -46,7 +47,7 @@ async function authenticate() {
 
 describe('RevealPhrase', () => {
   it('asks for the PIN before it reads or shows the phrase', async () => {
-    await render(<RevealPhrase />);
+    await render(<RevealPhrase walletId={walletId} />);
     await fireEvent.press(screen.getByRole('button', { name: 'Reveal recovery phrase' }));
 
     expect(await screen.findByText('Enter your PIN')).toBeOnTheScreen();
@@ -62,7 +63,7 @@ describe('RevealPhrase', () => {
   });
 
   it('keeps the words out of the screen after the PIN until the eye is pressed', async () => {
-    await render(<RevealPhrase />);
+    await render(<RevealPhrase walletId={walletId} />);
     const eye = await authenticate();
     for (const word of PHRASE.split(' ')) expect(screen.queryByText(word)).toBeNull();
 
@@ -76,7 +77,7 @@ describe('RevealPhrase', () => {
   });
 
   it('masks the words again 30 seconds after the eye was pressed', async () => {
-    await render(<RevealPhrase />);
+    await render(<RevealPhrase walletId={walletId} />);
     const eye = await authenticate();
     jest.useFakeTimers();
     await fireEvent.press(eye);
@@ -94,7 +95,7 @@ describe('RevealPhrase', () => {
       emit = handler as typeof emit;
       return { remove: jest.fn() };
     });
-    await render(<RevealPhrase />);
+    await render(<RevealPhrase walletId={walletId} />);
     await fireEvent.press(await authenticate());
     expect(screen.getByText('abandon')).toBeOnTheScreen();
 
@@ -104,8 +105,8 @@ describe('RevealPhrase', () => {
   });
 
   it('never offers a phrase for a private-key wallet', async () => {
-    seedWalletRecord({ source: 'private-key', address: ADDRESS });
-    await render(<RevealPhrase />);
+    walletId = seedWalletRecord({ source: 'private-key', address: ADDRESS });
+    await render(<RevealPhrase walletId={walletId} />);
     expect(screen.getByText(/has no recovery phrase/)).toBeOnTheScreen();
     expect(screen.queryByRole('button', { name: 'Reveal recovery phrase' })).toBeNull();
   });

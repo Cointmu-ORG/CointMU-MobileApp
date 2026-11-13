@@ -16,7 +16,7 @@ export function useWalletLabel(): (wallet: WalletRecord) => string {
   return (wallet) => wallet.name ?? t('wallets.defaultName', { number: wallet.number });
 }
 
-export function useActiveWallet(): WalletRecord | null {
+function useActiveWallet(): WalletRecord | null {
   return useWalletStore(
     (state) => state.wallets.find((wallet) => wallet.id === state.activeWalletId) ?? null,
   );
@@ -69,14 +69,6 @@ export function useAccount(
     const account = wallet?.accounts.find((candidate) => candidate.index === index);
     return wallet && account ? { ...account, walletId: wallet.id } : null;
   }, [wallet, index]);
-}
-
-/** Same as `useActiveAccount`, outside React. */
-export function getActiveAccount(): ActiveAccount | null {
-  const { wallets, activeWalletId, accountIndex } = useWalletStore.getState();
-  const wallet = wallets.find((candidate) => candidate.id === activeWalletId);
-  const account = wallet?.accounts.find((candidate) => candidate.index === accountIndex);
-  return wallet && account ? { ...account, walletId: wallet.id } : null;
 }
 
 export function findWallet(walletId: string): WalletRecord | null {
