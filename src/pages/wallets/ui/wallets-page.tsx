@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { RefreshControl } from 'react-native';
 
 import { useAccountBalancesStore } from '@/entities/account';
-import { isWalletUsable, useWalletStore } from '@/entities/wallet';
+import { useUsableAccounts } from '@/entities/wallet';
 import { switchToAccount } from '@/features/manage-accounts';
 import { ROUTES } from '@/shared/config';
 import { ScrollScreen, useThemeColors } from '@/shared/ui';
@@ -16,13 +16,15 @@ const openAdd = () => router.push(ROUTES.walletAdd);
 /** What each card, section and attention card does. Ids in routes are public data. */
 const ACTIONS: WalletGridActions = {
   onSelectAccount: (account) => {
+    // The account becomes the remembered one; its screen then shows it.
     switchToAccount(account);
-    // Pops to the tabs screen: `navigate` would push a second one above a sheet that is opening.
-    router.dismissTo(ROUTES.home);
+    // A sheet that is still opening goes first, so the detail is never stacked on a sheet.
+    if (router.canDismiss()) router.dismissAll();
+    router.push({ pathname: ROUTES.walletDetail, params: account });
   },
   onAccountMenu: ({ walletId, index }) =>
     router.push({ pathname: ROUTES.accountMenu, params: { walletId, index } }),
-  onEditWallet: (walletId) => router.push({ pathname: ROUTES.walletEdit, params: { walletId } }),
+  onEditWallet: (walletId) => router.push({ pathname: ROUTES.personalize, params: { walletId } }),
   onResumeBackup: (walletId) =>
     router.push({ pathname: ROUTES.walletCreate, params: { walletId } }),
   onRecoverWallet: (walletId) =>
@@ -36,15 +38,9 @@ const ACTIONS: WalletGridActions = {
 export function WalletsPage() {
   const colors = useThemeColors();
   const isFocused = useIsFocused();
-  const wallets = useWalletStore((state) => state.wallets);
+  const accounts = useUsableAccounts();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const addresses = useMemo(
-    () =>
-      wallets
-        .filter(isWalletUsable)
-        .flatMap((wallet) => wallet.accounts.map((account) => account.address)),
-    [wallets],
-  );
+  const addresses = useMemo(() => accounts.map((account) => account.address), [accounts]);
 
   const refresh = async () => {
     setIsRefreshing(true);

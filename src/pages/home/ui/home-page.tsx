@@ -1,24 +1,43 @@
+import { router, useIsFocused } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshControl } from 'react-native';
 
-import { useBalanceStore } from '@/entities/account';
-import { useWalletStore } from '@/entities/wallet';
-import { AssetList } from '@/widgets/asset-list';
-import { BalanceCard } from '@/widgets/balance-card';
-import { TxList } from '@/widgets/tx-list';
-import { ScrollScreen, useThemeColors } from '@/shared/ui';
+import { useAccountBalancesStore } from '@/entities/account';
+import { useHistoryStore } from '@/entities/transaction';
+import { isWalletUsable, selectUsableAccounts, useWalletStore } from '@/entities/wallet';
+import { switchToAccount } from '@/features/manage-accounts';
+import { ROUTES } from '@/shared/config';
+import { Notice, ScrollScreen, useThemeColors } from '@/shared/ui';
+import { RecentActivity } from '@/widgets/history-list';
+import { AccountCarousel, type AccountRef } from '@/widgets/wallet-grid';
 
+import { HomeHeader } from './home-header';
 import { QuickActions } from './quick-actions';
 
+function openAccount(account: AccountRef) {
+  // The account becomes the remembered one; its screen then shows it.
+  switchToAccount(account);
+  router.push({ pathname: ROUTES.walletDetail, params: account });
+}
+
+/**
+ * Home: every account at a glance. A carousel of account cards, Transfer and Scan QR, and the
+ * newest activity of all accounts. Pulling down reloads every balance and the activity.
+ */
 export function HomePage() {
+  const { t } = useTranslation();
   const colors = useThemeColors();
-  const address = useWalletStore((state) => state.address);
+  const isFocused = useIsFocused();
+  const wallets = useWalletStore((state) => state.wallets);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refresh = async () => {
-    if (address === null) return;
     setIsRefreshing(true);
-    await useBalanceStore.getState().refresh(address);
+    // The activity card reloads by itself once what was found is forgotten.
+    useHistoryStore.getState().reset();
+    const addresses = selectUsableAccounts(wallets).map((account) => account.address);
+    await useAccountBalancesStore.getState().refresh(addresses);
     setIsRefreshing(false);
   };
 
@@ -33,10 +52,16 @@ export function HomePage() {
         />
       }
     >
-      <BalanceCard enterIndex={0} />
+      <HomeHeader />
+      {wallets.every(isWalletUsable) ? null : <Notice tone="warning">{t('home.attention')}</Notice>}
+      <AccountCarousel
+        isFocused={isFocused}
+        onOpenAccount={openAccount}
+        onAccountMenu={(account) => router.push({ pathname: ROUTES.accountMenu, params: account })}
+        onAdd={() => router.push(ROUTES.walletAdd)}
+      />
       <QuickActions enterIndex={1} />
-      <AssetList enterIndex={2} />
-      <TxList enterIndex={3} />
+      <RecentActivity enterIndex={2} onSeeAll={() => router.navigate(ROUTES.history)} />
     </ScrollScreen>
   );
 }

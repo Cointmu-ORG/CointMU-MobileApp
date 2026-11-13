@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { balanceOf, useAccountBalancesStore } from '@/entities/account';
-import { isWalletUsable, useWalletStore, type WalletRecord } from '@/entities/wallet';
-import { Button, Notice, Text } from '@/shared/ui';
+import { useUsableAccounts, useWalletStore } from '@/entities/wallet';
+import { Button, Text } from '@/shared/ui';
 
 import type { WalletGridActions } from '../model/types';
 import { useAccountBalances } from '../model/use-account-balances';
+import { NetworkNotice } from './network-notice';
 import { WalletSection } from './wallet-section';
 
 type WalletGridProps = {
@@ -14,21 +14,6 @@ type WalletGridProps = {
   /** Balances poll only while the tab is shown. */
   isFocused?: boolean;
 };
-
-function usableAddresses(wallets: readonly WalletRecord[]): string[] {
-  return wallets
-    .filter(isWalletUsable)
-    .flatMap((wallet) => wallet.accounts.map((account) => account.address));
-}
-
-/** True when no balance could be loaded at all: the node is unreachable, not one account. */
-function useIsNetworkDown(addresses: readonly string[]): boolean {
-  const balances = useAccountBalancesStore((state) => state.balances);
-  return (
-    addresses.length > 0 &&
-    addresses.every((address) => balanceOf(balances, address).status === 'error')
-  );
-}
 
 /**
  * Every account of every wallet as a grid of cards, grouped by wallet (D-80). Cards show a
@@ -38,9 +23,8 @@ function useIsNetworkDown(addresses: readonly string[]): boolean {
 export function WalletGrid({ actions, isFocused = true }: WalletGridProps) {
   const { t } = useTranslation();
   const wallets = useWalletStore((state) => state.wallets);
-  const addresses = usableAddresses(wallets);
+  const addresses = useUsableAccounts().map((account) => account.address);
   useAccountBalances(addresses, isFocused);
-  const isNetworkDown = useIsNetworkDown(addresses);
 
   if (wallets.length === 0) {
     return (
@@ -58,16 +42,7 @@ export function WalletGrid({ actions, isFocused = true }: WalletGridProps) {
 
   return (
     <View className="gap-6">
-      {isNetworkDown ? (
-        <View className="gap-3">
-          <Notice tone="danger">{t('wallets.error.network')}</Notice>
-          <Button
-            variant="secondary"
-            label={t('wallets.error.retry')}
-            onPress={() => void useAccountBalancesStore.getState().refresh(addresses)}
-          />
-        </View>
-      ) : null}
+      <NetworkNotice addresses={addresses} />
       {wallets.map((wallet) => (
         <WalletSection key={wallet.id} wallet={wallet} actions={actions} />
       ))}
