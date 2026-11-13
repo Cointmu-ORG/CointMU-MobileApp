@@ -27,9 +27,12 @@ export {
   findWalletByAddress,
   getActiveAccount,
   selectExpandableWallets,
+  selectUsableAccounts,
+  useAccount,
   useAccountLabel,
   useActiveAccount,
   useActiveWallet,
+  useUsableAccounts,
   useWalletLabel,
 } from './model/selectors';
 export {

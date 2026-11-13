@@ -110,7 +110,6 @@
       "retry": "Try again",
       "copyAddress": "Copy address",
       "copied": "Address copied",
-      "switchAccount": "Switch account",
       "show": "Show balances",
       "hide": "Hide balances",
       "showHint": "Shows the amounts for 30 seconds"
@@ -118,7 +117,9 @@
     "actions": {
       "send": "Send",
       "receive": "Receive",
-      "scan": "Scan"
+      "scan": "Scan",
+      "transfer": "Transfer",
+      "scanQr": "Scan QR"
     },
     "assets": {
       "title": "Assets",
@@ -127,7 +128,14 @@
     "transactions": {
       "title": "Recent activity",
       "empty": "No transactions yet",
-      "emptyHint": "Transactions you send from Muvo appear here."
+      "emptyHint": "Transfers to and from your accounts in the last 7 days appear here.",
+      "seeAll": "See all"
+    },
+    "brand": "Muvo",
+    "attention": "A wallet needs your attention. Open the Wallets tab to finish its backup or restore it.",
+    "cards": {
+      "add": "Add an account or wallet",
+      "position": "Card {{current}} of {{total}}"
     }
   },
   "history": {
@@ -148,7 +156,7 @@
       "explorer": "View in explorer",
       "missing": "This transaction isn't in your history on this device."
     },
-    "help": "Shows the last 7 days of transfers for this account, plus everything sent from Muvo. Transfers made by smart contracts on your behalf (internal transfers) don't appear here.",
+    "help": "Shows the last 7 days of transfers for your accounts, plus everything sent from Muvo. Transfers made by smart contracts on your behalf (internal transfers) don't appear here.",
     "today": "Today",
     "yesterday": "Yesterday",
     "rowLabel": "{{direction}} {{amount}}, {{address}}, {{status}}. Open details",
@@ -157,7 +165,12 @@
     "retry": "Try again",
     "loading": "Loading history…",
     "loadMore": "Load older transactions",
-    "end": "That's everything from the last 7 days."
+    "end": "That's everything from the last 7 days.",
+    "filter": {
+      "all": "All",
+      "label": "Account"
+    },
+    "rowLabelAccount": "{{account}}: {{direction}} {{amount}}, {{address}}, {{status}}. Open details"
   },
   "settings": {
     "title": "Settings",
@@ -479,7 +492,10 @@
         "empty": "Enter an amount.",
         "zero": "Enter an amount above zero.",
         "tooManyDecimals": "{{symbol}} allows at most {{decimals}} decimal places."
-      }
+      },
+      "from": "From",
+      "fromLabel": "From {{name}}, {{balance}}",
+      "fromHint": "Opens the list of your accounts"
     },
     "review": {
       "title": "Review",
@@ -610,10 +626,8 @@
   "accounts": {
     "defaultName": "Account {{number}}",
     "switcher": {
-      "title": "Switch account",
-      "manage": "Open Wallets",
-      "manageHint": "Rename, change colors and show a receive code",
-      "add": "Add an account or a wallet"
+      "title": "Send from",
+      "current": "Selected"
     }
   },
   "tokens": {
@@ -645,7 +659,6 @@
   },
   "tx": {
     "unknownAsset": "Unknown asset",
-    "rowLabel": "{{amount}}, {{address}}. Open details",
     "direction": {
       "in": "Received",
       "out": "Sent",
@@ -693,45 +706,35 @@
       "active": "Active",
       "label": "{{name}}, {{address}}",
       "labelActive": "{{name}}, {{address}}, active account",
-      "hint": "Makes this the active account and opens Home",
+      "hint": "Opens this account",
       "menu": "More options for {{name}}",
       "balanceError": "Balance unavailable",
       "balanceLoading": "Loading balance"
     },
     "menu": {
       "subtitle": "{{wallet}}, {{address}}",
-      "name": "Account name",
-      "nameHint": "Only shown on this phone.",
-      "nameSaved": "Name saved",
-      "saveName": "Save name",
-      "color": "Card color",
-      "setActive": "Set as active account",
-      "isActive": "This is the active account",
       "receive": "Show receive QR code",
-      "icon": "Change icon"
+      "personalize": "Personalize"
     },
     "details": {
-      "name": "Wallet name",
-      "nameHint": "Only shown on this phone. Leave it empty to keep the default name.",
-      "color": "Wallet color",
-      "save": "Save",
       "backupHint": "The active wallet's recovery phrase and private key are in Settings, under Security."
     },
     "add": {
       "title": "Add",
-      "accountTitle": "New account",
-      "accountIn": "Add an account to {{wallet}}",
+      "accountTitle": "Add the account to",
+      "accountIn": "In {{wallet}}",
       "accountCount_one": "Has {{count}} account now",
       "accountCount_other": "Has {{count}} accounts now",
       "accountHint": "A new account comes from that wallet's recovery phrase, so the same phrase restores it.",
       "accountNone": "Accounts can only be added to a wallet that has a recovery phrase.",
       "accountFailed": "Couldn't add an account. Please try again.",
-      "walletTitle": "New wallet",
       "create": "Create a new wallet",
       "createHint": "With a new recovery phrase to write down",
       "import": "Import a wallet",
       "importHint": "With a recovery phrase or a private key",
-      "limit": "Muvo holds up to {{max}} wallets. Remove one to add another."
+      "limit": "Muvo holds up to {{max}} wallets. Remove one to add another.",
+      "account": "Add an account",
+      "accountChoose": "Choose the wallet next"
     },
     "create": {
       "header": "New wallet",
@@ -747,11 +750,6 @@
         "title": "Check your backup",
         "subtitle": "Enter these words from the new wallet's recovery phrase.",
         "back": "Show the phrase again"
-      },
-      "details": {
-        "title": "Name your wallet",
-        "subtitle": "A name, a color and an icon help you tell your wallets apart.",
-        "finish": "Finish"
       }
     },
     "import": {
@@ -784,9 +782,7 @@
       "retry": "Try again"
     },
     "icons": {
-      "title": "Change icon",
       "label": "Card icon",
-      "done": "Done",
       "preview": "Card preview: {{name}}, icon: {{icon}}",
       "tabs": {
         "lucide": "Icons",
@@ -837,9 +833,21 @@
         "flag": "Flag"
       }
     },
-    "setup": {
-      "title": "Set up the new account",
-      "subtitle": "A name, a color and an icon help you tell your cards apart."
+    "detail": {
+      "title": "Account"
+    },
+    "personalize": {
+      "title": "Personalize",
+      "accountName": "Account name",
+      "walletName": "Wallet name",
+      "nameHint": "Only shown on this phone. Leave it empty to keep the default name.",
+      "nameInvalid": "A name needs at least one letter or number. Clear the field to keep the default name.",
+      "color": "Color",
+      "save": "Save",
+      "discardTitle": "Discard your changes?",
+      "discardBody": "The name, color and icon you picked are not saved yet.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
     }
   }
 }

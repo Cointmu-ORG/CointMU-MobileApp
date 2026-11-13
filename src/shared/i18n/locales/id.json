@@ -110,7 +110,6 @@
       "retry": "Coba lagi",
       "copyAddress": "Salin alamat",
       "copied": "Alamat disalin",
-      "switchAccount": "Ganti akun",
       "show": "Tampilkan saldo",
       "hide": "Sembunyikan saldo",
       "showHint": "Menampilkan jumlah selama 30 detik"
@@ -118,7 +117,9 @@
     "actions": {
       "send": "Kirim",
       "receive": "Terima",
-      "scan": "Pindai"
+      "scan": "Pindai",
+      "transfer": "Transfer",
+      "scanQr": "Pindai QR"
     },
     "assets": {
       "title": "Aset",
@@ -127,7 +128,14 @@
     "transactions": {
       "title": "Aktivitas terbaru",
       "empty": "Belum ada transaksi",
-      "emptyHint": "Transaksi yang kamu kirim dari Muvo akan muncul di sini."
+      "emptyHint": "Transfer ke dan dari akun kamu dalam 7 hari terakhir akan muncul di sini.",
+      "seeAll": "Lihat semua"
+    },
+    "brand": "Muvo",
+    "attention": "Ada dompet yang perlu perhatian. Buka tab Dompet untuk menyelesaikan cadangannya atau memulihkannya.",
+    "cards": {
+      "add": "Tambah akun atau dompet",
+      "position": "Kartu {{current}} dari {{total}}"
     }
   },
   "history": {
@@ -148,7 +156,7 @@
       "explorer": "Lihat di explorer",
       "missing": "Transaksi ini tidak ada di riwayat di perangkat ini."
     },
-    "help": "Menampilkan transfer 7 hari terakhir untuk akun ini, ditambah semua yang dikirim dari Muvo. Transfer yang dilakukan kontrak pintar atas namamu (transfer internal) tidak muncul di sini.",
+    "help": "Menampilkan transfer 7 hari terakhir untuk akun-akun kamu, ditambah semua yang dikirim dari Muvo. Transfer yang dilakukan kontrak pintar atas namamu (transfer internal) tidak muncul di sini.",
     "today": "Hari ini",
     "yesterday": "Kemarin",
     "rowLabel": "{{direction}} {{amount}}, {{address}}, {{status}}. Buka detail",
@@ -157,7 +165,12 @@
     "retry": "Coba lagi",
     "loading": "Memuat riwayat…",
     "loadMore": "Muat transaksi lama",
-    "end": "Itu semua dari 7 hari terakhir."
+    "end": "Itu semua dari 7 hari terakhir.",
+    "filter": {
+      "all": "Semua",
+      "label": "Akun"
+    },
+    "rowLabelAccount": "{{account}}: {{direction}} {{amount}}, {{address}}, {{status}}. Buka detail"
   },
   "settings": {
     "title": "Pengaturan",
@@ -479,7 +492,10 @@
         "empty": "Masukkan jumlah.",
         "zero": "Masukkan jumlah lebih dari nol.",
         "tooManyDecimals": "{{symbol}} maksimal {{decimals}} angka di belakang koma."
-      }
+      },
+      "from": "Dari",
+      "fromLabel": "Dari {{name}}, {{balance}}",
+      "fromHint": "Membuka daftar akun kamu"
     },
     "review": {
       "title": "Tinjau",
@@ -610,10 +626,8 @@
   "accounts": {
     "defaultName": "Akun {{number}}",
     "switcher": {
-      "title": "Ganti akun",
-      "manage": "Buka Dompet",
-      "manageHint": "Ubah nama, ganti warna, dan tampilkan kode terima",
-      "add": "Tambah akun atau dompet"
+      "title": "Kirim dari",
+      "current": "Dipilih"
     }
   },
   "tokens": {
@@ -645,7 +659,6 @@
   },
   "tx": {
     "unknownAsset": "Aset tidak dikenal",
-    "rowLabel": "{{amount}}, {{address}}. Buka detail",
     "direction": {
       "in": "Diterima",
       "out": "Dikirim",
@@ -693,45 +706,35 @@
       "active": "Aktif",
       "label": "{{name}}, {{address}}",
       "labelActive": "{{name}}, {{address}}, akun aktif",
-      "hint": "Menjadikan ini akun aktif dan membuka Beranda",
+      "hint": "Membuka akun ini",
       "menu": "Opsi lain untuk {{name}}",
       "balanceError": "Saldo tidak tersedia",
       "balanceLoading": "Memuat saldo"
     },
     "menu": {
       "subtitle": "{{wallet}}, {{address}}",
-      "name": "Nama akun",
-      "nameHint": "Hanya tampil di ponsel ini.",
-      "nameSaved": "Nama tersimpan",
-      "saveName": "Simpan nama",
-      "color": "Warna kartu",
-      "setActive": "Jadikan akun aktif",
-      "isActive": "Ini akun aktif",
       "receive": "Tampilkan kode QR terima",
-      "icon": "Ganti ikon"
+      "personalize": "Personalisasi"
     },
     "details": {
-      "name": "Nama dompet",
-      "nameHint": "Hanya tampil di ponsel ini. Kosongkan untuk memakai nama bawaan.",
-      "color": "Warna dompet",
-      "save": "Simpan",
       "backupHint": "Frasa pemulihan dan kunci privat dompet aktif ada di Pengaturan, di bagian Keamanan."
     },
     "add": {
       "title": "Tambah",
-      "accountTitle": "Akun baru",
-      "accountIn": "Tambah akun ke {{wallet}}",
+      "accountTitle": "Tambahkan akun ke",
+      "accountIn": "Di {{wallet}}",
       "accountCount_one": "Saat ini punya {{count}} akun",
       "accountCount_other": "Saat ini punya {{count}} akun",
       "accountHint": "Akun baru dibuat dari frasa pemulihan dompet itu, jadi frasa yang sama memulihkannya.",
       "accountNone": "Akun hanya bisa ditambahkan ke dompet yang punya frasa pemulihan.",
       "accountFailed": "Akun tidak dapat ditambahkan. Silakan coba lagi.",
-      "walletTitle": "Dompet baru",
       "create": "Buat dompet baru",
       "createHint": "Dengan frasa pemulihan baru untuk dicatat",
       "import": "Impor dompet",
       "importHint": "Dengan frasa pemulihan atau kunci privat",
-      "limit": "Muvo menyimpan hingga {{max}} dompet. Hapus satu untuk menambah yang lain."
+      "limit": "Muvo menyimpan hingga {{max}} dompet. Hapus satu untuk menambah yang lain.",
+      "account": "Tambah akun",
+      "accountChoose": "Pilih dompetnya setelah ini"
     },
     "create": {
       "header": "Dompet baru",
@@ -747,11 +750,6 @@
         "title": "Periksa cadangan Anda",
         "subtitle": "Masukkan kata-kata ini dari frasa pemulihan dompet baru.",
         "back": "Tampilkan frasa lagi"
-      },
-      "details": {
-        "title": "Beri nama dompet Anda",
-        "subtitle": "Nama, warna, dan ikon membantu Anda membedakan dompet.",
-        "finish": "Selesai"
       }
     },
     "import": {
@@ -784,9 +782,7 @@
       "retry": "Coba lagi"
     },
     "icons": {
-      "title": "Ganti ikon",
       "label": "Ikon kartu",
-      "done": "Selesai",
       "preview": "Pratinjau kartu: {{name}}, ikon: {{icon}}",
       "tabs": {
         "lucide": "Ikon",
@@ -837,9 +833,21 @@
         "flag": "Bendera"
       }
     },
-    "setup": {
-      "title": "Atur akun baru",
-      "subtitle": "Nama, warna, dan ikon membantu Anda membedakan kartu."
+    "detail": {
+      "title": "Akun"
+    },
+    "personalize": {
+      "title": "Personalisasi",
+      "accountName": "Nama akun",
+      "walletName": "Nama dompet",
+      "nameHint": "Hanya tampil di ponsel ini. Kosongkan untuk memakai nama bawaan.",
+      "nameInvalid": "Nama perlu setidaknya satu huruf atau angka. Kosongkan kolom untuk memakai nama bawaan.",
+      "color": "Warna",
+      "save": "Simpan",
+      "discardTitle": "Buang perubahan?",
+      "discardBody": "Nama, warna, dan ikon yang kamu pilih belum disimpan.",
+      "keepEditing": "Lanjut mengedit",
+      "discard": "Buang"
     }
   }
 }

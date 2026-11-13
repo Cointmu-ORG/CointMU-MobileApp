@@ -50,13 +50,14 @@ const newestFirst = (a: HistoryItem, b: HistoryItem) => {
 };
 
 /**
- * Merges every source into one newest-first list, one row per hash. A local record keeps its
- * live status (the poller follows it), but takes the block and time the chain reports.
+ * Merges every source into one newest-first list, one row per hash and own address. A local
+ * record keeps its live status (the poller follows it), but takes the block and time the chain
+ * reports.
  */
 export function mergeHistory(...sources: readonly (readonly HistoryItem[])[]): HistoryItem[] {
   const byHash = new Map<string, HistoryItem>();
   for (const item of sources.flat()) {
-    const key = item.hash.toLowerCase();
+    const key = `${item.hash}:${item.owner}`.toLowerCase();
     const existing = byHash.get(key);
     if (existing === undefined) {
       byHash.set(key, item);

@@ -47,6 +47,11 @@ export type TxDirection = 'in' | 'out' | 'self';
  */
 export type HistoryItem = {
   readonly hash: string;
+  /**
+   * The user's own address this row belongs to, lowercase. A transfer between two own accounts
+   * gives two rows: the sender's (out) and the recipient's (in).
+   */
+  readonly owner: string;
   readonly from: string;
   readonly to: string;
   /** Amount in the asset's base units, as a decimal string. */

@@ -32,6 +32,32 @@ export function useActiveAccount(): ActiveAccount | null {
   }, [wallet, accountIndex]);
 }
 
+/** Every account that can be used right now, in wallet order, each with its wallet id. */
+export function selectUsableAccounts(wallets: readonly WalletRecord[]): ActiveAccount[] {
+  return wallets
+    .filter(isWalletUsable)
+    .flatMap((wallet) => wallet.accounts.map((account) => ({ ...account, walletId: wallet.id })));
+}
+
+export function useUsableAccounts(): ActiveAccount[] {
+  const wallets = useWalletStore((state) => state.wallets);
+  return useMemo(() => selectUsableAccounts(wallets), [wallets]);
+}
+
+/** One account by wallet id and index, whatever the state of its wallet. */
+export function useAccount(
+  ref: { readonly walletId: string; readonly index: number } | null,
+): ActiveAccount | null {
+  const wallet = useWalletStore(
+    (state) => state.wallets.find((candidate) => candidate.id === ref?.walletId) ?? null,
+  );
+  const index = ref?.index;
+  return useMemo(() => {
+    const account = wallet?.accounts.find((candidate) => candidate.index === index);
+    return wallet && account ? { ...account, walletId: wallet.id } : null;
+  }, [wallet, index]);
+}
+
 /** Same as `useActiveAccount`, outside React. */
 export function getActiveAccount(): ActiveAccount | null {
   const { wallets, activeWalletId, accountIndex } = useWalletStore.getState();

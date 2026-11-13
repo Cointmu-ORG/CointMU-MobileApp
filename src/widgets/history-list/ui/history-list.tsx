@@ -6,19 +6,28 @@ import { RefreshControl, SectionList, View } from 'react-native';
 import { Button, ICON_SIZE, Notice, Skeleton, Spinner, Text, useThemeColors } from '@/shared/ui';
 
 import { groupByDay } from '../lib/group-by-day';
+import { useAccountsByAddress } from '../model/use-accounts-by-address';
 import { useHistory } from '../model/use-history';
+import { AccountFilter } from './account-filter';
 import { HistoryRow } from './history-row';
 
 const EMPTY_ICON_SIZE = ICON_SIZE.lg * 2;
 const SKELETON_ROWS = ['a', 'b', 'c', 'd'] as const;
 
-function Header() {
+export type HistoryListProps = {
+  /** Address of the one account to show, or null for all accounts. */
+  filter: string | null;
+  onFilterChange: (address: string | null) => void;
+};
+
+function Header({ filter, onFilterChange }: HistoryListProps) {
   const { t } = useTranslation();
   return (
-    <View className="gap-2 pb-2">
+    <View className="gap-3 pb-2">
       <Text variant="title" accessibilityRole="header">
         {t('history.title')}
       </Text>
+      <AccountFilter value={filter} onChange={onFilterChange} />
       <Text variant="caption" tone="secondary">
         {t('history.help')}
       </Text>
@@ -93,11 +102,15 @@ function Footer(props: {
   );
 }
 
-/** History tab: grouped by day, pull to refresh, older pages on scroll or on request. */
-export function HistoryList() {
+/**
+ * History tab: every account's transactions or one account's, grouped by day, pull to refresh,
+ * older pages on scroll or on request.
+ */
+export function HistoryList({ filter, onFilterChange }: HistoryListProps) {
   const colors = useThemeColors();
   const { t, i18n } = useTranslation();
-  const { items, status, hasMore, isFirstLoad, loadMore, refresh } = useHistory();
+  const { items, status, hasMore, isFirstLoad, loadMore, refresh } = useHistory(filter);
+  const accounts = useAccountsByAddress();
   const sections = useMemo(
     () =>
       groupByDay(items, i18n.language, {
@@ -116,8 +129,8 @@ export function HistoryList() {
   return (
     <SectionList
       sections={sections}
-      keyExtractor={(item) => item.hash}
-      renderItem={({ item }) => <HistoryRow item={item} />}
+      keyExtractor={(item) => `${item.hash}:${item.owner}`}
+      renderItem={({ item }) => <HistoryRow item={item} account={accounts.get(item.owner)} />}
       renderSectionHeader={({ section }) => (
         <Text
           variant="label"
@@ -128,7 +141,7 @@ export function HistoryList() {
           {section.title}
         </Text>
       )}
-      ListHeaderComponent={Header}
+      ListHeaderComponent={<Header filter={filter} onFilterChange={onFilterChange} />}
       ListEmptyComponent={
         isRefreshing ? undefined : isBusy ? (
           <LoadingRows />
