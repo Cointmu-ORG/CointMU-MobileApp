@@ -1,7 +1,7 @@
 {
   "name": "cointmu-mobileapp",
-  "version": "1.1.0",
-  "codename": "FelisCatus",
+  "version": "1.2.0",
+  "codename": "BettaSplendens",
   "main": "index.ts",
   "packageManager": "npm@12.2.0",
   "dependencies": {
