@@ -16,8 +16,7 @@ import { useActiveRpcUrl } from '@/entities/network';
 import { useAccountLabel, useDefaultAccount } from '@/entities/wallet';
 import { LANGUAGE_NAMES, useCurrentLanguage } from '@/features/change-language';
 import { lockNow } from '@/features/lock-settings';
-import { switchToDefaultAccount } from '@/features/manage-accounts';
-import { getAppInfo, ROUTES, type AppRoute } from '@/shared/config';
+import { getAppInfo, ROUTES } from '@/shared/config';
 import { formatUrlHost, isErrorReportingAvailable } from '@/shared/lib';
 import { useAppearanceStore, useErrorReportingStore } from '@/shared/model';
 import { ScrollScreen, SettingsRow, SettingsSection, Text } from '@/shared/ui';
@@ -37,15 +36,6 @@ function usePrivacyLabel(): string {
   const isEnabled = useErrorReportingStore((state) => state.isEnabled);
   if (!isErrorReportingAvailable()) return t('settings.privacy.notSetUp');
   return t(isEnabled ? 'settings.privacy.on' : 'settings.privacy.off');
-}
-
-/**
- * Security and "Remove wallet" act on one wallet. From Settings that is the default account's,
- * not the one last looked at (D-92); both screens name it.
- */
-function openForDefaultAccount(route: AppRoute) {
-  switchToDefaultAccount();
-  router.push(route);
 }
 
 /**
@@ -104,7 +94,7 @@ export function SettingsPage() {
           icon={ShieldCheck}
           title={t('settings.security.title')}
           value={t('settings.security.autoLockValue', { time: autoLock })}
-          onPress={() => openForDefaultAccount(ROUTES.security)}
+          onPress={() => router.push(ROUTES.security)}
         />
       </SettingsSection>
       <SettingsSection title={t('settings.logout.title')}>
@@ -118,7 +108,7 @@ export function SettingsPage() {
           icon={Trash2}
           title={t('settings.logout.remove')}
           description={t('settings.logout.removeDesc')}
-          onPress={() => openForDefaultAccount(ROUTES.removeWallet)}
+          onPress={() => router.push(ROUTES.removeWallet)}
           isDestructive
         />
       </SettingsSection>

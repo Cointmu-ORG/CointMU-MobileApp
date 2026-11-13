@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { AppState, ScrollView, View } from 'react-native';
 
 import { PinPrompt } from '@/entities/auth';
-import { useActiveWallet, useWalletLabel } from '@/entities/wallet';
-import { logger } from '@/shared/lib';
+import { useWalletLabel, useWalletStore } from '@/entities/wallet';
+import { logger, shortenAddress } from '@/shared/lib';
 import { Button, SecretEye, Text, useTimedReveal, WordGrid } from '@/shared/ui';
 
 import { loadRecoveryWords } from '../model/load-words';
@@ -13,15 +13,30 @@ import { PhraseWarning } from './phrase-warning';
 
 type State = { step: 'intro' | 'auth' | 'error' } | { step: 'shown'; words: string[] };
 
-type IntroProps = { walletName: string; onReveal: () => void; isFailed: boolean };
+/** Which wallet the phrase belongs to: its name and its first account's short address. */
+type Owner = { walletName: string; address: string };
 
-function Intro({ walletName, onReveal, isFailed }: IntroProps) {
+function OwnerHeading({ walletName, address }: Owner) {
   const { t } = useTranslation();
   return (
-    <ScrollView contentContainerClassName="gap-6 pb-8">
+    <View className="gap-1">
       <Text variant="heading" accessibilityRole="header">
         {t('settings.recoveryPhrase.wallet', { wallet: walletName })}
       </Text>
+      <Text variant="mono" tone="secondary">
+        {address}
+      </Text>
+    </View>
+  );
+}
+
+type IntroProps = { owner: Owner; onReveal: () => void; isFailed: boolean };
+
+function Intro({ owner, onReveal, isFailed }: IntroProps) {
+  const { t } = useTranslation();
+  return (
+    <ScrollView contentContainerClassName="gap-6 pb-8">
+      <OwnerHeading {...owner} />
       <Text tone="secondary">{t('settings.recoveryPhrase.description')}</Text>
       <PhraseWarning />
       {isFailed ? (
@@ -35,16 +50,14 @@ function Intro({ walletName, onReveal, isFailed }: IntroProps) {
 }
 
 /** The words stay masked until the eye is pressed, and mask themselves again after 30 s. */
-type ShownPhraseProps = { walletName: string; words: readonly string[]; onHide: () => void };
+type ShownPhraseProps = { owner: Owner; words: readonly string[]; onHide: () => void };
 
-function ShownPhrase({ walletName, words, onHide }: ShownPhraseProps) {
+function ShownPhrase({ owner, words, onHide }: ShownPhraseProps) {
   const { t } = useTranslation();
   const { isRevealed, toggle } = useTimedReveal();
   return (
     <ScrollView contentContainerClassName="gap-6 pb-8">
-      <Text variant="heading" accessibilityRole="header">
-        {t('settings.recoveryPhrase.wallet', { wallet: walletName })}
-      </Text>
+      <OwnerHeading {...owner} />
       <PhraseWarning />
       <View className="gap-1">
         <View className="flex-row items-center justify-between">
@@ -71,18 +84,19 @@ function ShownPhrase({ walletName, words, onHide }: ShownPhraseProps) {
 }
 
 /**
- * Settings > Recovery phrase, for the active wallet, whose name is shown (D-78). Screenshots are
- * blocked for the whole screen. The words are read from that wallet's SecureStore item only
+ * Settings > Recovery phrase, for the wallet the caller names (D-94); every step shows its name
+ * and its first account's short address. Screenshots are blocked for the whole screen. The words are read from that wallet's SecureStore item only
  * after a PIN or biometric check, kept in component state, shown masked
  * until the eye is pressed, and dropped on "Hide", on leaving the screen, and as soon as Muvo
  * leaves the foreground.
  */
-export function RevealPhrase() {
+export function RevealPhrase({ walletId }: { walletId: string }) {
   usePreventScreenCapture();
   const { t } = useTranslation();
-  const wallet = useActiveWallet();
+  const wallet = useWalletStore(
+    (state) => state.wallets.find((candidate) => candidate.id === walletId) ?? null,
+  );
   const walletLabel = useWalletLabel();
-  const walletId = wallet?.id;
   const [state, setState] = useState<State>({ step: 'intro' });
 
   useEffect(() => {
@@ -93,7 +107,6 @@ export function RevealPhrase() {
   }, []);
 
   const reveal = useCallback(async () => {
-    if (walletId === undefined) return;
     try {
       setState({ step: 'shown', words: await loadRecoveryWords(walletId) });
     } catch (error) {
@@ -103,7 +116,10 @@ export function RevealPhrase() {
   }, [walletId]);
 
   if (wallet === null) return null;
-  const walletName = walletLabel(wallet);
+  const owner: Owner = {
+    walletName: walletLabel(wallet),
+    address: shortenAddress(wallet.accounts[0]?.address ?? ''),
+  };
   if (wallet.source === 'private-key') {
     return <Text tone="secondary">{t('settings.recoveryPhrase.privateKey')}</Text>;
   }
@@ -111,7 +127,10 @@ export function RevealPhrase() {
     return (
       <PinPrompt
         title={t('settings.recoveryPhrase.authTitle')}
-        subtitle={t('settings.recoveryPhrase.authSubtitle')}
+        subtitle={t('settings.recoveryPhrase.authSubtitle', {
+          wallet: owner.walletName,
+          address: owner.address,
+        })}
         biometrics={{ prompt: t('settings.recoveryPhrase.authTitle') }}
         onVerified={() => void reveal()}
       />
@@ -119,16 +138,12 @@ export function RevealPhrase() {
   }
   if (state.step === 'shown') {
     return (
-      <ShownPhrase
-        walletName={walletName}
-        words={state.words}
-        onHide={() => setState({ step: 'intro' })}
-      />
+      <ShownPhrase owner={owner} words={state.words} onHide={() => setState({ step: 'intro' })} />
     );
   }
   return (
     <Intro
-      walletName={walletName}
+      owner={owner}
       onReveal={() => setState({ step: 'auth' })}
       isFailed={state.step === 'error'}
     />

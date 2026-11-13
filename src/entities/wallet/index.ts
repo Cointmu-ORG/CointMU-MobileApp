@@ -25,14 +25,12 @@ export { migrateWalletState } from './model/migrate';
 export {
   findWallet,
   findWalletByAddress,
-  getActiveAccount,
   getDefaultAccount,
   selectExpandableWallets,
   selectUsableAccounts,
   useAccount,
   useAccountLabel,
   useActiveAccount,
-  useActiveWallet,
   useDefaultAccount,
   useUsableAccounts,
   useWalletLabel,
@@ -57,4 +55,5 @@ export {
   AccountIconTile,
   useAccountIconLabel,
 } from './ui/account-icon';
+export { WalletTarget } from './ui/wallet-target';
 export { useMnemonicWords, type MnemonicWordsState } from './model/use-mnemonic-words';

@@ -22,6 +22,7 @@ const PIN = '135790';
 const PRIVATE_KEY = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 const ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const SECRET_KEY = 'muvo.wallet.secret';
+let walletId = '';
 
 const secretReads = () =>
   jest.mocked(SecureStore.getItemAsync).mock.calls.filter(([key]) => key.startsWith(SECRET_KEY))
@@ -48,7 +49,10 @@ async function revealWithPin() {
 beforeEach(async () => {
   await i18n.changeLanguage('en');
   await storeNewPin(PIN);
-  await seedWallet({ secret: { kind: 'private-key', privateKey: PRIVATE_KEY }, address: ADDRESS });
+  walletId = await seedWallet({
+    secret: { kind: 'private-key', privateKey: PRIVATE_KEY },
+    address: ADDRESS,
+  });
   jest.mocked(SecureStore.getItemAsync).mockClear();
 });
 
@@ -59,12 +63,12 @@ afterEach(() => {
 
 describe('RevealPrivateKey', () => {
   it('blocks screenshots for the whole screen', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     expect(ScreenCapture.usePreventScreenCapture).toHaveBeenCalled();
   });
 
   it('asks for the PIN before it reads or shows the key', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     expect(screen.getByText('Never share your private key')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Show private key' }));
 
@@ -82,7 +86,7 @@ describe('RevealPrivateKey', () => {
   });
 
   it('keeps the key out of the screen after the PIN until the eye is pressed', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     const eye = await authenticate();
     expect(screen.queryByText(PRIVATE_KEY)).toBeNull();
     // The mask is a fixed run of dots, not one dot per character of the key.
@@ -98,7 +102,7 @@ describe('RevealPrivateKey', () => {
   });
 
   it('masks the key again 30 seconds after the eye was pressed', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     const eye = await authenticate();
     jest.useFakeTimers();
     await fireEvent.press(eye);
@@ -112,7 +116,7 @@ describe('RevealPrivateKey', () => {
   });
 
   it('offers no way to copy the key', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     const key = await revealWithPin();
 
     expect(key.props.selectable).toBe(false);
@@ -129,7 +133,7 @@ describe('RevealPrivateKey', () => {
       emit = handler as typeof emit;
       return { remove: jest.fn() };
     });
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     await revealWithPin();
 
     await act(() => emit('inactive'));
@@ -138,7 +142,7 @@ describe('RevealPrivateKey', () => {
   });
 
   it('hides the key on "Hide" and asks for the PIN again next time', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     await revealWithPin();
 
     await fireEvent.press(screen.getByRole('button', { name: 'Hide' }));
@@ -148,13 +152,13 @@ describe('RevealPrivateKey', () => {
   });
 
   it('explains that the key is the only backup of an imported-key wallet', async () => {
-    await render(<RevealPrivateKey />);
+    await render(<RevealPrivateKey walletId={walletId} />);
     expect(screen.getByText(/only way to restore it/)).toBeOnTheScreen();
   });
 
-  it('tells a phrase wallet that the key covers the active account only', async () => {
-    seedWalletRecord({ source: 'mnemonic', address: ADDRESS });
-    await render(<RevealPrivateKey />);
+  it('tells a phrase wallet that the key covers that account only', async () => {
+    walletId = seedWalletRecord({ source: 'mnemonic', address: ADDRESS });
+    await render(<RevealPrivateKey walletId={walletId} />);
     expect(screen.getByText(/key of Account 1 only/)).toBeOnTheScreen();
   });
 });
