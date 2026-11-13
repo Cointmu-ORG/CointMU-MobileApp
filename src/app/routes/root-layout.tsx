@@ -39,6 +39,7 @@ const SUB_SCREENS = [
   { name: 'language', titleKey: 'settings.language.title' },
   { name: 'network', titleKey: 'settings.network.title' },
   { name: 'security', titleKey: 'settings.security.title' },
+  { name: 'default-account', titleKey: 'settings.defaultAccount.title' },
   { name: 'enable-biometrics', titleKey: 'settings.biometrics.title' },
   { name: 'wallet-detail', titleKey: 'wallets.detail.title' },
   { name: 'personalize', titleKey: 'wallets.personalize.title' },

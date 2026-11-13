@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fireEvent, renderRouter, screen, waitFor, within } from 'expo-router/testing-library';
+import { router } from 'expo-router';
+import { act, fireEvent, renderRouter, screen, waitFor, within } from 'expo-router/testing-library';
 
 import { useAccountBalancesStore } from '@/entities/account';
 import { storeNewPin, useSessionStore } from '@/entities/auth';
@@ -41,6 +42,15 @@ jest.mock('@/shared/api', () => ({
     send: jest.fn(async () => '0x778'),
     destroy: jest.fn(),
   }),
+}));
+
+// The scanner opens on its own explanation: the camera is not allowed yet, so none is drawn.
+jest.mock('expo-camera', () => ({
+  useCameraPermissions: () => [
+    { granted: false, canAskAgain: true, status: 'undetermined' },
+    jest.fn(),
+  ],
+  CameraView: () => null,
 }));
 
 preloadRoutes();
@@ -114,13 +124,13 @@ describe('Home', () => {
 
     await fireEvent.press(screen.getByRole('button', { name: 'Transfer' }));
     await waitFor(() => expect(app.getPathname()).toBe(ROUTES.send));
-    // The send form opens with the source selector on the remembered account.
+    // The send form opens with the source selector on the default account.
     expect(await screen.findByRole('button', { name: /^From Account 1/ })).toBeOnTheScreen();
   });
 
   it('lists the newest activity of all accounts, naming the account, with a way to the rest', async () => {
     const app = await openHome();
-    // Received by the second account while the first one is the remembered account.
+    // Received by the second account while the first one is the default account.
     expect(
       await screen.findByRole('button', { name: /^Savings: Received \+1 CMU/ }, TIMEOUT),
     ).toBeOnTheScreen();
@@ -148,6 +158,8 @@ describe('Home', () => {
 
     await waitFor(() => expect(app.getPathname()).toBe(ROUTES.walletDetail));
     expect(state()).toMatchObject({ activeWalletId: firstId, accountIndex: 1, address: A1 });
+    // Looking at an account does not make it the default.
+    expect(state().defaultAccount).toEqual({ walletId: firstId, index: 0 });
     // That account's activity only, so the rows no longer need to name it.
     expect(
       await screen.findByRole('button', { name: /^Received \+1 CMU/ }, TIMEOUT),
@@ -157,6 +169,104 @@ describe('Home', () => {
     await waitFor(() => expect(app.getPathname()).toBe(ROUTES.send));
     expect(await screen.findByRole('button', { name: /^From Savings/ })).toBeOnTheScreen();
     expect(screen.getByText('0x7099…79C8')).toBeOnTheScreen();
+  });
+
+  describe('the default account', () => {
+    const defaultRef = () => ({ walletId: firstId, index: 0 });
+
+    it('carries the "Default" badge in the carousel', async () => {
+      await openHome();
+      const card = screen.getByRole('button', {
+        name: 'Account 1, 0xf39F…2266, default account',
+      });
+      expect(within(card).getByText('Default')).toBeOnTheScreen();
+      expect(screen.getAllByText('Default')).toHaveLength(1);
+    });
+
+    it('is where Transfer starts, also after another account was looked at', async () => {
+      const app = await openHome();
+      await fireEvent.press(screen.getByRole('button', { name: /^Savings, 0x7099…79C8/ }));
+      await waitFor(() => expect(app.getPathname()).toBe(ROUTES.walletDetail));
+      await act(async () => router.back());
+      await waitFor(() => expect(app.getPathname()).toBe(ROUTES.home));
+
+      await fireEvent.press(screen.getByRole('button', { name: 'Transfer' }));
+      await waitFor(() => expect(app.getPathname()).toBe(ROUTES.send));
+      expect(await screen.findByRole('button', { name: /^From Account 1/ })).toBeOnTheScreen();
+      expect(screen.getByText('0xf39F…2266')).toBeOnTheScreen();
+      expect(state().defaultAccount).toEqual(defaultRef());
+    });
+
+    it('is where Scan QR starts too', async () => {
+      const app = await openHome();
+      await act(async () => state().selectAccount(firstId, 1));
+      await fireEvent.press(screen.getByRole('button', { name: 'Scan QR' }));
+      await waitFor(() => expect(app.getPathname()).toBe(ROUTES.scan));
+      expect(state()).toMatchObject({ accountIndex: 0, address: A0 });
+      expect(state().defaultAccount).toEqual(defaultRef());
+    });
+
+    it('is not changed by picking another From: the next transfer starts from it again', async () => {
+      const app = await openHome();
+      await fireEvent.press(screen.getByRole('button', { name: 'Transfer' }));
+      await fireEvent.press(await screen.findByRole('button', { name: /^From Account 1/ }));
+      expect(await screen.findByRole('header', { name: 'Send from' })).toBeOnTheScreen();
+      await fireEvent.press(screen.getAllByRole('radio', { checked: false })[0]);
+      await act(async () => jest.runOnlyPendingTimers());
+      // This send only: the form shows the picked account.
+      expect(await screen.findByRole('button', { name: /^From Savings/ })).toBeOnTheScreen();
+      expect(state().defaultAccount).toEqual(defaultRef());
+
+      await act(async () => router.back());
+      await waitFor(() => expect(app.getPathname()).toBe(ROUTES.home));
+      await fireEvent.press(screen.getByRole('button', { name: 'Transfer' }));
+
+      expect(await screen.findByRole('button', { name: /^From Account 1/ })).toBeOnTheScreen();
+      expect(screen.getByText('0xf39F…2266')).toBeOnTheScreen();
+    });
+
+    it('keeps the account of a wallet detail for a send started there, after From was changed', async () => {
+      const app = await openHome();
+      await fireEvent.press(screen.getByRole('button', { name: /^Savings, 0x7099…79C8/ }));
+      await fireEvent.press(await screen.findByRole('button', { name: 'Send' }));
+      await screen.findByRole('button', { name: /^From Savings/ });
+      // Another source for that send, then back to the account's screen.
+      await act(async () => state().selectAccount(firstId, 0));
+      await act(async () => router.back());
+      await waitFor(() => expect(app.getPathname()).toBe(ROUTES.walletDetail));
+
+      await fireEvent.press(await screen.findByRole('button', { name: 'Send' }));
+      expect(await screen.findByRole('button', { name: /^From Savings/ })).toBeOnTheScreen();
+      expect(state().defaultAccount).toEqual(defaultRef());
+    });
+
+    it('moves to the first readable account when its wallet is removed, and says so once', async () => {
+      await openHome();
+      expect(screen.queryByText('Default account changed')).toBeNull();
+
+      await act(async () => state().removeWallet(firstId));
+
+      const secondId = state().wallets[0]?.id;
+      expect(state().defaultAccount).toEqual({ walletId: secondId, index: 0 });
+      expect(await screen.findByText('Default account changed')).toBeOnTheScreen();
+      expect(
+        screen.getByText(/Account 1 is now your default account for transfers/),
+      ).toBeOnTheScreen();
+      expect(
+        screen.getByRole('button', { name: 'Account 1, 0x3C44…93BC, default account' }),
+      ).toBeOnTheScreen();
+
+      await fireEvent.press(screen.getByRole('button', { name: 'Got it' }));
+      expect(screen.queryByText('Default account changed')).toBeNull();
+      expect(state().hasDefaultMovedNotice).toBe(false);
+    });
+
+    it('moves off a wallet that can no longer be read, with the same notice', async () => {
+      await openHome();
+      await act(async () => state().setUnreadableWallets([firstId]));
+      expect(await screen.findByText('Default account changed')).toBeOnTheScreen();
+      expect(state().defaultAccount?.walletId).not.toBe(firstId);
+    });
   });
 
   it('opens the history of that account from its screen', async () => {

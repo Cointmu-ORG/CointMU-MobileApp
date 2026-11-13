@@ -53,6 +53,9 @@ export type WalletRecord = {
   readonly accounts: readonly WalletAccount[];
 };
 
+/** Points at one account of one wallet. Public data. */
+export type AccountRef = { readonly walletId: string; readonly index: number };
+
 /** The active account together with the wallet that holds its secret. */
 export type ActiveAccount = WalletAccount & { readonly walletId: string };
 

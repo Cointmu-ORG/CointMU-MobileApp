@@ -269,7 +269,7 @@
       "lockNow": "Kunci sekarang",
       "lockNowDesc": "Kunci Muvo sampai Anda memasukkan PIN. Tidak ada yang dihapus.",
       "remove": "Hapus dompet dari perangkat ini",
-      "removeDesc": "Menghapus kunci dompet aktif dari ponsel ini. Anda memerlukan frasa pemulihan atau kunci privatnya untuk mendapatkannya kembali."
+      "removeDesc": "Menghapus kunci dompet akun utama dari ponsel ini. Anda memerlukan frasa pemulihan atau kunci privatnya untuk mendapatkannya kembali."
     },
     "removeWallet": {
       "title": "Hapus dompet",
@@ -472,6 +472,10 @@
         "howToDisable": "Kamu bisa mengubahnya kapan saja di Pengaturan > Privasi.",
         "acknowledge": "Mengerti"
       }
+    },
+    "defaultAccount": {
+      "title": "Akun utama untuk transfer",
+      "description": "Transfer dan Pindai QR di Beranda dimulai dari akun ini. Akun lain tetap bisa dipilih untuk satu transfer."
     }
   },
   "send": {
@@ -628,6 +632,11 @@
     "switcher": {
       "title": "Kirim dari",
       "current": "Dipilih"
+    },
+    "defaultMoved": {
+      "title": "Akun utama berubah",
+      "body": "Akun utama sebelumnya tidak lagi tersedia. {{name}} sekarang menjadi akun utama untuk transfer. Bisa diubah di Pengaturan.",
+      "dismiss": "Mengerti"
     }
   },
   "tokens": {
@@ -703,9 +712,9 @@
       "slate": "Abu batu"
     },
     "card": {
-      "active": "Aktif",
+      "default": "Utama",
       "label": "{{name}}, {{address}}",
-      "labelActive": "{{name}}, {{address}}, akun aktif",
+      "labelDefault": "{{name}}, {{address}}, akun utama",
       "hint": "Membuka akun ini",
       "menu": "Opsi lain untuk {{name}}",
       "balanceError": "Saldo tidak tersedia",
@@ -714,10 +723,11 @@
     "menu": {
       "subtitle": "{{wallet}}, {{address}}",
       "receive": "Tampilkan kode QR terima",
-      "personalize": "Personalisasi"
+      "personalize": "Personalisasi",
+      "setDefault": "Jadikan akun utama"
     },
     "details": {
-      "backupHint": "Frasa pemulihan dan kunci privat dompet aktif ada di Pengaturan, di bagian Keamanan."
+      "backupHint": "Frasa pemulihan dan kunci privat dompet akun utama ada di Pengaturan, di bagian Keamanan."
     },
     "add": {
       "title": "Tambah",

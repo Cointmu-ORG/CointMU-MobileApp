@@ -3,6 +3,7 @@ import { useTokenBalanceStore } from '@/entities/asset';
 import {
   deriveAccount,
   findWallet,
+  getDefaultAccount,
   readWalletSecret,
   useWalletStore,
   type AccountIcon,
@@ -20,7 +21,8 @@ export type AddAccountResult =
 export type AccountRef = { readonly walletId: string; readonly index: number };
 
 /**
- * Makes an account of any wallet the active one. Balances are cleared so the previous
+ * Makes an account of any wallet the one in use (on screen, or the source of a send). The
+ * default account is not touched. Balances are cleared so the previous
  * account's never show. A wallet that is not usable (backup pending, unreadable) is ignored.
  */
 export function switchToAccount({ walletId, index }: AccountRef): void {
@@ -30,6 +32,17 @@ export function switchToAccount({ walletId, index }: AccountRef): void {
   if (useWalletStore.getState().address === before.address) return;
   useBalanceStore.getState().clear();
   useTokenBalanceStore.getState().clear();
+}
+
+/** Puts the default account in use: where Transfer and Scan QR start from Home (D-92). */
+export function switchToDefaultAccount(): void {
+  const account = getDefaultAccount();
+  if (account) switchToAccount(account);
+}
+
+/** Makes an account the default for transfers. Only the user does this (D-92). */
+export function setDefaultAccount({ walletId, index }: AccountRef): void {
+  useWalletStore.getState().setDefaultAccount(walletId, index);
 }
 
 /**

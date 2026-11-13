@@ -24,7 +24,7 @@ function useFundsCheck(draft: SendDraft | null) {
   const tokenBalance = useAssetBalance(draft?.asset ?? { kind: 'native', symbol: '', decimals: 0 });
   const balanceOwner = useWalletStore((state) => state.address);
   if (draft === null || nativeBalance === null) return 'unknown' as const;
-  // The loaded balances are the remembered account's. They only count for this transfer while
+  // The loaded balances are those of the account in use. They only count for this transfer while
   // that is still the account it is sent from.
   if (balanceOwner === null || !isSameAddress(balanceOwner, draft.from.address)) {
     return 'unknown' as const;
@@ -48,7 +48,7 @@ function Warnings({ draft }: { draft: SendDraft }) {
 export function SendReview() {
   const { t } = useTranslation();
   const { draft, isRefreshing, error, ensureFresh } = useFreshQuote();
-  // The account the draft names, not the remembered default: what is shown is what signs.
+  // The account the draft names, not the account in use: what is shown is what signs.
   const account = useAccount(draft?.from ?? null);
   const funds = useFundsCheck(draft);
   const [step, setStep] = useState<Step>('review');

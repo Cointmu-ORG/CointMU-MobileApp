@@ -37,7 +37,7 @@ type BalanceCardProps = {
   onMenu?: () => void;
 };
 
-/** The remembered account in full: name, CMU balance, address. Its balances poll while shown. */
+/** The account in use in full: name, CMU balance, address. Its balances poll while shown. */
 export function BalanceCard({ enterIndex = 0, onMenu }: BalanceCardProps) {
   const { t } = useTranslation();
   const address = useWalletStore((state) => state.address);

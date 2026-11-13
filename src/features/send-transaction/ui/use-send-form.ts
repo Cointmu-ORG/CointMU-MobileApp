@@ -106,8 +106,8 @@ function useNetworkStep(setErrors: (update: (current: FieldErrors) => FieldError
 
 export function useSendForm() {
   const { i18n } = useTranslation();
-  // "From" is the remembered account: the one Send was opened from, else the last one used.
-  // Picking another one in the selector makes that the remembered account.
+  // "From" is the account in use: the default from Home, or the account Send was opened from.
+  // Picking another one in the selector changes this send only, never the default (D-92).
   const source = useActiveAccount();
   const from = source?.address ?? '';
   const fields = useFields();

@@ -9,7 +9,7 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 
-import { useActiveAccount, useUsableAccounts } from '@/entities/wallet';
+import { useUsableAccounts, useWalletStore } from '@/entities/wallet';
 import { ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 import type { AccountRef } from '../model/types';
@@ -82,7 +82,7 @@ export function AccountCarousel(props: AccountCarouselProps) {
   const { onOpenAccount, onAccountMenu, onAdd, isFocused = true } = props;
   const { width } = useWindowDimensions();
   const accounts = useUsableAccounts();
-  const active = useActiveAccount();
+  const defaultAccount = useWalletStore((state) => state.defaultAccount);
   const addresses = accounts.map((account) => account.address);
   useAccountBalances(addresses, isFocused);
   const [page, setPage] = useState(0);
@@ -118,7 +118,10 @@ export function AccountCarousel(props: AccountCarouselProps) {
               <AccountCard
                 account={account}
                 size="wide"
-                isActive={active?.walletId === account.walletId && active.index === account.index}
+                isDefault={
+                  defaultAccount?.walletId === account.walletId &&
+                  defaultAccount.index === account.index
+                }
                 onPress={() => onOpenAccount(ref)}
                 onMenu={() => onAccountMenu(ref)}
               />

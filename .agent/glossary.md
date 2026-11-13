@@ -9,6 +9,7 @@
 | Derivation path | BIP-44 path used to derive accounts: `m/44'/60'/0'/0/{index}`. |
 | Wallet | One secret (a recovery phrase or a private key) with its accounts, a local name and a color. The app holds up to 10; one is active. |
 | Account | One address of a wallet: derived from its mnemonic at a BIP-44 index (0, 1, 2, …), with an optional local name, a card color and a card icon. A private-key wallet has one account. |
+| Default account | The account transfers start from on Home. Set by the user in Settings or from a card's menu; looking at an account or picking a source for one send never changes it. |
 | Private key | Raw 32-byte key for one address. Imported keys have no mnemonic. |
 | RPC | JSON-RPC endpoint of a CointMU node (HTTP). |
 | Wei | Smallest unit. 1 CMU = 10^decimals wei. Amounts are `bigint` in wei. |

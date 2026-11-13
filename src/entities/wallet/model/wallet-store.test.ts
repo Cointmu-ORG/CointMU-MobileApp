@@ -122,11 +122,81 @@ describe('migrateWalletState', () => {
     expect(migrated.wallets[0]?.accounts).toMatchObject([{ index: 0, address: A0, name: null }]);
   });
 
-  it('is idempotent: the same input gives the same output, and v3 passes through', () => {
+  it('is idempotent: the same input gives the same output, and v4 passes through', () => {
     const once = migrateWalletState(V1_MNEMONIC, 1);
     expect(migrateWalletState(V1_MNEMONIC, 1)).toEqual(once);
     expect(migrateWalletState(once, 2)).toEqual(once);
-    expect(migrateWalletState(once, 3)).toBe(once);
+    expect(migrateWalletState(once, 3)).toEqual(once);
+    expect(migrateWalletState(once, 4)).toBe(once);
+  });
+
+  describe('default account (v3 → v4)', () => {
+    const account = (index: number, address: string) => ({
+      index,
+      address,
+      name: null,
+      color: 'ocean',
+      icon: { kind: 'lucide', name: 'wallet-minimal' },
+    });
+    const record = (id: string, accounts: unknown[]) => ({
+      id,
+      number: 1,
+      name: null,
+      color: 'ocean',
+      source: 'mnemonic',
+      origin: 'imported',
+      addedAt: 1,
+      isBackupPending: false,
+      needsRecovery: false,
+      accounts,
+    });
+    const V3 = {
+      status: 'active',
+      wallets: [
+        record('a'.repeat(32), [account(0, A0), account(1, A1)]),
+        record('b'.repeat(32), [account(0, B0)]),
+      ],
+      activeWalletId: 'a'.repeat(32),
+      accountIndex: 1,
+      address: A1,
+      source: 'mnemonic',
+      isRecoveryRequired: false,
+    };
+
+    it('starts with the account the install remembered as the default, without a notice', () => {
+      const migrated = migrateWalletState(V3, 3) as ReturnType<typeof state>;
+      expect(migrated.defaultAccount).toEqual({ walletId: 'a'.repeat(32), index: 1 });
+      expect(migrated.hasDefaultMovedNotice).toBe(false);
+      expect(migrated.wallets).toEqual(V3.wallets);
+    });
+
+    it('takes the first account when the remembered one is not there', () => {
+      const migrated = migrateWalletState({ ...V3, accountIndex: 9 }, 3) as ReturnType<
+        typeof state
+      >;
+      expect(migrated.defaultAccount).toEqual({ walletId: 'a'.repeat(32), index: 0 });
+    });
+
+    it('has no default before there is a wallet', () => {
+      const empty = { status: 'none', wallets: [], activeWalletId: null, accountIndex: 0 };
+      expect((migrateWalletState(empty, 3) as ReturnType<typeof state>).defaultAccount).toBeNull();
+    });
+
+    it('carries the remembered account of a v1 store all the way', () => {
+      const migrated = migrateWalletState(V1_MNEMONIC, 1) as ReturnType<typeof state>;
+      expect(migrated.defaultAccount).toEqual({ walletId: LEGACY_WALLET_ID, index: 1 });
+    });
+
+    it('loads a stored v3 install with its remembered account as the default and in use', async () => {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, state: V3 }));
+      await useWalletStore.persist.rehydrate();
+      expect(state()).toMatchObject({
+        defaultAccount: { walletId: 'a'.repeat(32), index: 1 },
+        activeWalletId: 'a'.repeat(32),
+        accountIndex: 1,
+        address: A1,
+      });
+    });
   });
 });
 
@@ -231,7 +301,7 @@ describe('upgrading an existing install', () => {
     await expect(secureStorage.get(LEGACY_SECRET_KEY)).resolves.not.toBeNull();
     await expect(secureStorage.get('muvo.wallet.ids')).resolves.toBeNull();
     const stored = JSON.parse((await AsyncStorage.getItem(STORAGE_KEY)) ?? '{}');
-    expect(stored.version).toBe(3);
+    expect(stored.version).toBe(4);
   });
 
   it('gives the same wallet when the migrated state was never written back (crash)', async () => {
@@ -338,6 +408,94 @@ describe('card icons', () => {
     expect(wallet(firstId)?.accounts[1]?.icon).toEqual({ kind: 'emoji', value: '🏠' });
     expect(wallet(firstId)?.accounts[0]?.icon).toEqual({ kind: 'lucide', name: 'wallet-minimal' });
     expect(wallet(secondId)?.accounts[0]?.icon).toEqual({ kind: 'lucide', name: 'key-round' });
+  });
+});
+
+describe('default account', () => {
+  const ref = (walletId: string, index = 0) => ({ walletId, index });
+
+  it('is the first wallet, and adding or importing another does not change it', () => {
+    const { firstId } = seedTwoWallets();
+    expect(state().defaultAccount).toEqual(ref(firstId));
+    expect(state().hasDefaultMovedNotice).toBe(false);
+  });
+
+  it('is not changed by looking at an account or picking one', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().selectAccount(secondId, 0);
+    expect(state()).toMatchObject({ activeWalletId: secondId, defaultAccount: ref(firstId) });
+  });
+
+  it('is set by the user only, to an account that exists in a usable wallet', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().setDefaultAccount(secondId, 0);
+    expect(state().defaultAccount).toEqual(ref(secondId));
+    // Setting the default does not change the account in use either.
+    state().selectAccount(firstId, 0);
+    state().setDefaultAccount(secondId, 7);
+    state().setDefaultAccount('missing', 0);
+    expect(state()).toMatchObject({ activeWalletId: firstId, defaultAccount: ref(secondId) });
+
+    const pending = newWallet(A1, { origin: 'created' });
+    state().addWallet(pending);
+    state().setDefaultAccount(pending.id, 0);
+    expect(state().defaultAccount).toEqual(ref(secondId));
+  });
+
+  it('falls back to the first usable account, with a notice, when its wallet is removed', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().removeWallet(firstId);
+    expect(state()).toMatchObject({ defaultAccount: ref(secondId), hasDefaultMovedNotice: true });
+
+    state().dismissDefaultMovedNotice();
+    expect(state().hasDefaultMovedNotice).toBe(false);
+  });
+
+  it('says nothing when a wallet that does not hold the default is removed', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().removeWallet(secondId);
+    expect(state()).toMatchObject({ defaultAccount: ref(firstId), hasDefaultMovedNotice: false });
+  });
+
+  it('falls back, with a notice, when its wallet cannot be read, and stays there afterwards', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().setUnreadableWallets([firstId]);
+    expect(state()).toMatchObject({ defaultAccount: ref(secondId), hasDefaultMovedNotice: true });
+
+    state().setUnreadableWallets([]);
+    expect(state().defaultAccount).toEqual(ref(secondId));
+  });
+
+  it('is left alone when no wallet can be used at all', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().setUnreadableWallets([firstId, secondId]);
+    expect(state()).toMatchObject({ defaultAccount: ref(firstId), hasDefaultMovedNotice: false });
+  });
+
+  it('clears the notice when the user picks a default', () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().removeWallet(firstId);
+    expect(state().hasDefaultMovedNotice).toBe(true);
+    state().setDefaultAccount(secondId, 0);
+    expect(state().hasDefaultMovedNotice).toBe(false);
+  });
+
+  it('is stored; the account in use is not, and starts as the default after a restart', async () => {
+    const { firstId, secondId } = seedTwoWallets();
+    state().selectAccount(secondId, 0);
+    const stored = JSON.parse((await AsyncStorage.getItem(STORAGE_KEY)) ?? '{}');
+    expect(stored.state.defaultAccount).toEqual(ref(firstId));
+    expect(stored.state).not.toHaveProperty('activeWalletId');
+
+    await useWalletStore.persist.rehydrate();
+
+    expect(state()).toMatchObject({
+      defaultAccount: ref(firstId),
+      activeWalletId: firstId,
+      accountIndex: 0,
+      address: A0,
+      source: 'mnemonic',
+    });
   });
 });
 

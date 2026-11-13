@@ -4,7 +4,8 @@ import { LEGACY_WALLET_ID } from '../config/wallet-config';
 import { defaultAccountIcon, resolveAccountIcon } from '../lib/account-icon';
 import type { WalletAccount, WalletRecord, WalletSource } from './types';
 
-export const WALLET_PERSIST_VERSION = 3;
+export const WALLET_PERSIST_VERSION = 4;
+const ACCOUNT_ICON_VERSION = 3;
 const ACCOUNT_LIST_VERSION = 1;
 const WALLET_LIST_VERSION = 2;
 
@@ -86,6 +87,37 @@ function withAccountIcons(v2: Persisted): Persisted {
   return { ...v2, wallets };
 }
 
+function hasAccount(wallet: unknown, index: unknown): boolean {
+  const accounts = (wallet as Persisted | null)?.accounts;
+  return (
+    Array.isArray(accounts) &&
+    accounts.some((account: Persisted | null) => account?.index === index)
+  );
+}
+
+/**
+ * v3 remembered the account last looked at; v4 has a default account the user sets (D-92). An
+ * install starts with the account it remembered, or its first account if that one is not there.
+ * Pure and repeatable like the steps before it.
+ */
+function withDefaultAccount(v3: Persisted): Persisted {
+  const wallets: unknown[] = Array.isArray(v3.wallets) ? v3.wallets : [];
+  const remembered = wallets.find(
+    (wallet) => (wallet as Persisted | null)?.id === v3.activeWalletId,
+  );
+  const first = wallets[0] as Persisted | undefined;
+  const firstIndex = Array.isArray(first?.accounts)
+    ? (first.accounts[0] as Persisted | undefined)?.index
+    : undefined;
+  let defaultAccount: Persisted | null = null;
+  if (typeof v3.activeWalletId === 'string' && hasAccount(remembered, v3.accountIndex)) {
+    defaultAccount = { walletId: v3.activeWalletId, index: v3.accountIndex };
+  } else if (typeof first?.id === 'string' && typeof firstIndex === 'number') {
+    defaultAccount = { walletId: first.id, index: firstIndex };
+  }
+  return { ...v3, defaultAccount, hasDefaultMovedNotice: false };
+}
+
 /** Brings a persisted wallet store of any older version up to the current shape. */
 export function migrateWalletState(persisted: unknown, version: number): unknown {
   if (version >= WALLET_PERSIST_VERSION || typeof persisted !== 'object' || persisted === null) {
@@ -93,5 +125,6 @@ export function migrateWalletState(persisted: unknown, version: number): unknown
   }
   const v1 = version < ACCOUNT_LIST_VERSION ? toAccountList(persisted as Persisted) : persisted;
   const v2 = version < WALLET_LIST_VERSION ? toWalletList(v1 as Persisted) : (v1 as Persisted);
-  return withAccountIcons(v2);
+  const v3 = version < ACCOUNT_ICON_VERSION ? withAccountIcons(v2) : v2;
+  return withDefaultAccount(v3);
 }

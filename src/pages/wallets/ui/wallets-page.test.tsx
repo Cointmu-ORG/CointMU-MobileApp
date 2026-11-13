@@ -43,7 +43,7 @@ beforeEach(async () => {
 
 describe('Wallets tab', () => {
   // A card tapped while a sheet is still opening: the sheet goes, and no second tabs screen appears.
-  it('opens the account on its own screen and makes it the remembered one', async () => {
+  it('opens the account on its own screen', async () => {
     const app = await renderRouter('./app', { initialUrl: ROUTES.wallets });
     const rootStackRoutes = () =>
       (app.getRouterState()?.routes[0]?.state?.routes ?? []).map((route) => route.name);

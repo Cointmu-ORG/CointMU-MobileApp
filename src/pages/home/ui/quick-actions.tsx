@@ -5,12 +5,20 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import { ROUTES } from '@/shared/config';
+import { switchToDefaultAccount } from '@/features/manage-accounts';
+import { ROUTES, type AppRoute } from '@/shared/config';
 import { Button, ICON_SIZE, MOTION, useThemeColors } from '@/shared/ui';
 
+/** Home belongs to no single account, so a send from here starts from the default one (D-92). */
+function openFromDefault(route: AppRoute) {
+  switchToDefaultAccount();
+  router.push(route);
+}
+
 /**
- * The two things Home is for: Transfer and Scan QR. Both end in the send form, where the
- * source account is chosen. Receiving belongs to one account and lives on its screen.
+ * The two things Home is for: Transfer and Scan QR. Both end in the send form with the default
+ * account as the source, which can be changed there for that send. Receiving belongs to one
+ * account and lives on its screen.
  */
 export function QuickActions({ enterIndex }: { enterIndex: number }) {
   const { t } = useTranslation();
@@ -24,7 +32,7 @@ export function QuickActions({ enterIndex }: { enterIndex: number }) {
           <Button
             label={t('home.actions.transfer')}
             icon={<ArrowUpRight size={ICON_SIZE.md} color={colors.content.inverse} />}
-            onPress={() => router.push(ROUTES.send)}
+            onPress={() => openFromDefault(ROUTES.send)}
           />
         </View>
         <View className="flex-1">
@@ -32,7 +40,7 @@ export function QuickActions({ enterIndex }: { enterIndex: number }) {
             variant="secondary"
             label={t('home.actions.scanQr')}
             icon={<ScanLine size={ICON_SIZE.md} color={colors.accent.DEFAULT} />}
-            onPress={() => router.push(ROUTES.scan)}
+            onPress={() => openFromDefault(ROUTES.scan)}
           />
         </View>
       </View>

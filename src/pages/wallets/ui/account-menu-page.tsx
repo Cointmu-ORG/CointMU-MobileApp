@@ -17,6 +17,7 @@ export function AccountMenuPage() {
       <AccountMenu
         account={params}
         onPersonalize={() => router.replace({ pathname: ROUTES.personalize, params })}
+        onDefaultSet={() => router.back()}
         onReceive={() => router.replace({ pathname: ROUTES.receive, params })}
         onRemoveWallet={() =>
           router.replace({ pathname: ROUTES.removeWallet, params: { walletId } })
