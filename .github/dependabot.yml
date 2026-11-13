@@ -31,6 +31,11 @@ updates:
       # ESLint major; it moves with the Expo SDK's eslint-config-expo.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+      # @sentry/core must be exactly the version @sentry/react-native depends on
+      # (D-77, scripts/sentry-versions.test.js), and the SDK is pinned outside the
+      # Expo SDK's range (D-83). Both are bumped together by hand (D-93).
+      - dependency-name: "@sentry/core"
+      - dependency-name: "@sentry/react-native"
 
   - package-ecosystem: github-actions
     directory: /
