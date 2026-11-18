@@ -1,6 +1,6 @@
 import Check from 'lucide-react-native/icons/check';
 import { useEffect } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { balanceOf, useAccountBalancesStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
@@ -14,12 +14,14 @@ import {
   type WalletAccount,
 } from '@/entities/wallet';
 import { shortenAddress } from '@/shared/lib';
-import { useAmountDisplay } from '@/shared/model';
+import { COMPACT_BALANCE_LENGTH, useAmountDisplay } from '@/shared/model';
 import { ICON_SIZE, ListRow, ListSection, useThemeColors } from '@/shared/ui';
 
 import type { AccountRef } from '../model/accounts';
 
 export const ROW_BADGE_SIZE = 36;
+const SECTION_GAP = 16;
+const LIST_END_PADDING = 24;
 
 /** An account's native balance as text; "hide balances" masks it. Nothing until it is loaded. */
 export function useBalanceText(): (account: WalletAccount) => string | undefined {
@@ -28,7 +30,7 @@ export function useBalanceText(): (account: WalletAccount) => string | undefined
   return (account) => {
     const { wei } = balanceOf(balances, account.address);
     if (wei === null) return undefined;
-    return `${formatBalance(wei, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`;
+    return `${formatBalance(wei, NATIVE_ASSET.decimals, COMPACT_BALANCE_LENGTH)} ${NATIVE_ASSET.symbol}`;
   };
 }
 
@@ -37,6 +39,8 @@ type AccountPickerListProps = {
   selected: AccountRef | null;
   onPick: (account: AccountRef) => void;
   testID: string;
+  /** Padding inside the scroll view; a sheet passes its edges and the bottom safe area here. */
+  contentStyle?: StyleProp<ViewStyle>;
 };
 
 /**
@@ -44,7 +48,12 @@ type AccountPickerListProps = {
  * balance, with a check on the selected one. It scrolls by itself and loads the balances it
  * shows.
  */
-export function AccountPickerList({ selected, onPick, testID }: AccountPickerListProps) {
+export function AccountPickerList({
+  selected,
+  onPick,
+  testID,
+  contentStyle,
+}: AccountPickerListProps) {
   const colors = useThemeColors();
   const accountLabel = useAccountLabel();
   const walletLabel = useWalletLabel();
@@ -59,7 +68,12 @@ export function AccountPickerList({ selected, onPick, testID }: AccountPickerLis
   }, []);
 
   return (
-    <ScrollView testID={testID} className="flex-1" contentContainerClassName="gap-4 pb-6">
+    <ScrollView
+      testID={testID}
+      style={styles.fill}
+      // One style, not a class plus a style: NativeWind would let one replace the other.
+      contentContainerStyle={[styles.content, contentStyle]}
+    >
       {wallets.filter(isWalletUsable).map((wallet) => (
         <ListSection key={wallet.id} title={walletLabel(wallet)}>
           {wallet.accounts.map((account) => {
@@ -89,3 +103,8 @@ export function AccountPickerList({ selected, onPick, testID }: AccountPickerLis
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  content: { gap: SECTION_GAP, paddingBottom: LIST_END_PADDING },
+});

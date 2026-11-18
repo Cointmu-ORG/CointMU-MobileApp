@@ -4,7 +4,10 @@
     "cancel": "Cancel",
     "comingSoon": "Coming soon. This part of Muvo arrives in a later version.",
     "done": "Done",
-    "paste": "Paste"
+    "paste": "Paste",
+    "copied": "Copied",
+    "copyHint": "Copies the full value to the clipboard",
+    "labelled": "{{label}}: {{value}}"
   },
   "onboarding": {
     "welcome": {
@@ -142,19 +145,10 @@
     "title": "History",
     "detail": {
       "title": "Transaction",
-      "amount": "Amount",
-      "from": "From",
-      "to": "To",
-      "date": "Date",
-      "block": "Block",
-      "notMined": "Not in a block yet",
-      "confirmations": "Confirmations",
-      "confirmationsValue": "{{count}} of {{total}}",
-      "fee": "Network fee paid",
-      "feeUnknown": "Known once the transaction is mined",
-      "hash": "Transaction hash",
-      "explorer": "View in explorer",
-      "missing": "This transaction isn't in your history on this device."
+      "missing": "This transaction isn't in your history on this device.",
+      "titleOut": "Sent to {{name}}",
+      "titleIn": "Received from {{name}}",
+      "titleSelf": "Sent to yourself"
     },
     "help": "Shows the last 7 days of transfers for your accounts, plus everything sent from Muvo. Transfers made by smart contracts on your behalf (internal transfers) don't appear here.",
     "today": "Today",
@@ -526,14 +520,6 @@
       "signing": "Signing on this device…",
       "broadcasting": "Sending to the network…"
     },
-    "result": {
-      "uncertainTitle": "Sent, waiting for the network",
-      "uncertainBody": "The network didn't answer in time, so it may or may not have the transaction. Muvo keeps checking. Don't send again until its status updates.",
-      "failedTitle": "Not sent",
-      "hash": "Transaction hash",
-      "explorer": "View in explorer",
-      "tryAgain": "Edit and try again"
-    },
     "errors": {
       "insufficientFunds": "Not enough balance for this amount plus the network fee.",
       "insufficientGas": "Not enough CMU for the network fee. Token transfers pay their fee in CMU.",
@@ -546,28 +532,38 @@
       "reverted": "The network would reject this transfer (for a token, the contract refused it). Nothing was sent.",
       "unknown": "Something went wrong and nothing was sent. Try again."
     },
-    "status": {
-      "from": "From",
-      "to": "To",
-      "sendingBody": "Keep Muvo open until this finishes.",
-      "sentToNetwork": "Sent to the network",
-      "broadcastBody": "The network has your transaction. It isn't in a block yet.",
-      "confirmedTitle": "Confirmed",
-      "confirmedBody": "Your transaction is in a block. It becomes final after {{total}} blocks.",
-      "finalTitle": "Final",
-      "finalBody": "Settled, {{total}} blocks deep.",
-      "revertedTitle": "Failed on the network",
-      "droppedTitle": "Dropped by the network",
-      "replacedTitle": "Replaced",
-      "progress": "{{count}} of {{total}} confirmations",
+    "receipt": {
+      "title": {
+        "broadcast": "Sending…",
+        "uncertain": "Still checking",
+        "confirmed": "Sent!",
+        "final": "Completed",
+        "reverted": "Transfer failed",
+        "dropped": "Didn't go through",
+        "replaced": "Replaced by another transfer",
+        "notSent": "Not sent"
+      },
+      "uncertainBody": "Muvo sent it, but the network didn't answer in time. Muvo keeps checking. Wait a few minutes and look at History before sending again.",
+      "sendingBody": "Keep Muvo open for a moment.",
       "steps": {
-        "sent": "Sent to the network",
+        "sent": "Sent",
         "confirmed": "Confirmed",
-        "final": "Final"
+        "final": "Completed"
       },
       "stepDone": "{{step}}: done",
       "stepCurrent": "{{step}}: in progress",
-      "stepWaiting": "{{step}}: not yet"
+      "stepWaiting": "{{step}}: not yet",
+      "amountLabel": "Amount: {{amount}}",
+      "share": "Share receipt",
+      "shareTitle": "Muvo transfer receipt",
+      "shareLine": {
+        "amount": "Amount: {{value}}",
+        "to": "To: {{value}}",
+        "date": "Date: {{value}}",
+        "status": "Status: {{value}}",
+        "hash": "Transaction ID: {{value}}"
+      },
+      "tryAgain": "Edit and try again"
     }
   },
   "receive": {
@@ -678,21 +674,39 @@
       "self": "To yourself"
     },
     "status": {
-      "pending": "Pending",
+      "pending": "Sending",
       "confirmed": "Confirmed",
-      "confirmedCount": "Confirmed {{count}}/{{total}}",
-      "final": "Final",
+      "final": "Completed",
       "failed": "Failed",
-      "dropped": "Dropped",
+      "dropped": "Didn't go through",
       "replaced": "Replaced"
     },
     "statusHelp": {
-      "pending": "Waiting to be included in a block.",
-      "confirmed": "In a block. It becomes final after {{total}} blocks, because a recent block can still be undone.",
-      "final": "Deep enough in the chain to be treated as settled.",
-      "failed": "Included in a block but rejected by the contract. Only the network fee was spent.",
-      "dropped": "The network no longer knows this transaction and it was never mined. Nothing was sent; you can send again.",
-      "replaced": "Another transaction with the same nonce was mined instead. This one will never be mined."
+      "pending": "This usually takes under a minute.",
+      "confirmed": "It has arrived. It will show as Completed in a few minutes.",
+      "final": "All done. This transfer can't be reversed.",
+      "failed": "The transfer was refused, so the amount didn't move. The network fee was still used. Check the details and try again.",
+      "dropped": "The network let this transfer go. Nothing left the account, so it's safe to send it again.",
+      "replaced": "Another transfer from the same account went through in its place. Check History before sending again."
+    },
+    "details": {
+      "from": "From",
+      "to": "To",
+      "fee": "Network fee",
+      "feeMax": "Up to {{amount}}",
+      "feeUnknown": "Calculated when completed",
+      "date": "Date",
+      "status": "Status",
+      "technical": "Technical details",
+      "fromFull": "From address",
+      "toFull": "To address",
+      "hash": "Transaction ID",
+      "block": "Block",
+      "notInBlock": "Not yet",
+      "confirmations": "Confirmations",
+      "confirmationsValue": "{{count}} of {{total}}",
+      "node": "Network node",
+      "explorer": "View in explorer"
     }
   },
   "wallets": {

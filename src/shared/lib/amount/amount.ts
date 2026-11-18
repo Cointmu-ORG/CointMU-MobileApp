@@ -3,6 +3,12 @@ import { formatUnits } from 'ethers';
 export type FormatAmountOptions = {
   readonly locale: string;
   readonly maxFractionDigits: number;
+  /**
+   * Longest text a narrow slot can hold. Decimals are dropped (truncated, never rounded) until
+   * the number fits, so a long balance is shortened by precision and never cut by an ellipsis.
+   * The whole part is always shown in full.
+   */
+  readonly maxLength?: number;
 };
 
 export type Separators = { readonly group: string; readonly decimal: string };
@@ -35,9 +41,12 @@ export function formatAmount(
 ): string {
   const isNegative = value < 0n;
   const [whole, fraction = ''] = formatUnits(isNegative ? -value : value, decimals).split('.');
-  const shownFraction = fraction.slice(0, options.maxFractionDigits).replace(/0+$/, '');
   const { group, decimal } = getSeparators(options.locale);
-  const grouped = whole.replace(THOUSANDS_PATTERN, group);
-  const sign = isNegative ? '-' : '';
-  return shownFraction ? `${sign}${grouped}${decimal}${shownFraction}` : `${sign}${grouped}`;
+  const head = `${isNegative ? '-' : ''}${whole.replace(THOUSANDS_PATTERN, group)}`;
+  // Room left for the decimal separator and the digits after it.
+  const room =
+    options.maxLength === undefined ? Infinity : options.maxLength - head.length - decimal.length;
+  const digits = Math.max(0, Math.min(options.maxFractionDigits, room));
+  const shownFraction = fraction.slice(0, digits).replace(/0+$/, '');
+  return shownFraction ? `${head}${decimal}${shownFraction}` : head;
 }

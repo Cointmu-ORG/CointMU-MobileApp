@@ -31,4 +31,24 @@ describe('formatAmount', () => {
   it('handles negative values', () => {
     expect(formatAmount(-ONE, DECIMALS, EN)).toBe('-1');
   });
+
+  describe('maxLength', () => {
+    const BALANCE = 997_999_978_999_999_999_999n; // 997.999978999999999999
+    const FULL = { locale: 'en-US', maxFractionDigits: DECIMALS };
+
+    it('drops decimals until the number fits, never adding an ellipsis', () => {
+      expect(formatAmount(BALANCE, DECIMALS, { ...FULL, maxLength: 10 })).toBe('997.999978');
+      expect(formatAmount(BALANCE, DECIMALS, { ...FULL, maxLength: 6 })).toBe('997.99');
+    });
+
+    it('keeps the chosen decimals when they already fit', () => {
+      expect(formatAmount(BALANCE, DECIMALS, { ...EN, maxLength: 20 })).toBe('997.999978');
+    });
+
+    it('never cuts the whole part, even when it alone is too long', () => {
+      expect(formatAmount(1_234_567n * ONE + ONE / 2n, DECIMALS, { ...EN, maxLength: 5 })).toBe(
+        '1,234,567',
+      );
+    });
+  });
 });

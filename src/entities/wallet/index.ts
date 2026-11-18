@@ -29,6 +29,7 @@ export {
   selectExpandableWallets,
   selectUsableAccounts,
   useAccount,
+  useAccountByAddress,
   useAccountLabel,
   useActiveAccount,
   useDefaultAccount,
@@ -55,5 +56,6 @@ export {
   AccountIconTile,
   useAccountIconLabel,
 } from './ui/account-icon';
+export { AddressLabel } from './ui/address-label';
 export { WalletTarget } from './ui/wallet-target';
 export { useMnemonicWords, type MnemonicWordsState } from './model/use-mnemonic-words';

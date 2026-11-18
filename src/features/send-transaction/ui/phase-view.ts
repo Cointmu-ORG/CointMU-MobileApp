@@ -14,8 +14,13 @@ import type { SendPhase } from '../lib/send-phase';
 export type PhaseView = {
   readonly Icon: LucideIcon;
   readonly color: (colors: ThemeColors) => string;
-  readonly titleKey: string;
-  /** Null where the body is the send error or the stage text, chosen by the screen. */
+  /** Soft fill of the circle behind the icon. */
+  readonly circleClass: string;
+  /** The halo pulses while the outcome is still open; never once it is settled. */
+  readonly isWaiting: boolean;
+  /** Null for `sending`, whose title is the current stage. */
+  readonly titleKey: string | null;
+  /** Null where the body is the send error, chosen by the screen. */
   readonly bodyKey: string | null;
 };
 
@@ -26,52 +31,81 @@ const warning = (colors: ThemeColors) => colors.warning.strong;
 const neutral = (colors: ThemeColors) => colors.content.secondary;
 
 /**
- * Icon, color and words for each phase after the send call returned. Only `confirmed` and
- * `final` use the success color and a check mark; `sending` has no entry because it shows the
- * spinner and the current stage.
+ * Icon, color and words of the receipt's hero for each phase. Only `confirmed` and `final` use
+ * the success color and a check mark (D-81). The body of a settled transfer is the same
+ * one-line explanation the transaction detail shows (`tx.statusHelp`), so both screens match.
  */
-export const PHASE_VIEW: Record<Exclude<SendPhase, 'sending'>, PhaseView> = {
-  notSent: { Icon: CircleX, color: danger, titleKey: 'send.result.failedTitle', bodyKey: null },
+export const PHASE_VIEW: Record<SendPhase, PhaseView> = {
+  sending: {
+    Icon: Send,
+    color: accent,
+    circleClass: 'bg-primary-50',
+    isWaiting: true,
+    titleKey: null,
+    bodyKey: 'send.receipt.sendingBody',
+  },
+  notSent: {
+    Icon: CircleX,
+    color: danger,
+    circleClass: 'bg-danger-soft',
+    isWaiting: false,
+    titleKey: 'send.receipt.title.notSent',
+    bodyKey: null,
+  },
   broadcast: {
     Icon: Send,
     color: accent,
-    titleKey: 'send.status.sentToNetwork',
-    bodyKey: 'send.status.broadcastBody',
+    circleClass: 'bg-primary-50',
+    isWaiting: true,
+    titleKey: 'send.receipt.title.broadcast',
+    bodyKey: 'tx.statusHelp.pending',
   },
   uncertain: {
     Icon: Clock,
     color: warning,
-    titleKey: 'send.result.uncertainTitle',
-    bodyKey: 'send.result.uncertainBody',
+    circleClass: 'bg-warning-soft',
+    isWaiting: true,
+    titleKey: 'send.receipt.title.uncertain',
+    bodyKey: 'send.receipt.uncertainBody',
   },
   confirmed: {
     Icon: Check,
     color: success,
-    titleKey: 'send.status.confirmedTitle',
-    bodyKey: 'send.status.confirmedBody',
+    circleClass: 'bg-success-soft',
+    isWaiting: false,
+    titleKey: 'send.receipt.title.confirmed',
+    bodyKey: 'tx.statusHelp.confirmed',
   },
   final: {
     Icon: CheckCheck,
     color: success,
-    titleKey: 'send.status.finalTitle',
-    bodyKey: 'send.status.finalBody',
+    circleClass: 'bg-success-soft',
+    isWaiting: false,
+    titleKey: 'send.receipt.title.final',
+    bodyKey: 'tx.statusHelp.final',
   },
   reverted: {
     Icon: CircleX,
     color: danger,
-    titleKey: 'send.status.revertedTitle',
+    circleClass: 'bg-danger-soft',
+    isWaiting: false,
+    titleKey: 'send.receipt.title.reverted',
     bodyKey: 'tx.statusHelp.failed',
   },
   dropped: {
     Icon: Ban,
     color: neutral,
-    titleKey: 'send.status.droppedTitle',
+    circleClass: 'bg-surface-muted',
+    isWaiting: false,
+    titleKey: 'send.receipt.title.dropped',
     bodyKey: 'tx.statusHelp.dropped',
   },
   replaced: {
     Icon: Repeat,
     color: neutral,
-    titleKey: 'send.status.replacedTitle',
+    circleClass: 'bg-surface-muted',
+    isWaiting: false,
+    titleKey: 'send.receipt.title.replaced',
     bodyKey: 'tx.statusHelp.replaced',
   },
 };

@@ -1,10 +1,6 @@
 import { SendStatus } from '@/features/send-transaction';
-import { FormScreen } from '@/shared/ui';
 
+/** The receipt lays itself out: a scrolling body and buttons fixed above the bottom safe area. */
 export function SendResultPage() {
-  return (
-    <FormScreen>
-      <SendStatus />
-    </FormScreen>
-  );
+  return <SendStatus />;
 }

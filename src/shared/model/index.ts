@@ -21,6 +21,7 @@ export {
 export { REVEAL_DURATION_MS, usePrivacyRevealStore } from './privacy-store';
 export {
   AMOUNT_MASK,
+  COMPACT_BALANCE_LENGTH,
   useAmountDisplay,
   useIsAmountHidden,
   type AmountDisplay,

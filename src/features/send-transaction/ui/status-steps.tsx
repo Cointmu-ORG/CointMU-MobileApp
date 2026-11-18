@@ -1,78 +1,112 @@
-import CircleCheck from 'lucide-react-native/icons/circle-check';
-import CircleDashed from 'lucide-react-native/icons/circle-dashed';
-import Hourglass from 'lucide-react-native/icons/hourglass';
-import type { LucideIcon } from 'lucide-react-native';
+import Check from 'lucide-react-native/icons/check';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { ICON_SIZE, Text, type ThemeColors, useThemeColors } from '@/shared/ui';
+import { ICON_SIZE, Text, useThemeColors } from '@/shared/ui';
 
 import type { StepState } from '../lib/send-phase';
 
 const STEP_KEYS = ['sent', 'confirmed', 'final'] as const;
+const DOT_SIZE = 24;
+const CURRENT_CORE_SIZE = 8;
+const LINE_HEIGHT = 2;
 
-const STEP_VIEW: Record<
-  StepState,
-  { Icon: LucideIcon; color: (colors: ThemeColors) => string; a11yKey: string }
-> = {
-  done: {
-    Icon: CircleCheck,
-    color: (colors) => colors.success.strong,
-    a11yKey: 'send.status.stepDone',
-  },
-  current: {
-    Icon: Hourglass,
-    color: (colors) => colors.accent.DEFAULT,
-    a11yKey: 'send.status.stepCurrent',
-  },
-  waiting: {
-    Icon: CircleDashed,
-    color: (colors) => colors.content.secondary,
-    a11yKey: 'send.status.stepWaiting',
-  },
+const A11Y_KEY: Record<StepState, string> = {
+  done: 'send.receipt.stepDone',
+  current: 'send.receipt.stepCurrent',
+  waiting: 'send.receipt.stepWaiting',
 };
 
-type StatusStepsProps = {
-  states: readonly [StepState, StepState, StepState];
-  /** Shown next to "Confirmed" once the transaction is in a block, e.g. "3/12". */
-  confirmationsText: string | null;
-};
+/** Done: a filled dot with a check. Current: a ring with a core. Waiting: an empty ring. */
+function StepDot({ state }: { state: StepState }) {
+  const colors = useThemeColors();
+  if (state === 'done') {
+    return (
+      <View style={[styles.dot, { backgroundColor: colors.accent.DEFAULT }]}>
+        <Check size={ICON_SIZE.sm} color={colors.content.inverse} />
+      </View>
+    );
+  }
+  const ring = state === 'current' ? colors.accent.DEFAULT : colors.border.strong;
+  return (
+    <View style={[styles.dot, styles.ring, { borderColor: ring }]}>
+      {state === 'current' ? (
+        <View style={[styles.core, { backgroundColor: colors.accent.DEFAULT }]} />
+      ) : null}
+    </View>
+  );
+}
 
-/** Sent to the network, confirmed, final: each with an icon and words, never color alone. */
-export function StatusSteps({ states, confirmationsText }: StatusStepsProps) {
+/**
+ * Sent → Confirmed → Completed, left to right, in words and without numbers (the "n of 12"
+ * count is in Technical details). Every state has its own shape, never color alone. The steps
+ * use the accent, not the success color: success styling waits for the confirmation (D-81).
+ */
+export function StatusSteps({ states }: { states: readonly [StepState, StepState, StepState] }) {
   const { t } = useTranslation();
   const colors = useThemeColors();
+  const lineColor = (isReached: boolean) =>
+    isReached ? colors.accent.DEFAULT : colors.border.DEFAULT;
 
   return (
-    <View className="gap-3 rounded-card border border-border bg-surface-card p-4">
+    <View className="flex-row">
       {STEP_KEYS.map((key, position) => {
         const state = states[position] ?? 'waiting';
-        const { Icon, color, a11yKey } = STEP_VIEW[state];
-        const label = t(`send.status.steps.${key}`);
-        const detail = key === 'confirmed' ? confirmationsText : null;
+        const label = t(`send.receipt.steps.${key}`);
+        const isFirst = position === 0;
+        const isLast = position === STEP_KEYS.length - 1;
+        // The line into a step is reached when that step has started.
+        const isReached = state !== 'waiting';
+        const isNextReached = !isLast && (states[position + 1] ?? 'waiting') !== 'waiting';
         return (
           <View
             key={key}
-            className="flex-row items-center gap-3"
+            className="flex-1 items-center gap-2"
             accessible
-            accessibilityLabel={t(a11yKey, { step: detail ? `${label} ${detail}` : label })}
+            accessibilityLabel={t(A11Y_KEY[state], { step: label })}
           >
-            <Icon size={ICON_SIZE.md} color={color(colors)} />
+            <View className="flex-row items-center self-stretch">
+              <View
+                style={[
+                  styles.line,
+                  { backgroundColor: isFirst ? 'transparent' : lineColor(isReached) },
+                ]}
+              />
+              <StepDot state={state} />
+              <View
+                style={[
+                  styles.line,
+                  { backgroundColor: isLast ? 'transparent' : lineColor(isNextReached) },
+                ]}
+              />
+            </View>
             <Text
-              variant="label"
+              variant="caption"
               tone={state === 'waiting' ? 'secondary' : 'default'}
-              className="flex-1"
+              className="text-center"
             >
               {label}
             </Text>
-            {detail ? (
-              <Text variant="label" tone="secondary">
-                {detail}
-              </Text>
-            ) : null}
           </View>
         );
       })}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  dot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ring: { borderWidth: LINE_HEIGHT },
+  core: {
+    width: CURRENT_CORE_SIZE,
+    height: CURRENT_CORE_SIZE,
+    borderRadius: CURRENT_CORE_SIZE / 2,
+  },
+  line: { flex: 1, height: LINE_HEIGHT },
+});

@@ -1,4 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react-native';
+import { StyleSheet, type ViewStyle } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useAccountBalancesStore, useBalanceStore } from '@/entities/account';
 import { useWalletStore } from '@/entities/wallet';
@@ -12,6 +14,11 @@ const A0 = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 const A1 = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
 const B0 = '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC';
 const TWO_CMU = 2n * 10n ** 18n;
+const BOTTOM_INSET = 34;
+const SAFE_AREA = {
+  frame: { x: 0, y: 0, width: 320, height: 568 },
+  insets: { top: 20, right: 0, bottom: BOTTOM_INSET, left: 0 },
+};
 
 const state = () => useWalletStore.getState();
 
@@ -32,7 +39,11 @@ async function setUp() {
     refresh: jest.fn(async () => undefined),
   });
   const onDone = jest.fn();
-  await render(<AccountSwitcher onDone={onDone} />);
+  await render(
+    <SafeAreaProvider initialMetrics={SAFE_AREA}>
+      <AccountSwitcher onDone={onDone} />
+    </SafeAreaProvider>,
+  );
   return { onDone, firstId, secondId };
 }
 
@@ -42,6 +53,19 @@ beforeEach(async () => {
 });
 
 describe('AccountSwitcher', () => {
+  it('is a "Send from" sheet with one section per wallet, clear of the home indicator', async () => {
+    await setUp();
+    expect(screen.getByRole('header', { name: 'Send from' })).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: 'Wallet 1' })).toBeOnTheScreen();
+    expect(screen.getByRole('header', { name: 'Wallet 2' })).toBeOnTheScreen();
+    expect(screen.getByTestId('account-switcher-sheet')).toBeOnTheScreen();
+    // The last row scrolls above the bottom safe area instead of under it.
+    const list = screen.getByTestId('account-switcher-list');
+    const content = StyleSheet.flatten(list.props.contentContainerStyle as ViewStyle);
+    expect(content?.paddingBottom).toBeGreaterThan(BOTTOM_INSET);
+    expect(content?.paddingHorizontal).toBeGreaterThan(0);
+  });
+
   it('lists the accounts of every wallet under the wallet name', async () => {
     await setUp();
     expect(screen.getByRole('header', { name: 'Wallet 1' })).toBeOnTheScreen();

@@ -10,7 +10,6 @@ import { View } from 'react-native';
 
 import { ICON_SIZE, Text, type TextTone, type ThemeColors, useThemeColors } from '@/shared/ui';
 
-import { TX_POLICY } from '../config/tx-config';
 import type { TxStatus } from '../model/types';
 
 type BadgeStyle = {
@@ -59,21 +58,15 @@ const STYLE: Record<TxStatus, BadgeStyle> = {
   },
 };
 
-type TxStatusBadgeProps = {
-  status: TxStatus;
-  /** Shown as "n/12" while confirming, so "confirmed" is never mistaken for final. */
-  confirmations?: number;
-};
-
-/** Status chip: icon and text, never color alone. */
-export function TxStatusBadge({ status, confirmations = 0 }: TxStatusBadgeProps) {
+/**
+ * Status chip in plain words (Sending, Confirmed, Completed…), the same words as the send
+ * receipt: icon and text, never color alone. The "n of 12" count lives in Technical details.
+ */
+export function TxStatusBadge({ status }: { status: TxStatus }) {
   const { t } = useTranslation();
   const colors = useThemeColors();
   const { Icon, tone, color, box } = STYLE[status];
-  const label =
-    status === 'confirmed'
-      ? t('tx.status.confirmedCount', { count: confirmations, total: TX_POLICY.finalConfirmations })
-      : t(`tx.status.${status}`);
+  const label = t(`tx.status.${status}`);
   return (
     <View
       className={`flex-row items-center gap-1 self-start rounded-full px-2 py-1 ${box}`}
