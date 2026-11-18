@@ -5,7 +5,8 @@ import { View } from 'react-native';
 import { useBalanceStore } from '@/entities/account';
 import { NATIVE_ASSET } from '@/entities/asset';
 import { AccountBadge, useAccountLabel, type WalletAccount } from '@/entities/wallet';
-import { formatAmount, shortenAddress } from '@/shared/lib';
+import { shortenAddress } from '@/shared/lib';
+import { COMPACT_BALANCE_LENGTH, useAmountDisplay } from '@/shared/model';
 import { ICON_SIZE, PressableSurface, SURFACE_PALETTE, Text, useThemeColors } from '@/shared/ui';
 
 const BADGE_SIZE = 40;
@@ -21,18 +22,17 @@ type SourceFieldProps = {
  * another one. The balance is exact, like every amount in the send flow.
  */
 export function SourceField({ account, onPress }: SourceFieldProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const colors = useThemeColors();
   const labelOf = useAccountLabel();
+  const { formatBalance } = useAmountDisplay();
   const wei = useBalanceStore((state) => state.wei);
   const name = labelOf(account);
+  // The same balance as the picker sheet and the cards: Settings > Display decimals.
   const balance =
     wei === null
       ? t('send.form.balanceLoading')
-      : `${formatAmount(wei, NATIVE_ASSET.decimals, {
-          locale: i18n.language,
-          maxFractionDigits: NATIVE_ASSET.decimals,
-        })} ${NATIVE_ASSET.symbol}`;
+      : `${formatBalance(wei, NATIVE_ASSET.decimals, COMPACT_BALANCE_LENGTH)} ${NATIVE_ASSET.symbol}`;
 
   return (
     <View className="gap-2">
@@ -56,9 +56,7 @@ export function SourceField({ account, onPress }: SourceFieldProps) {
             {shortenAddress(account.address)}
           </Text>
         </View>
-        <Text variant="label" numberOfLines={1} className="max-w-[40%]">
-          {balance}
-        </Text>
+        <Text variant="label">{balance}</Text>
         <ChevronDown size={ICON_SIZE.md} color={colors.content.secondary} />
       </PressableSurface>
     </View>

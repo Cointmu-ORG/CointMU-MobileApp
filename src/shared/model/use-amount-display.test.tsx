@@ -28,6 +28,18 @@ describe('useAmountDisplay', () => {
     expect(result.current.formatExact(AMOUNT, DECIMALS)).toBe('1.234567891234567891');
   });
 
+  it('shortens a balance by decimals for a narrow slot', async () => {
+    const { result } = await renderHook(() => useAmountDisplay());
+    await act(() => useAppearanceStore.getState().update({ balanceDecimals: 'full' }));
+    expect(result.current.formatBalance(AMOUNT, DECIMALS, 8)).toBe('1.234567');
+  });
+
+  it('formatPlain uses the chosen decimals and is never masked', async () => {
+    const { result } = await renderHook(() => useAmountDisplay());
+    await act(() => useAppearanceStore.getState().update({ hidesBalances: true }));
+    expect(result.current.formatPlain(AMOUNT, DECIMALS)).toBe('1.234567');
+  });
+
   it('masks every amount while balances are hidden', async () => {
     const { result } = await renderHook(() => useAmountDisplay());
     await act(() => useAppearanceStore.getState().update({ hidesBalances: true }));
