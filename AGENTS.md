@@ -47,4 +47,4 @@ Android releases do not use EAS: `.github/workflows/release.yml` builds the APK 
 @.agent/architecture.md
 @.agent/conventions.md
 @.agent/glossary.md
-@.agent/decisions.md
+Decision log (D-xx / Q-xx): `.agent/decisions.md`. It is large and is NOT auto-loaded. Search it (e.g. `grep -n "D-78" .agent/decisions.md`) when architecture.md cites a decision or before changing a decided behavior, and add new entries there.
