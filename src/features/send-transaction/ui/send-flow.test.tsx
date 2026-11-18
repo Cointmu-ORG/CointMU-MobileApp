@@ -48,6 +48,8 @@ jest.mock('@/shared/api', () => ({
     })),
     getTransactionCount: jest.fn(async () => 3),
     broadcastTransaction: (signed: string) => mockBroadcast(signed),
+    // The receipt reads the fee paid once the transfer is in a block.
+    getTransactionReceipt: jest.fn(async () => ({ fee: 21_000n })),
     destroy: jest.fn(),
   }),
 }));
@@ -101,7 +103,7 @@ describe('send flow', () => {
     expect(await screen.findByText('Confirm with your PIN')).toBeOnTheScreen();
     await enterPin(PIN);
 
-    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sending…' })).toBeOnTheScreen();
     expect(mockBroadcast).toHaveBeenCalledTimes(1);
     const tx = Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '');
     expect(tx).toMatchObject({ chainId: CHAIN_ID, type: 2, to: TO, value: ONE_AND_A_HALF_CMU });
@@ -120,7 +122,7 @@ describe('send flow', () => {
     await press('Confirm and send');
     await enterPin(PIN);
 
-    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sending…' })).toBeOnTheScreen();
     expect(screen.queryByTestId('send-success-mark')).toBeNull();
     const hash = useTxStore.getState().records[0]?.hash ?? '';
 
@@ -133,17 +135,17 @@ describe('send flow', () => {
         unknownSince: null,
       }),
     );
-    expect(await screen.findByRole('header', { name: 'Confirmed' })).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sent!' })).toBeOnTheScreen();
     expect(screen.getByTestId('send-success-mark')).toBeOnTheScreen();
-    expect(screen.getByText('3/12')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Completed: in progress')).toBeOnTheScreen();
 
     await act(() =>
       useTxStore
         .getState()
         .update(hash, { status: 'final', confirmations: 12, blockNumber: 10, unknownSince: null }),
     );
-    expect(await screen.findByRole('header', { name: 'Final' })).toBeOnTheScreen();
-    expect(screen.getByText('12/12')).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Completed' })).toBeOnTheScreen();
+    expect(screen.getByLabelText('Completed: done')).toBeOnTheScreen();
   });
 
   it('signs with the secret of the wallet that holds the sending account', async () => {
@@ -151,7 +153,7 @@ describe('send flow', () => {
     jest.mocked(SecureStore.getItemAsync).mockClear();
     await press('Confirm and send');
     await enterPin(PIN);
-    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sending…' })).toBeOnTheScreen();
 
     const read = secretReads().map(([key]) => key);
     expect(read).toEqual([`${SECRET_KEY}.${walletId}`]);
@@ -164,7 +166,7 @@ describe('send flow', () => {
     jest.mocked(SecureStore.getItemAsync).mockClear();
     await press('Confirm and send');
     await enterPin(PIN);
-    expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+    expect(await screen.findByRole('header', { name: 'Sending…' })).toBeOnTheScreen();
 
     expect(secretReads().map(([key]) => key)).toEqual([`${SECRET_KEY}.${otherWalletId}`]);
     expect(Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '').from).toBe(OTHER);
@@ -200,7 +202,7 @@ describe('send flow', () => {
       jest.mocked(SecureStore.getItemAsync).mockClear();
       await press('Confirm and send');
       await enterPin(PIN);
-      expect(await screen.findByRole('header', { name: 'Sent to the network' })).toBeOnTheScreen();
+      expect(await screen.findByRole('header', { name: 'Sending…' })).toBeOnTheScreen();
 
       expect(secretReads().map(([key]) => key)).toEqual([`${SECRET_KEY}.${otherWalletId}`]);
       expect(Transaction.from(mockBroadcast.mock.calls[0]?.[0] ?? '').from).toBe(OTHER);

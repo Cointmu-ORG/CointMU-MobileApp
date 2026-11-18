@@ -1,36 +1,39 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState, type ReactNode } from 'react';
+import ArrowDownLeft from 'lucide-react-native/icons/arrow-down-left';
+import ArrowLeftRight from 'lucide-react-native/icons/arrow-left-right';
+import ArrowUpRight from 'lucide-react-native/icons/arrow-up-right';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Linking, View } from 'react-native';
+import { View } from 'react-native';
 
 import { findAsset, NATIVE_ASSET } from '@/entities/asset';
 import { getProvider } from '@/entities/network';
-import { fetchTxFee, TX_POLICY, TxStatusBadge, type HistoryItem } from '@/entities/transaction';
-import { explorerTxUrl } from '@/shared/config';
-import { formatDateTime, logger } from '@/shared/lib';
+import { fetchTxFee, TxStatusBadge, type HistoryItem } from '@/entities/transaction';
+import { AddressLabel, useAccountByAddress, useAccountLabel } from '@/entities/wallet';
+import { formatDateTime, logger, shortenAddress } from '@/shared/lib';
 import { useAmountDisplay, useAppearanceStore } from '@/shared/model';
-import { Button, Card, FormScreen, Text } from '@/shared/ui';
+import { DetailRow, FormScreen, ICON_SIZE, Text, useThemeColors } from '@/shared/ui';
 
+import { TxTechnical } from './tx-technical';
 import { useHistoryItem } from './use-history-item';
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <View className="gap-1 border-b border-border py-3">
-      <Text variant="caption" tone="secondary">
-        {label}
-      </Text>
-      {children}
-    </View>
-  );
-}
+const DIRECTION_ICON = { in: ArrowDownLeft, out: ArrowUpRight, self: ArrowLeftRight } as const;
+const DIRECTION_TITLE = {
+  in: 'history.detail.titleIn',
+  out: 'history.detail.titleOut',
+  self: 'history.detail.titleSelf',
+} as const;
 
-/** The fee actually paid, read from the receipt once the tx is mined. */
-function usePaidFee(item: HistoryItem | null): bigint | null {
+/**
+ * The fee actually paid, read from the receipt once the tx is mined. The send receipt has the
+ * same hook: two copies, below the rule of three.
+ */
+function usePaidFee(item: HistoryItem): bigint | null {
   const [fee, setFee] = useState<bigint | null>(null);
-  const hash = item?.hash;
-  const isMined = item?.blockNumber !== null && item?.blockNumber !== undefined;
+  const { hash } = item;
+  const isMined = item.blockNumber !== null;
   useEffect(() => {
-    if (!hash || !isMined) return;
+    if (!isMined) return;
     fetchTxFee(getProvider(), hash)
       .then(setFee)
       .catch((error: unknown) => logger.warn('Reading the tx fee failed', { error }));
@@ -38,62 +41,81 @@ function usePaidFee(item: HistoryItem | null): bigint | null {
   return fee;
 }
 
-function Details({ item }: { item: HistoryItem }) {
-  const { t, i18n } = useTranslation();
-  const fee = usePaidFee(item);
+/** "Sent to Account 2", "Received from 0xA1dd…1Eef": the other side by name when it is ours. */
+function useTitle(item: HistoryItem): string {
+  const { t } = useTranslation();
+  const counterparty = item.direction === 'in' ? item.from : item.to;
+  const account = useAccountByAddress(counterparty);
+  const labelOf = useAccountLabel();
+  const name = account ? labelOf(account) : shortenAddress(counterparty);
+  return t(DIRECTION_TITLE[item.direction], { name });
+}
+
+/** Direction icon, a human title, the amount large, the status in plain words and what it means. */
+function Summary({ item }: { item: HistoryItem }) {
+  const { t } = useTranslation();
+  const colors = useThemeColors();
+  const { formatBalance } = useAmountDisplay();
+  const title = useTitle(item);
   const asset = findAsset(item.assetKey);
-  const { formatExact: exact } = useAmountDisplay();
-  const timeFormat = useAppearanceStore((state) => state.timeFormat);
-  const amount = asset
-    ? `${exact(BigInt(item.value), asset.decimals)} ${asset.symbol}`
-    : t('tx.unknownAsset');
+  const Icon = DIRECTION_ICON[item.direction];
   return (
-    <Card className="gap-0">
-      <Row label={t('history.detail.amount')}>
-        <Text variant="heading">{amount}</Text>
-      </Row>
-      <Row label={t('history.detail.from')}>
-        <Text variant="mono" selectable>
-          {item.from}
-        </Text>
-      </Row>
-      <Row label={t('history.detail.to')}>
-        <Text variant="mono" selectable>
-          {item.to}
-        </Text>
-      </Row>
-      <Row label={t('history.detail.date')}>
-        <Text>{formatDateTime(item.timestamp, i18n.language, timeFormat)}</Text>
-      </Row>
-      <Row label={t('history.detail.block')}>
-        <Text>
-          {item.blockNumber === null ? t('history.detail.notMined') : String(item.blockNumber)}
-        </Text>
-      </Row>
-      <Row label={t('history.detail.confirmations')}>
-        <Text>
-          {t('history.detail.confirmationsValue', {
-            count: item.confirmations,
-            total: TX_POLICY.finalConfirmations,
-          })}
-        </Text>
-      </Row>
-      <Row label={t('history.detail.fee')}>
-        <Text>
-          {fee === null
-            ? t('history.detail.feeUnknown')
-            : `${exact(fee, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`}
-        </Text>
-      </Row>
-      <Row label={t('history.detail.hash')}>
-        <Text variant="mono" selectable>
-          {item.hash}
-        </Text>
-      </Row>
-    </Card>
+    <View className="items-center gap-3">
+      <View className="h-14 w-14 items-center justify-center rounded-full bg-primary-50">
+        <Icon size={ICON_SIZE.lg} color={colors.accent.DEFAULT} />
+      </View>
+      <Text variant="heading" accessibilityRole="header" className="text-center">
+        {title}
+      </Text>
+      {asset ? (
+        <View className="flex-row flex-wrap items-baseline justify-center gap-2">
+          <Text variant="amount">{formatBalance(BigInt(item.value), asset.decimals)}</Text>
+          <Text variant="heading" tone="secondary">
+            {asset.symbol}
+          </Text>
+        </View>
+      ) : (
+        <Text tone="secondary">{t('tx.unknownAsset')}</Text>
+      )}
+      <View className="items-center">
+        <TxStatusBadge status={item.status} />
+      </View>
+      <Text tone="secondary" className="text-center">
+        {t(`tx.statusHelp.${item.status}`)}
+      </Text>
+    </View>
   );
 }
 
+function MainRows({ item }: { item: HistoryItem }) {
+  const { t, i18n } = useTranslation();
+  const fee = usePaidFee(item);
+  const { formatExact } = useAmountDisplay();
+  const timeFormat = useAppearanceStore((state) => state.timeFormat);
+  return (
+    <View className="rounded-card border border-border bg-surface-card px-4 py-3">
+      <DetailRow label={t('tx.details.from')}>
+        <AddressLabel address={item.from} label={t('tx.details.from')} />
+      </DetailRow>
+      <DetailRow label={t('tx.details.to')}>
+        <AddressLabel address={item.to} label={t('tx.details.to')} />
+      </DetailRow>
+      <DetailRow label={t('tx.details.date')}>
+        {formatDateTime(item.timestamp, i18n.language, timeFormat)}
+      </DetailRow>
+      <DetailRow label={t('tx.details.fee')}>
+        {fee === null
+          ? t('tx.details.feeUnknown')
+          : `${formatExact(fee, NATIVE_ASSET.decimals)} ${NATIVE_ASSET.symbol}`}
+      </DetailRow>
+      <DetailRow label={t('tx.details.status')}>
+        <TxStatusBadge status={item.status} />
+      </DetailRow>
+    </View>
+  );
+}
+
+/** One transaction, readable without knowing what a block is; the rest is in Technical details. */
 export function TxDetailPage() {
   const { t } = useTranslation();
   const { hash, owner } = useLocalSearchParams<{ hash: string; owner?: string }>();
@@ -105,26 +127,11 @@ export function TxDetailPage() {
       </FormScreen>
     );
   }
-  const link = explorerTxUrl(item.hash);
   return (
     <FormScreen>
-      <View className="gap-2">
-        <Text variant="title" accessibilityRole="header">
-          {t(`tx.direction.${item.direction}`)}
-        </Text>
-        <TxStatusBadge status={item.status} confirmations={item.confirmations} />
-        <Text tone="secondary">
-          {t(`tx.statusHelp.${item.status}`, { total: TX_POLICY.finalConfirmations })}
-        </Text>
-      </View>
-      <Details item={item} />
-      {link ? (
-        <Button
-          variant="secondary"
-          label={t('history.detail.explorer')}
-          onPress={() => void Linking.openURL(link)}
-        />
-      ) : null}
+      <Summary item={item} />
+      <MainRows item={item} />
+      <TxTechnical item={item} />
     </FormScreen>
   );
 }

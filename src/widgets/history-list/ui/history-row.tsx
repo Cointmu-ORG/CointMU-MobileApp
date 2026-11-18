@@ -82,7 +82,7 @@ export function HistoryRow({ item, account }: HistoryRowProps) {
         <Text variant="label" tone={item.direction === 'in' ? 'success' : 'default'}>
           {amount}
         </Text>
-        <TxStatusBadge status={item.status} confirmations={item.confirmations} />
+        <TxStatusBadge status={item.status} />
         <Text variant="caption" tone="secondary">
           {time}
         </Text>

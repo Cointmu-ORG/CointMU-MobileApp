@@ -71,6 +71,21 @@ export function useAccount(
   }, [wallet, index]);
 }
 
+/** The own account that holds an address, in any wallet, or null for someone else's address. */
+export function useAccountByAddress(address: string): ActiveAccount | null {
+  const wanted = address.toLowerCase();
+  const wallets = useWalletStore((state) => state.wallets);
+  return useMemo(
+    () =>
+      wallets
+        .flatMap((wallet) =>
+          wallet.accounts.map((account) => ({ ...account, walletId: wallet.id })),
+        )
+        .find((account) => account.address.toLowerCase() === wanted) ?? null,
+    [wallets, wanted],
+  );
+}
+
 export function findWallet(walletId: string): WalletRecord | null {
   return useWalletStore.getState().wallets.find((wallet) => wallet.id === walletId) ?? null;
 }

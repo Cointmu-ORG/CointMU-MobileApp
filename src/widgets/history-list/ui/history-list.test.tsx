@@ -90,8 +90,10 @@ describe('HistoryList', () => {
     expect(screen.queryByLabelText('Loading history…')).toBeNull();
     expect(screen.getByText('-2 CMU')).toBeOnTheScreen();
     expect(screen.getByText('Today')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Pending')).toBeOnTheScreen();
-    expect(screen.getByLabelText('Confirmed 1/12')).toBeOnTheScreen();
+    // Plain status words, the same as the receipt; no block count in the list.
+    expect(screen.getByLabelText('Sending')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Confirmed')).toBeOnTheScreen();
+    expect(screen.queryByText(/\/12/)).toBeNull();
     expect(useHistoryStore.getState().session?.head).toBe(HEAD);
     // Not one of the user's addresses: the other transfer in that block stays out.
     expect(screen.queryByText('+3 CMU')).toBeNull();

@@ -57,39 +57,27 @@ export function isProblemPhase(phase: SendPhase): boolean {
 }
 
 /**
- * Where the coin sits between the sender (0) and the recipient (1). It only reaches the
- * recipient once the node accepted the transaction; an uncertain broadcast leaves it half way,
- * and a transaction that did not go through is back with the sender.
+ * The status chip of the receipt, in the same words as History. Null while nothing has reached
+ * the network (sending, not sent): there is no transaction to give a status to.
  */
-export function coinPosition(phase: SendPhase): number {
+export function phaseTxStatus(phase: SendPhase): TxStatus | null {
   switch (phase) {
+    case 'sending':
+    case 'notSent':
+      return null;
     case 'broadcast':
-    case 'confirmed':
-    case 'final':
-      return 1;
     case 'uncertain':
-      return COIN_HALF_WAY;
+      return 'pending';
+    case 'reverted':
+      return 'failed';
     default:
-      return 0;
+      return phase;
   }
-}
-
-const COIN_HALF_WAY = 0.5;
-
-/** How full the confirmation ring is, 0 to 1. Only a mined transaction fills it. */
-export function ringProgress(
-  phase: SendPhase,
-  confirmations: number,
-  finalConfirmations: number,
-): number {
-  if (phase === 'final') return 1;
-  if (phase !== 'confirmed') return 0;
-  return Math.min(Math.max(confirmations, 1), finalConfirmations) / finalConfirmations;
 }
 
 export type StepState = 'done' | 'current' | 'waiting';
 
-/** The three steps under the ring: sent to the network, confirmed, final. */
+/** The three steps of the receipt: Sent, Confirmed, Completed. */
 export function stepStates(phase: SendPhase): readonly [StepState, StepState, StepState] {
   switch (phase) {
     case 'broadcast':

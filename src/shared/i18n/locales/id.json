@@ -4,7 +4,10 @@
     "cancel": "Batal",
     "comingSoon": "Segera hadir. Bagian Muvo ini hadir di versi berikutnya.",
     "done": "Selesai",
-    "paste": "Tempel"
+    "paste": "Tempel",
+    "copied": "Disalin",
+    "copyHint": "Menyalin nilai lengkap ke clipboard",
+    "labelled": "{{label}}: {{value}}"
   },
   "onboarding": {
     "welcome": {
@@ -142,19 +145,10 @@
     "title": "Riwayat",
     "detail": {
       "title": "Transaksi",
-      "amount": "Jumlah",
-      "from": "Dari",
-      "to": "Ke",
-      "date": "Tanggal",
-      "block": "Blok",
-      "notMined": "Belum masuk blok",
-      "confirmations": "Konfirmasi",
-      "confirmationsValue": "{{count}} dari {{total}}",
-      "fee": "Biaya jaringan yang dibayar",
-      "feeUnknown": "Diketahui setelah transaksi ditambang",
-      "hash": "Hash transaksi",
-      "explorer": "Lihat di explorer",
-      "missing": "Transaksi ini tidak ada di riwayat di perangkat ini."
+      "missing": "Transaksi ini tidak ada di riwayat di perangkat ini.",
+      "titleOut": "Dikirim ke {{name}}",
+      "titleIn": "Diterima dari {{name}}",
+      "titleSelf": "Dikirim ke diri sendiri"
     },
     "help": "Menampilkan transfer 7 hari terakhir untuk akun-akun kamu, ditambah semua yang dikirim dari Muvo. Transfer yang dilakukan kontrak pintar atas namamu (transfer internal) tidak muncul di sini.",
     "today": "Hari ini",
@@ -526,14 +520,6 @@
       "signing": "Menandatangani di perangkat ini…",
       "broadcasting": "Mengirim ke jaringan…"
     },
-    "result": {
-      "uncertainTitle": "Terkirim, menunggu jaringan",
-      "uncertainBody": "Jaringan tidak menjawab tepat waktu, jadi transaksi ini mungkin sudah atau belum diterima. Muvo terus memeriksanya. Jangan kirim ulang sampai statusnya berubah.",
-      "failedTitle": "Tidak terkirim",
-      "hash": "Hash transaksi",
-      "explorer": "Lihat di explorer",
-      "tryAgain": "Ubah dan coba lagi"
-    },
     "errors": {
       "insufficientFunds": "Saldo tidak cukup untuk jumlah ini ditambah biaya jaringan.",
       "insufficientGas": "CMU tidak cukup untuk biaya jaringan. Transfer token membayar biayanya dengan CMU.",
@@ -546,28 +532,38 @@
       "reverted": "Jaringan akan menolak transfer ini (untuk token, kontraknya menolak). Tidak ada yang terkirim.",
       "unknown": "Terjadi kesalahan dan tidak ada yang terkirim. Coba lagi."
     },
-    "status": {
-      "from": "Dari",
-      "to": "Ke",
-      "sendingBody": "Biarkan Muvo terbuka sampai ini selesai.",
-      "sentToNetwork": "Terkirim ke jaringan",
-      "broadcastBody": "Jaringan sudah menerima transaksi Anda. Transaksi belum masuk blok.",
-      "confirmedTitle": "Terkonfirmasi",
-      "confirmedBody": "Transaksi Anda sudah masuk blok. Transaksi menjadi final setelah {{total}} blok.",
-      "finalTitle": "Final",
-      "finalBody": "Selesai, sedalam {{total}} blok.",
-      "revertedTitle": "Gagal di jaringan",
-      "droppedTitle": "Dibatalkan jaringan",
-      "replacedTitle": "Digantikan",
-      "progress": "{{count}} dari {{total}} konfirmasi",
+    "receipt": {
+      "title": {
+        "broadcast": "Sedang dikirim…",
+        "uncertain": "Masih memeriksa",
+        "confirmed": "Terkirim!",
+        "final": "Selesai",
+        "reverted": "Transfer gagal",
+        "dropped": "Tidak terkirim",
+        "replaced": "Diganti transfer lain",
+        "notSent": "Tidak terkirim"
+      },
+      "uncertainBody": "Muvo sudah mengirimnya, tetapi jaringan tidak menjawab tepat waktu. Muvo terus memeriksanya. Tunggu beberapa menit dan lihat Riwayat sebelum mengirim lagi.",
+      "sendingBody": "Biarkan Muvo terbuka sebentar.",
       "steps": {
-        "sent": "Terkirim ke jaringan",
+        "sent": "Terkirim",
         "confirmed": "Terkonfirmasi",
-        "final": "Final"
+        "final": "Selesai"
       },
       "stepDone": "{{step}}: selesai",
       "stepCurrent": "{{step}}: sedang berjalan",
-      "stepWaiting": "{{step}}: belum"
+      "stepWaiting": "{{step}}: belum",
+      "amountLabel": "Jumlah: {{amount}}",
+      "share": "Bagikan bukti",
+      "shareTitle": "Bukti transfer Muvo",
+      "shareLine": {
+        "amount": "Jumlah: {{value}}",
+        "to": "Ke: {{value}}",
+        "date": "Tanggal: {{value}}",
+        "status": "Status: {{value}}",
+        "hash": "ID transaksi: {{value}}"
+      },
+      "tryAgain": "Ubah dan coba lagi"
     }
   },
   "receive": {
@@ -678,21 +674,39 @@
       "self": "Ke diri sendiri"
     },
     "status": {
-      "pending": "Tertunda",
+      "pending": "Sedang dikirim",
       "confirmed": "Terkonfirmasi",
-      "confirmedCount": "Terkonfirmasi {{count}}/{{total}}",
-      "final": "Final",
+      "final": "Selesai",
       "failed": "Gagal",
-      "dropped": "Dibatalkan jaringan",
-      "replaced": "Digantikan"
+      "dropped": "Tidak terkirim",
+      "replaced": "Diganti"
     },
     "statusHelp": {
-      "pending": "Menunggu dimasukkan ke dalam blok.",
-      "confirmed": "Sudah masuk blok. Menjadi final setelah {{total}} blok, karena blok terbaru masih bisa dibatalkan.",
-      "final": "Sudah cukup dalam di rantai untuk dianggap selesai.",
-      "failed": "Masuk blok tetapi ditolak oleh kontrak. Hanya biaya jaringan yang terpakai.",
-      "dropped": "Jaringan tidak lagi mengenal transaksi ini dan tidak pernah ditambang. Tidak ada yang terkirim; kamu bisa mengirim lagi.",
-      "replaced": "Transaksi lain dengan nonce yang sama yang ditambang. Transaksi ini tidak akan pernah ditambang."
+      "pending": "Biasanya kurang dari semenit.",
+      "confirmed": "Sudah sampai. Statusnya akan menjadi Selesai dalam beberapa menit.",
+      "final": "Semua beres. Transfer ini tidak bisa dibatalkan.",
+      "failed": "Transfer ditolak, jadi jumlahnya tidak berpindah. Biaya jaringan tetap terpakai. Periksa detailnya lalu coba lagi.",
+      "dropped": "Jaringan melepaskan transfer ini. Tidak ada yang keluar dari akun, jadi aman untuk mengirimnya lagi.",
+      "replaced": "Transfer lain dari akun yang sama diproses sebagai gantinya. Cek Riwayat sebelum mengirim lagi."
+    },
+    "details": {
+      "from": "Dari",
+      "to": "Ke",
+      "fee": "Biaya jaringan",
+      "feeMax": "Maksimal {{amount}}",
+      "feeUnknown": "Dihitung setelah selesai",
+      "date": "Tanggal",
+      "status": "Status",
+      "technical": "Detail teknis",
+      "fromFull": "Alamat pengirim",
+      "toFull": "Alamat penerima",
+      "hash": "ID transaksi",
+      "block": "Blok",
+      "notInBlock": "Belum",
+      "confirmations": "Konfirmasi",
+      "confirmationsValue": "{{count}} dari {{total}}",
+      "node": "Node jaringan",
+      "explorer": "Lihat di explorer"
     }
   },
   "wallets": {
