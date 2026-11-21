@@ -1,7 +1,7 @@
 name: Release
 
 # A version tag (pushed by scripts/bump-version.js) builds the signed release
-# APK and attaches it to a draft GitHub Release for review. A manual run builds
+# APK and publishes it in a GitHub Release right away. A manual run builds
 # the same APK as a workflow artifact only, for test builds. Never runs on
 # pull_request.
 on:
@@ -222,7 +222,7 @@ jobs:
 
   # Only this job can write to the repository, and only for a tag.
   release:
-    name: Draft release
+    name: Publish release
     if: github.event_name == 'push'
     needs: build
     runs-on: ubuntu-latest
@@ -242,17 +242,19 @@ jobs:
             -f tag_name="$GITHUB_REF_NAME" --jq .body > release-notes.md
           cat build-notes.md >> release-notes.md
 
-      # The release stays a draft: the owner reviews and publishes it.
-      # Idempotent: a re-run replaces the assets and notes of the draft. The
-      # list endpoint, unlike /releases/tags, includes drafts.
-      - name: Create draft release
+      # Published at once: the release is public as soon as this step ends.
+      # A re-run never replaces a published release's files. A draft left by
+      # an older run of this workflow is only refreshed (assets and notes),
+      # not published; the owner publishes it. The list endpoint, unlike
+      # /releases/tags, includes drafts.
+      - name: Create release
         run: |
           release=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
             --jq "[.[] | select(.tag_name == \"$GITHUB_REF_NAME\")][0]")
           if [ -z "$release" ] || [ "$release" = "null" ]; then
             prerelease=""
             case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
-            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft $prerelease \
+            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" $prerelease \
               --title "${GITHUB_REF_NAME#v}" --notes-file release-notes.md out/*
             exit 0
           fi

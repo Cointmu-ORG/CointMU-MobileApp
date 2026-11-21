@@ -36,7 +36,7 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Releases
 
-Android releases do not use EAS: `.github/workflows/release.yml` builds the APK on a GitHub runner (D-86). `node scripts/bump-version.js <bump-type> <codename>` pushes the `v*` tag that starts it; the result is a draft GitHub Release to review and publish. A manual run of the workflow (`gh workflow run release.yml --ref <branch>`) makes a test APK as a workflow artifact. The config plugins in `plugins/` set the versionCode, signing and network security config at prebuild time; change those, never a generated file. Secrets, variables and the full steps are in the README ("Android releases").
+Android releases do not use EAS: `.github/workflows/release.yml` builds the APK on a GitHub runner (D-86). `node scripts/bump-version.js <bump-type> <codename>` pushes the `v*` tag that starts it; the result is a published GitHub Release (D-97), public as soon as the run ends. A manual run of the workflow (`gh workflow run release.yml --ref <branch>`) makes a test APK as a workflow artifact. The config plugins in `plugins/` set the versionCode, signing and network security config at prebuild time; change those, never a generated file. Secrets, variables and the full steps are in the README ("Android releases").
 
 ## Rules
 
