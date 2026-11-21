@@ -38,11 +38,10 @@ node scripts/bump-version.js <bump-type> <codename> [--preid=<id>] [--dry-run] [
 **Cut a release:**
 
 1. On an up-to-date `main`: `node scripts/bump-version.js <bump-type> <codename>`. It commits, tags `v<version>` and pushes both.
-2. The tag starts the **Release** workflow. It checks that the tag matches `package.json`, builds a signed universal APK and creates a **draft** GitHub Release holding `Muvo-<version>-<codename>.apk`, its `.sha256` file and the notes (changes by category from `.github/release.yml`, plus version, versionCode, commit, build time and the SHA-256).
-3. Review the draft: install the APK on a phone, check the notes.
-4. Publish the draft. Until then nobody outside the repository sees it.
+2. The tag starts the **Release** workflow. It checks that the tag matches `package.json`, builds a signed universal APK and **publishes** a GitHub Release holding `Muvo-<version>-<codename>.apk`, its `.sha256` file and the notes (changes by category from `.github/release.yml`, plus version, versionCode, commit, build time and the SHA-256). A tag with a `-` (such as `v1.3.0-beta.0`) is published as a prerelease; any other tag becomes the latest release.
+3. The release is public as soon as the workflow ends: there is no review step. Test the APK before you push the tag, with a test build (below).
 
-A failed run can be re-run: it replaces the draft's files and never touches a published release.
+A run that failed before the release step can be re-run. A re-run never replaces the files of a published release. A tag that already has a draft release (from an older version of this workflow) only gets the draft's files and notes refreshed; publish it yourself.
 
 **Make a test build:** Actions > Release > Run workflow on any branch, or `gh workflow run release.yml --ref <branch>`. The APK is a workflow artifact only (no release, no tag), named `…-preview.apk`. Without the signing secrets it is signed with the debug key and named `…-unsigned-preview.apk`; such a build cannot be installed over a real release.
 
