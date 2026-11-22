@@ -3,7 +3,7 @@
     "name": "Muvo",
     "slug": "muvo",
     "scheme": "muvo",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
